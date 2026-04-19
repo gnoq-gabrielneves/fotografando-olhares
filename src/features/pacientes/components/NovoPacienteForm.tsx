@@ -57,6 +57,8 @@ const inputClass =
   "w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
 const labelClass = "text-slate-400 text-xs mb-1.5 block";
 const errClass = "text-red-400 text-xs mt-1";
+const selectClass =
+  "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10";
 
 export function NovoPacienteForm({ onSuccess }: Props) {
   const queryClient = useQueryClient();
@@ -125,28 +127,28 @@ export function NovoPacienteForm({ onSuccess }: Props) {
       return;
     }
     mutate({
-      ...form,
+      nome_completo: form.nome_completo,
       sexo: form.sexo as "M" | "F",
       cpf_cns: form.cpf_cns || undefined,
       data_nascimento: form.data_nascimento || undefined,
       local_atendimento_id: form.local_atendimento_id || undefined,
       prontuario: form.prontuario || undefined,
       medicamentos_em_uso: form.medicamentos_em_uso || undefined,
+      insulina: form.insulina,
       tempo_diagnostico_dm:
         (form.tempo_diagnostico_dm as
           | "<1 ano"
           | "1 a 5 anos"
           | "5 a 10 anos"
-          | ">10 anos"
-          | undefined) || undefined,
+          | ">10 anos") || undefined,
+      fez_exame_oftalmologico: form.fez_exame_oftalmologico,
+      tabagista: form.tabagista,
+      atividade_fisica: form.atividade_fisica,
       av_od: form.av_od || undefined,
       av_oe: form.av_oe || undefined,
       outras_obs: form.outras_obs || undefined,
     });
   }
-
-  const selectClass =
-    "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10";
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 pb-8">
@@ -170,22 +172,18 @@ export function NovoPacienteForm({ onSuccess }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className={labelClass}>Sexo *</label>
-            <div className="grid grid-cols-2 gap-2">
-              {(["M", "F"] as const).map((opcao) => (
-                <button
-                  key={opcao}
-                  type="button"
-                  onClick={() => set("sexo", opcao)}
-                  className={`h-10 rounded-md text-sm font-medium border transition-colors ${
-                    form.sexo === opcao
-                      ? "bg-cyan-600 border-cyan-500 text-white"
-                      : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-                  }`}
-                >
-                  {opcao === "M" ? "Masculino" : "Feminino"}
-                </button>
-              ))}
-            </div>
+            <Select
+              value={form.sexo}
+              onValueChange={(v) => set("sexo", v as "M" | "F")}
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
+                <SelectItem value="M">Masculino</SelectItem>
+                <SelectItem value="F">Feminino</SelectItem>
+              </SelectContent>
+            </Select>
             {erros.sexo && <p className={errClass}>{erros.sexo}</p>}
           </div>
 
