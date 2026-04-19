@@ -84,3 +84,13 @@ export type PacienteTabela = {
   profiles: { full_name: string }[] | null;
   laudos: { resultado_rd: string | null }[];
 };
+
+export type LaudoComLaudador = Laudo & {
+  profiles: Pick<Profile, "full_name"> | null;
+};
+
+export type PacienteDetalhado = Paciente & {
+  locais_atendimento: Pick<LocalAtendimento, "id" | "nome"> | null;
+  profiles: Pick<Profile, "id" | "full_name"> | null;
+  laudos: LaudoComLaudador[];
+};

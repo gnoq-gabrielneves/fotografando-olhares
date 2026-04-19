@@ -109,3 +109,61 @@ export async function criarPaciente(input: NovoPacienteInput) {
   if (error) throw new Error(error.message);
   return data;
 }
+
+export async function getPacienteById(id: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("pacientes")
+    .select(
+      `
+      *,
+      locais_atendimento(id, nome),
+      profiles(id, full_name),
+      laudos(
+        id,
+        data_laudo,
+        resultado_rd,
+        descricao,
+        dilatacao,
+        created_at,
+        profiles(full_name)
+      )
+    `,
+    )
+    .eq("id", id)
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export type NovoLaudoInput = {
+  paciente_id: string;
+  data_laudo?: string;
+  resultado_rd?:
+    | "Sem RD"
+    | "Não proliferativa"
+    | "Proliferativa"
+    | "Outra patologia";
+  descricao?: string;
+  dilatacao?: string;
+};
+
+export async function criarLaudo(input: NovoLaudoInput) {
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+
+  const { data, error } = await supabase
+    .from("laudos")
+    .insert({ ...input, laudador_id: user.id })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
