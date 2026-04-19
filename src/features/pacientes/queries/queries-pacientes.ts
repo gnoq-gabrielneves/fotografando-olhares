@@ -1,0 +1,111 @@
+import { createClient } from "@/lib/supabase/client";
+import { PacienteTabela } from "@/types";
+
+export type FiltrosPacientes = {
+  busca?: string;
+  resultado_rd?: string;
+  local_id?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
+  data: PacienteTabela[];
+  count: number;
+}> {
+  const supabase = createClient();
+  const { busca, resultado_rd, local_id, page = 1, pageSize = 10 } = filtros;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from("pacientes")
+    .select(
+      `
+      id,
+      nome_completo,
+      sexo,
+      data_nascimento,
+      created_at,
+      locais_atendimento(nome),
+      profiles(full_name),
+      laudos(resultado_rd)
+    `,
+      { count: "exact" },
+    )
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (busca) {
+    query = query.ilike("nome_completo", `%${busca}%`);
+  }
+
+  if (local_id && local_id !== "todos") {
+    query = query.eq("local_atendimento_id", local_id);
+  }
+
+  if (resultado_rd && resultado_rd !== "todos") {
+    if (resultado_rd === "sem_laudo") {
+      query = query.not("id", "in", "(select paciente_id from laudos)");
+    } else {
+      query = query.eq("laudos.resultado_rd", resultado_rd);
+    }
+  }
+
+  const { data, error, count } = await query;
+
+  if (error) throw new Error(error.message);
+  return {
+    data: data as unknown as PacienteTabela[],
+    count: count ?? 0,
+  };
+}
+
+export async function getLocaisAtendimento() {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("locais_atendimento")
+    .select("id, nome")
+    .order("nome");
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export type NovoPacienteInput = {
+  nome_completo: string;
+  sexo: "M" | "F";
+  cpf_cns?: string;
+  data_nascimento?: string;
+  local_atendimento_id?: string;
+  prontuario?: string;
+  termo_assinado?: boolean;
+  medicamentos_em_uso?: string;
+  insulina?: boolean;
+  tempo_diagnostico_dm?: "<1 ano" | "1 a 5 anos" | "5 a 10 anos" | ">10 anos";
+  fez_exame_oftalmologico?: boolean;
+  qt_tempo_ultimo_exame?: string;
+  tabagista?: boolean;
+  atividade_fisica?: boolean;
+  av_od?: string;
+  av_oe?: string;
+  outras_obs?: string;
+};
+
+export async function criarPaciente(input: NovoPacienteInput) {
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+
+  const { data, error } = await supabase
+    .from("pacientes")
+    .insert({ ...input, extensionista_id: user.id })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}

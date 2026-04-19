@@ -128,3 +128,36 @@
     @apply font-sans;
   }
 }
+
+[data-sidebar="sidebar"] {
+  --sidebar-background: theme("colors.slate.900");
+  --sidebar-foreground: theme("colors.slate.300");
+  --sidebar-border: theme("colors.slate.800");
+  --sidebar-accent: theme("colors.slate.800");
+  --sidebar-accent-foreground: theme("colors.white");
+  --sidebar-primary: theme("colors.cyan.400");
+  --sidebar-primary-foreground: theme("colors.slate.900");
+  --sidebar-ring: theme("colors.cyan.500");
+
+  background-color: var(--sidebar-background);
+  border-color: var(--sidebar-border);
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme("colors.slate.700");
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.slate.600");
+}

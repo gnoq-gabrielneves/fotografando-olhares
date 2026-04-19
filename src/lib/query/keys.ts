@@ -1,0 +1,21 @@
+export const queryKeys = {
+  profile: {
+    all: ["profile"] as const,
+    byId: (id: string) => ["profile", id] as const,
+  },
+  pacientes: {
+    all: ["pacientes"] as const,
+    lista: (filtros: object) => ["pacientes", "lista", filtros] as const,
+    byId: (id: string) => ["pacientes", id] as const,
+  },
+  laudos: {
+    all: ["laudos"] as const,
+    byPaciente: (pacienteId: string) => ["laudos", pacienteId] as const,
+  },
+  home: {
+    metricas: ["home", "metricas"] as const,
+    distribuicaoRD: ["home", "distribuicaoRD"] as const,
+    distribuicaoPorLocal: ["home", "distribuicaoPorLocal"] as const,
+    ultimosPacientes: ["home", "ultimosPacientes"] as const,
+  },
+};

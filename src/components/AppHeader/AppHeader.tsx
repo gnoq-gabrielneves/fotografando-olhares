@@ -1,0 +1,45 @@
+"use client";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { usePathname } from "next/navigation";
+
+const pageInfo: Record<string, { title: string; description: string }> = {
+  "/home": {
+    title: "Início",
+    description: "Visão geral do projeto de triagem",
+  },
+  "/pacientes": {
+    title: "Pacientes",
+    description: "Gerencie os pacientes cadastrados no projeto",
+  },
+  "/laudos": {
+    title: "Laudos",
+    description: "Gerencie os laudos oftalmológicos emitidos",
+  },
+  "/relatorios": {
+    title: "Relatórios",
+    description: "Análises e estatísticas do projeto",
+  },
+};
+
+export function AppHeader() {
+  const pathname = usePathname();
+
+  // pega a rota base (ex: /pacientes/123 → /pacientes)
+  const baseRoute = "/" + pathname.split("/")[1];
+  const info = pageInfo[baseRoute] ?? { title: "", description: "" };
+
+  return (
+    <header className="fixed flex items-center gap-3 px-4 border-b border-slate-800 bg-slate-900 shrink-0 h-20 w-full">
+      <SidebarTrigger className="text-slate-400 hover:text-white hover:bg-slate-800" />
+
+      <div className="flex flex-col">
+        <span className="text-sm font-medium text-white leading-tight">
+          {info.title}
+        </span>
+        <span className="text-xs text-slate-500 leading-tight">
+          {info.description}
+        </span>
+      </div>
+    </header>
+  );
+}
