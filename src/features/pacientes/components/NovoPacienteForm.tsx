@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -23,9 +24,7 @@ import {
 
 const novoPacienteSchema = z.object({
   nome_completo: z.string().min(3, "Nome deve ter ao menos 3 caracteres"),
-  sexo: z.enum(["M", "F"]).refine((v) => v !== undefined, {
-    message: "Selecione o sexo",
-  }),
+  sexo: z.enum(["M", "F"]),
   cpf_cns: z.string().optional(),
   data_nascimento: z.string().optional(),
   local_atendimento_id: z.string().optional(),
@@ -57,6 +56,28 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
       </span>
       <div className="h-px bg-slate-800 flex-1" />
     </div>
+  );
+}
+
+const inputClass =
+  "w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
+const labelClass = "text-slate-400 text-xs mb-1.5 block";
+const errClass = "text-red-400 text-xs mt-1";
+
+type MaskedFieldProps = {
+  mask: string;
+  placeholder: string;
+  onAccept: (value: string) => void;
+};
+
+function MaskedField({ mask, placeholder, onAccept }: MaskedFieldProps) {
+  return (
+    <IMaskInput
+      mask={mask}
+      placeholder={placeholder}
+      className={inputClass}
+      onAccept={onAccept}
+    />
   );
 }
 
@@ -97,10 +118,8 @@ export function NovoPacienteForm({ onSuccess }: Props) {
     mutate(values);
   }
 
-  const field =
+  const selectClass =
     "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10";
-  const label = "text-slate-400 text-xs mb-1.5 block";
-  const err = "text-red-400 text-xs mt-1";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-8">
@@ -109,22 +128,22 @@ export function NovoPacienteForm({ onSuccess }: Props) {
         <SectionTitle>Dados pessoais</SectionTitle>
 
         <div className="space-y-1.5">
-          <label className={label}>Nome completo *</label>
+          <label className={labelClass}>Nome completo *</label>
           <Input
             {...register("nome_completo")}
             placeholder="Nome completo do paciente"
-            className={field}
+            className={selectClass}
           />
           {errors.nome_completo && (
-            <p className={err}>{errors.nome_completo.message}</p>
+            <p className={errClass}>{errors.nome_completo.message}</p>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className={label}>Sexo *</label>
+            <label className={labelClass}>Sexo *</label>
             <Select onValueChange={(v) => setValue("sexo", v as "M" | "F")}>
-              <SelectTrigger className={field}>
+              <SelectTrigger className={selectClass}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
@@ -132,42 +151,49 @@ export function NovoPacienteForm({ onSuccess }: Props) {
                 <SelectItem value="F">Feminino</SelectItem>
               </SelectContent>
             </Select>
-            {errors.sexo && <p className={err}>{errors.sexo.message}</p>}
+            {errors.sexo && <p className={errClass}>{errors.sexo.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label className={label}>Data de nascimento</label>
-            <Input
-              {...register("data_nascimento")}
-              type="date"
-              className={field}
+            <label className={labelClass}>Data de nascimento</label>
+            <MaskedField
+              mask="00/00/0000"
+              placeholder="DD/MM/AAAA"
+              onAccept={(value) => {
+                if (value.length === 10) {
+                  const [d, m, y] = value.split("/");
+                  setValue("data_nascimento", `${y}-${m}-${d}`);
+                } else {
+                  setValue("data_nascimento", "");
+                }
+              }}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className={label}>CPF / CNS</label>
-            <Input
-              {...register("cpf_cns")}
+            <label className={labelClass}>CPF / CNS</label>
+            <MaskedField
+              mask="000.000.000-00"
               placeholder="000.000.000-00"
-              className={field}
+              onAccept={(value) => setValue("cpf_cns", value)}
             />
           </div>
           <div className="space-y-1.5">
-            <label className={label}>Prontuário</label>
+            <label className={labelClass}>Prontuário</label>
             <Input
               {...register("prontuario")}
               placeholder="Nº do prontuário"
-              className={field}
+              className={selectClass}
             />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className={label}>Local de atendimento</label>
+          <label className={labelClass}>Local de atendimento</label>
           <Select onValueChange={(v) => setValue("local_atendimento_id", v)}>
-            <SelectTrigger className={field}>
+            <SelectTrigger className={selectClass}>
               <SelectValue placeholder="Selecione o local" />
             </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
@@ -186,7 +212,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
         <SectionTitle>Dados clínicos</SectionTitle>
 
         <div className="space-y-1.5">
-          <label className={label}>Medicamentos em uso</label>
+          <label className={labelClass}>Medicamentos em uso</label>
           <textarea
             {...register("medicamentos_em_uso")}
             placeholder="Liste os medicamentos e doses..."
@@ -197,7 +223,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className={label}>Tempo de diagnóstico DM</label>
+            <label className={labelClass}>Tempo de diagnóstico DM</label>
             <Select
               onValueChange={(v) =>
                 setValue(
@@ -206,7 +232,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
                 )
               }
             >
-              <SelectTrigger className={field}>
+              <SelectTrigger className={selectClass}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
@@ -219,17 +245,17 @@ export function NovoPacienteForm({ onSuccess }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <label className={label}>Acuidade visual</label>
+            <label className={labelClass}>Acuidade visual</label>
             <div className="grid grid-cols-2 gap-2">
               <Input
                 {...register("av_od")}
                 placeholder="OD"
-                className={field}
+                className={selectClass}
               />
               <Input
                 {...register("av_oe")}
                 placeholder="OE"
-                className={field}
+                className={selectClass}
               />
             </div>
           </div>
@@ -242,19 +268,19 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             { field: "atividade_fisica", label: "Atividade física" },
             {
               field: "fez_exame_oftalmologico",
-              label: "Fez exame",
+              label: "Fez exame oftalmológico",
             },
           ].map(({ field: f, label: l }) => (
             <label
               key={f}
-              className="flex items-center gap-2.5 cursor-pointer group p-3 rounded-lg bg-slate-800/50 border border-slate-800 hover:border-slate-700 transition-colors"
+              className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-slate-800/50 border border-slate-800 hover:border-slate-700 transition-colors"
             >
               <input
                 type="checkbox"
                 {...register(f as keyof NovoPacienteSchema)}
-                className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-cyan-500"
+                className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-cyan-500 shrink-0"
               />
-              <span className="text-slate-300 text-sm">{l}</span>
+              <span className="text-slate-300 text-sm leading-tight">{l}</span>
             </label>
           ))}
         </div>
