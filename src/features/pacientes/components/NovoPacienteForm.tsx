@@ -10,39 +10,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { queryKeys } from "@/lib/query/keys";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
-import { z } from "zod";
 import {
   criarPaciente,
   getLocaisAtendimento,
 } from "../queries/queries-pacientes";
 
-const novoPacienteSchema = z.object({
-  nome_completo: z.string().min(3, "Nome deve ter ao menos 3 caracteres"),
-  sexo: z.enum(["M", "F"]),
-  cpf_cns: z.string().optional(),
-  data_nascimento: z.string().optional(),
-  local_atendimento_id: z.string().optional(),
-  prontuario: z.string().optional(),
-  medicamentos_em_uso: z.string().optional(),
-  insulina: z.boolean().optional(),
-  tempo_diagnostico_dm: z
-    .enum(["<1 ano", "1 a 5 anos", "5 a 10 anos", ">10 anos"])
-    .optional(),
-  fez_exame_oftalmologico: z.boolean().optional(),
-  tabagista: z.boolean().optional(),
-  atividade_fisica: z.boolean().optional(),
-  av_od: z.string().optional(),
-  av_oe: z.string().optional(),
-  outras_obs: z.string().optional(),
-});
-
-type NovoPacienteSchema = z.infer<typeof novoPacienteSchema>;
+type FormData = {
+  nome_completo: string;
+  sexo: "M" | "F" | "";
+  cpf_cns: string;
+  data_nascimento: string;
+  local_atendimento_id: string;
+  prontuario: string;
+  medicamentos_em_uso: string;
+  insulina: boolean;
+  tempo_diagnostico_dm: string;
+  fez_exame_oftalmologico: boolean;
+  tabagista: boolean;
+  atividade_fisica: boolean;
+  av_od: string;
+  av_oe: string;
+  outras_obs: string;
+};
 
 type Props = {
   onSuccess: () => void;
@@ -64,25 +58,30 @@ const inputClass =
 const labelClass = "text-slate-400 text-xs mb-1.5 block";
 const errClass = "text-red-400 text-xs mt-1";
 
-type MaskedFieldProps = {
-  mask: string;
-  placeholder: string;
-  onAccept: (value: string) => void;
-};
-
-function MaskedField({ mask, placeholder, onAccept }: MaskedFieldProps) {
-  return (
-    <IMaskInput
-      mask={mask}
-      placeholder={placeholder}
-      className={inputClass}
-      onAccept={onAccept}
-    />
-  );
-}
-
 export function NovoPacienteForm({ onSuccess }: Props) {
   const queryClient = useQueryClient();
+
+  const [form, setForm] = useState<FormData>({
+    nome_completo: "",
+    sexo: "",
+    cpf_cns: "",
+    data_nascimento: "",
+    local_atendimento_id: "",
+    prontuario: "",
+    medicamentos_em_uso: "",
+    insulina: false,
+    tempo_diagnostico_dm: "",
+    fez_exame_oftalmologico: false,
+    tabagista: false,
+    atividade_fisica: false,
+    av_od: "",
+    av_oe: "",
+    outras_obs: "",
+  });
+
+  const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
+    {},
+  );
 
   const { data: locais } = useQuery({
     queryKey: ["locais_atendimento"],
@@ -105,24 +104,52 @@ export function NovoPacienteForm({ onSuccess }: Props) {
     },
   });
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<NovoPacienteSchema>({
-    resolver: zodResolver(novoPacienteSchema),
-  });
+  function set<K extends keyof FormData>(key: K, value: FormData[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setErros((prev) => ({ ...prev, [key]: undefined }));
+  }
 
-  function onSubmit(values: NovoPacienteSchema) {
-    mutate(values);
+  function validar() {
+    const novosErros: Partial<Record<keyof FormData, string>> = {};
+    if (!form.nome_completo || form.nome_completo.length < 3)
+      novosErros.nome_completo = "Nome deve ter ao menos 3 caracteres";
+    if (!form.sexo) novosErros.sexo = "Selecione o sexo";
+    return novosErros;
+  }
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const novosErros = validar();
+    if (Object.keys(novosErros).length > 0) {
+      setErros(novosErros);
+      return;
+    }
+    mutate({
+      ...form,
+      sexo: form.sexo as "M" | "F",
+      cpf_cns: form.cpf_cns || undefined,
+      data_nascimento: form.data_nascimento || undefined,
+      local_atendimento_id: form.local_atendimento_id || undefined,
+      prontuario: form.prontuario || undefined,
+      medicamentos_em_uso: form.medicamentos_em_uso || undefined,
+      tempo_diagnostico_dm:
+        (form.tempo_diagnostico_dm as
+          | "<1 ano"
+          | "1 a 5 anos"
+          | "5 a 10 anos"
+          | ">10 anos"
+          | undefined) || undefined,
+      av_od: form.av_od || undefined,
+      av_oe: form.av_oe || undefined,
+      outras_obs: form.outras_obs || undefined,
+    });
   }
 
   const selectClass =
     "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10";
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-8">
+    <form onSubmit={onSubmit} className="space-y-6 pb-8">
       {/* Dados pessoais */}
       <div className="space-y-4">
         <SectionTitle>Dados pessoais</SectionTitle>
@@ -130,41 +157,50 @@ export function NovoPacienteForm({ onSuccess }: Props) {
         <div className="space-y-1.5">
           <label className={labelClass}>Nome completo *</label>
           <Input
-            {...register("nome_completo")}
+            value={form.nome_completo}
+            onChange={(e) => set("nome_completo", e.target.value)}
             placeholder="Nome completo do paciente"
             className={selectClass}
           />
-          {errors.nome_completo && (
-            <p className={errClass}>{errors.nome_completo.message}</p>
+          {erros.nome_completo && (
+            <p className={errClass}>{erros.nome_completo}</p>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className={labelClass}>Sexo *</label>
-            <Select onValueChange={(v) => setValue("sexo", v as "M" | "F")}>
-              <SelectTrigger className={selectClass}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
-                <SelectItem value="M">Masculino</SelectItem>
-                <SelectItem value="F">Feminino</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.sexo && <p className={errClass}>{errors.sexo.message}</p>}
+            <div className="grid grid-cols-2 gap-2">
+              {(["M", "F"] as const).map((opcao) => (
+                <button
+                  key={opcao}
+                  type="button"
+                  onClick={() => set("sexo", opcao)}
+                  className={`h-10 rounded-md text-sm font-medium border transition-colors ${
+                    form.sexo === opcao
+                      ? "bg-cyan-600 border-cyan-500 text-white"
+                      : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"
+                  }`}
+                >
+                  {opcao === "M" ? "Masculino" : "Feminino"}
+                </button>
+              ))}
+            </div>
+            {erros.sexo && <p className={errClass}>{erros.sexo}</p>}
           </div>
 
           <div className="space-y-1.5">
             <label className={labelClass}>Data de nascimento</label>
-            <MaskedField
+            <IMaskInput
               mask="00/00/0000"
               placeholder="DD/MM/AAAA"
-              onAccept={(value) => {
+              className={inputClass}
+              onAccept={(value: string) => {
                 if (value.length === 10) {
                   const [d, m, y] = value.split("/");
-                  setValue("data_nascimento", `${y}-${m}-${d}`);
+                  set("data_nascimento", `${y}-${m}-${d}`);
                 } else {
-                  setValue("data_nascimento", "");
+                  set("data_nascimento", "");
                 }
               }}
             />
@@ -174,16 +210,18 @@ export function NovoPacienteForm({ onSuccess }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className={labelClass}>CPF / CNS</label>
-            <MaskedField
+            <IMaskInput
               mask="000.000.000-00"
               placeholder="000.000.000-00"
-              onAccept={(value) => setValue("cpf_cns", value)}
+              className={inputClass}
+              onAccept={(value: string) => set("cpf_cns", value)}
             />
           </div>
           <div className="space-y-1.5">
             <label className={labelClass}>Prontuário</label>
             <Input
-              {...register("prontuario")}
+              value={form.prontuario}
+              onChange={(e) => set("prontuario", e.target.value)}
               placeholder="Nº do prontuário"
               className={selectClass}
             />
@@ -192,7 +230,10 @@ export function NovoPacienteForm({ onSuccess }: Props) {
 
         <div className="space-y-1.5">
           <label className={labelClass}>Local de atendimento</label>
-          <Select onValueChange={(v) => setValue("local_atendimento_id", v)}>
+          <Select
+            value={form.local_atendimento_id}
+            onValueChange={(v) => set("local_atendimento_id", v)}
+          >
             <SelectTrigger className={selectClass}>
               <SelectValue placeholder="Selecione o local" />
             </SelectTrigger>
@@ -214,7 +255,8 @@ export function NovoPacienteForm({ onSuccess }: Props) {
         <div className="space-y-1.5">
           <label className={labelClass}>Medicamentos em uso</label>
           <textarea
-            {...register("medicamentos_em_uso")}
+            value={form.medicamentos_em_uso}
+            onChange={(e) => set("medicamentos_em_uso", e.target.value)}
             placeholder="Liste os medicamentos e doses..."
             rows={3}
             className="w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 py-2 text-sm resize-none outline-none"
@@ -225,12 +267,8 @@ export function NovoPacienteForm({ onSuccess }: Props) {
           <div className="space-y-1.5">
             <label className={labelClass}>Tempo de diagnóstico DM</label>
             <Select
-              onValueChange={(v) =>
-                setValue(
-                  "tempo_diagnostico_dm",
-                  v as NovoPacienteSchema["tempo_diagnostico_dm"],
-                )
-              }
+              value={form.tempo_diagnostico_dm}
+              onValueChange={(v) => set("tempo_diagnostico_dm", v)}
             >
               <SelectTrigger className={selectClass}>
                 <SelectValue placeholder="Selecione" />
@@ -248,12 +286,14 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             <label className={labelClass}>Acuidade visual</label>
             <div className="grid grid-cols-2 gap-2">
               <Input
-                {...register("av_od")}
+                value={form.av_od}
+                onChange={(e) => set("av_od", e.target.value)}
                 placeholder="OD"
                 className={selectClass}
               />
               <Input
-                {...register("av_oe")}
+                value={form.av_oe}
+                onChange={(e) => set("av_oe", e.target.value)}
                 placeholder="OE"
                 className={selectClass}
               />
@@ -263,11 +303,11 @@ export function NovoPacienteForm({ onSuccess }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { field: "insulina", label: "Usa insulina" },
-            { field: "tabagista", label: "Tabagista" },
-            { field: "atividade_fisica", label: "Atividade física" },
+            { field: "insulina" as const, label: "Usa insulina" },
+            { field: "tabagista" as const, label: "Tabagista" },
+            { field: "atividade_fisica" as const, label: "Atividade física" },
             {
-              field: "fez_exame_oftalmologico",
+              field: "fez_exame_oftalmologico" as const,
               label: "Fez exame oftalmológico",
             },
           ].map(({ field: f, label: l }) => (
@@ -277,7 +317,8 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             >
               <input
                 type="checkbox"
-                {...register(f as keyof NovoPacienteSchema)}
+                checked={form[f]}
+                onChange={(e) => set(f, e.target.checked)}
                 className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-cyan-500 shrink-0"
               />
               <span className="text-slate-300 text-sm leading-tight">{l}</span>
@@ -290,7 +331,8 @@ export function NovoPacienteForm({ onSuccess }: Props) {
       <div className="space-y-4">
         <SectionTitle>Observações</SectionTitle>
         <textarea
-          {...register("outras_obs")}
+          value={form.outras_obs}
+          onChange={(e) => set("outras_obs", e.target.value)}
           placeholder="Observações adicionais sobre o paciente..."
           rows={3}
           className="w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 py-2 text-sm resize-none outline-none"
