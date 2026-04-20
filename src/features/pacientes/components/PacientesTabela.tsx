@@ -9,7 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { queryKeys } from "@/lib/query/keys";
-import { PacienteTabela } from "@/types";
+import { resultadoBadge } from "@/lib/utils/resultado-badge";
+import { PacienteTabela, ResultadoRD } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -20,26 +21,6 @@ import { PacientesFiltros } from "./PacientesFiltros";
 import { PacientesPaginacao } from "./PacientesPaginacao";
 
 const PAGE_SIZE = 10;
-
-const resultadoConfig: Record<string, { label: string; className: string }> = {
-  "Sem RD": "bg-cyan-950 text-cyan-400 border-cyan-900/50",
-  "Não proliferativa": "bg-amber-950 text-amber-400 border-amber-900/50",
-  Proliferativa: "bg-red-950 text-red-400 border-red-900/50",
-  "Outra patologia": "bg-violet-950 text-violet-400 border-violet-900/50",
-} as unknown as Record<string, { label: string; className: string }>;
-
-const resultadoBadge: Record<string, string> = {
-  "Sem RD": "bg-cyan-950 text-cyan-400 border border-cyan-900/50",
-  "Não proliferativa": "bg-amber-950 text-amber-400 border border-amber-900/50",
-  Proliferativa: "bg-red-950 text-red-400 border border-red-900/50",
-  "Outra patologia":
-    "bg-violet-950 text-violet-400 border border-violet-900/50",
-};
-
-function formatarData(data: string | null) {
-  if (!data) return "—";
-  return new Date(data).toLocaleDateString("pt-BR");
-}
 
 function calcularIdade(data: string | null) {
   if (!data) return null;
@@ -130,8 +111,8 @@ export function PacientesTabela() {
             ) : (
               data?.data.map((paciente: PacienteTabela) => {
                 const resultado = paciente.laudos?.[0]?.resultado_rd;
-                const local = paciente.locais_atendimento?.[0]?.nome ?? "—";
-                const extensionista = paciente.profiles?.[0]?.full_name ?? "—";
+                const local = paciente.locais_atendimento?.nome ?? "—";
+                const extensionista = paciente.profiles?.full_name ?? "—";
                 const idade = calcularIdade(paciente.data_nascimento);
 
                 return (
@@ -160,7 +141,7 @@ export function PacientesTabela() {
                     <TableCell>
                       {resultado ? (
                         <span
-                          className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[resultado] ?? "bg-slate-800 text-slate-400 border-slate-700"}`}
+                          className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[resultado as ResultadoRD] ?? "bg-slate-800 text-slate-400 border-slate-700"}`}
                         >
                           {resultado}
                         </span>

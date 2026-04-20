@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/lib/query/keys";
+import { ResultadoRD } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,12 +10,6 @@ import { useState } from "react";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
 import { criarLaudo } from "../../queries/queries-pacientes";
-
-type ResultadoRD =
-  | "Sem RD"
-  | "Não proliferativa"
-  | "Proliferativa"
-  | "Outra patologia";
 
 type FormData = {
   resultado_rd: ResultadoRD | "";
@@ -27,26 +22,30 @@ type Props = {
   pacienteId: string;
 };
 
-const resultados: { value: ResultadoRD; className: string }[] = [
+const resultados: { value: ResultadoRD; activeClass: string }[] = [
   {
-    value: "Sem RD",
-    className:
-      "border-cyan-900/50 data-[active=true]:bg-cyan-950 data-[active=true]:border-cyan-500 data-[active=true]:text-cyan-400",
+    value: "Exame de retinografia normal",
+    activeClass: "bg-cyan-950 border-cyan-500 text-cyan-400",
   },
   {
-    value: "Não proliferativa",
-    className:
-      "border-amber-900/50 data-[active=true]:bg-amber-950 data-[active=true]:border-amber-500 data-[active=true]:text-amber-400",
+    value: "Retinopatia diabética não proliferativa",
+    activeClass: "bg-amber-950 border-amber-500 text-amber-400",
   },
   {
-    value: "Proliferativa",
-    className:
-      "border-red-900/50 data-[active=true]:bg-red-950 data-[active=true]:border-red-500 data-[active=true]:text-red-400",
+    value: "Retinopatia diabética proliferativa",
+    activeClass: "bg-red-950 border-red-500 text-red-400",
   },
   {
-    value: "Outra patologia",
-    className:
-      "border-violet-900/50 data-[active=true]:bg-violet-950 data-[active=true]:border-violet-500 data-[active=true]:text-violet-400",
+    value: "Retinopatia hipertensiva",
+    activeClass: "bg-orange-950 border-orange-500 text-orange-400",
+  },
+  {
+    value: "Outras alterações",
+    activeClass: "bg-violet-950 border-violet-500 text-violet-400",
+  },
+  {
+    value: "Qualidade da imagem ruim",
+    activeClass: "bg-slate-700 border-slate-500 text-slate-300",
   },
 ];
 
@@ -124,21 +123,24 @@ export function LaudoForm({ pacienteId }: Props) {
       <div className="space-y-1.5">
         <label className={labelClass}>Resultado da RD *</label>
         <div className="grid grid-cols-2 gap-3">
-          {resultados.map((r) => (
-            <button
-              key={r.value}
-              type="button"
-              data-active={form.resultado_rd === r.value}
-              onClick={() => set("resultado_rd", r.value)}
-              className={`h-11 rounded-lg text-sm font-medium border transition-all
-                bg-slate-800/50 text-slate-400 hover:border-slate-600 hover:text-slate-300
-                ${r.className}
-                ${form.resultado_rd === r.value ? "ring-1 ring-offset-1 ring-offset-slate-900" : ""}
-              `}
-            >
-              {r.value}
-            </button>
-          ))}
+          {resultados.map((r) => {
+            const isActive = form.resultado_rd === r.value;
+            return (
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => set("resultado_rd", r.value)}
+                className={`h-11 rounded-lg text-sm font-medium border transition-all px-2
+                  ${
+                    isActive
+                      ? r.activeClass
+                      : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"
+                  }`}
+              >
+                {r.value}
+              </button>
+            );
+          })}
         </div>
         {erros.resultado_rd && (
           <p className="text-red-400 text-xs mt-1">{erros.resultado_rd}</p>

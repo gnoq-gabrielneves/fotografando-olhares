@@ -51,17 +51,20 @@ export type Paciente = {
   updated_at: string;
 };
 
+export type ResultadoRD =
+  | "Retinopatia diabética não proliferativa"
+  | "Retinopatia diabética proliferativa"
+  | "Retinopatia hipertensiva"
+  | "Outras alterações"
+  | "Exame de retinografia normal"
+  | "Qualidade da imagem ruim";
+
 export type Laudo = {
   id: string;
   paciente_id: string;
   laudador_id: string | null;
   data_laudo: string | null;
-  resultado_rd:
-    | "Sem RD"
-    | "Não proliferativa"
-    | "Proliferativa"
-    | "Outra patologia"
-    | null;
+  resultado_rd: ResultadoRD | null;
   descricao: string | null;
   dilatacao: string | null;
   created_at: string;
@@ -80,8 +83,8 @@ export type PacienteTabela = {
   sexo: "M" | "F" | null;
   data_nascimento: string | null;
   created_at: string;
-  locais_atendimento: { nome: string }[] | null;
-  profiles: { full_name: string }[] | null;
+  locais_atendimento: { nome: string } | null;
+  profiles: { full_name: string } | null;
   laudos: { resultado_rd: string | null }[];
 };
 

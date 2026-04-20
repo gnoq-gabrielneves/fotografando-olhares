@@ -51,11 +51,22 @@ export function PacientesFiltros({
         </SelectTrigger>
         <SelectContent className="bg-slate-900 border-slate-700 text-slate-300">
           <SelectItem value="todos">Todos os resultados</SelectItem>
-          <SelectItem value="sem_laudo">Sem laudo</SelectItem>
-          <SelectItem value="Sem RD">Sem RD</SelectItem>
-          <SelectItem value="Não proliferativa">Não proliferativa</SelectItem>
-          <SelectItem value="Proliferativa">Proliferativa</SelectItem>
-          <SelectItem value="Outra patologia">Outra patologia</SelectItem>
+          <SelectItem value="Exame de retinografia normal">
+            Exame de retinografia normal
+          </SelectItem>
+          <SelectItem value="Retinopatia diabética não proliferativa">
+            Retinopatia diabética não proliferativa
+          </SelectItem>
+          <SelectItem value="Retinopatia diabética proliferativa">
+            Retinopatia diabética proliferativa
+          </SelectItem>
+          <SelectItem value="Retinopatia hipertensiva">
+            Retinopatia hipertensiva
+          </SelectItem>
+          <SelectItem value="Outras alterações">Outras alterações</SelectItem>
+          <SelectItem value="Qualidade da imagem ruim">
+            Qualidade da imagem ruim
+          </SelectItem>
         </SelectContent>
       </Select>
 

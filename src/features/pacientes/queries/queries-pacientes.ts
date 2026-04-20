@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import { PacienteTabela } from "@/types";
+import { PacienteTabela, ResultadoRD } from "@/types";
 
 export type FiltrosPacientes = {
   busca?: string;
@@ -28,9 +28,9 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
       data_nascimento,
       created_at,
       locais_atendimento(nome),
-      profiles(full_name),
+      profiles!pacientes_extensionista_id_fkey(full_name),
       laudos(resultado_rd)
-    `,
+      `,
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
@@ -46,15 +46,34 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
 
   if (resultado_rd && resultado_rd !== "todos") {
     if (resultado_rd === "sem_laudo") {
-      query = query.not("id", "in", "(select paciente_id from laudos)");
+      const { data: comLaudo } = await supabase
+        .from("laudos")
+        .select("paciente_id");
+
+      const ids = comLaudo?.map((l) => l.paciente_id) ?? [];
+      if (ids.length > 0) {
+        query = query.not("id", "in", `(${ids.join(",")})`);
+      }
     } else {
-      query = query.eq("laudos.resultado_rd", resultado_rd);
+      const { data: laudosFiltrados } = await supabase
+        .from("laudos")
+        .select("paciente_id")
+        .eq("resultado_rd", resultado_rd);
+
+      const ids = laudosFiltrados?.map((l) => l.paciente_id) ?? [];
+
+      if (ids.length === 0) {
+        return { data: [], count: 0 };
+      }
+
+      query = query.in("id", ids);
     }
   }
 
   const { data, error, count } = await query;
 
   if (error) throw new Error(error.message);
+
   return {
     data: data as unknown as PacienteTabela[],
     count: count ?? 0,
@@ -119,7 +138,7 @@ export async function getPacienteById(id: string) {
       `
       *,
       locais_atendimento(id, nome),
-      profiles(id, full_name),
+      profiles!pacientes_extensionista_id_fkey(id, full_name),
       laudos(
         id,
         data_laudo,
@@ -127,9 +146,9 @@ export async function getPacienteById(id: string) {
         descricao,
         dilatacao,
         created_at,
-        profiles(full_name)
+        profiles!laudos_laudador_id_fkey(full_name)
       )
-    `,
+      `,
     )
     .eq("id", id)
     .single();
@@ -141,11 +160,7 @@ export async function getPacienteById(id: string) {
 export type NovoLaudoInput = {
   paciente_id: string;
   data_laudo?: string;
-  resultado_rd?:
-    | "Sem RD"
-    | "Não proliferativa"
-    | "Proliferativa"
-    | "Outra patologia";
+  resultado_rd?: ResultadoRD;
   descricao?: string;
   dilatacao?: string;
 };
@@ -161,6 +176,23 @@ export async function criarLaudo(input: NovoLaudoInput) {
   const { data, error } = await supabase
     .from("laudos")
     .insert({ ...input, laudador_id: user.id })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function atualizarPaciente(
+  id: string,
+  input: Partial<NovoPacienteInput>,
+) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("pacientes")
+    .update(input)
+    .eq("id", id)
     .select()
     .single();
 
