@@ -10,6 +10,7 @@ export const queryKeys = {
   },
   laudos: {
     all: ["laudos"] as const,
+    lista: (filtros: object) => ["laudos", "lista", filtros] as const,
     byPaciente: (pacienteId: string) => ["laudos", pacienteId] as const,
   },
   home: {
