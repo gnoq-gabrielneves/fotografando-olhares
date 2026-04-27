@@ -30,12 +30,12 @@ export function LaudosFiltros({
           placeholder="Buscar por paciente..."
           value={busca}
           onChange={(e) => onBuscaChange(e.target.value)}
-          className="pl-9 bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10"
+          className="pl-9 w-100 bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10"
         />
       </div>
 
       <Select value={resultadoRd} onValueChange={onResultadoChange}>
-        <SelectTrigger className="w-full sm:w-56 bg-slate-900 border-slate-700 text-slate-300 focus:ring-cyan-500 h-10">
+        <SelectTrigger className="w-100 sm:w-56 bg-slate-900 border-slate-700 text-slate-300 focus:ring-cyan-500 h-10">
           <SelectValue placeholder="Resultado" />
         </SelectTrigger>
         <SelectContent className="bg-slate-900 border-slate-700 text-slate-300">
