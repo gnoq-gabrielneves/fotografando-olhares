@@ -199,3 +199,11 @@ export async function atualizarPaciente(
   if (error) throw new Error(error.message);
   return data;
 }
+
+export async function excluirPaciente(id: string) {
+  const supabase = createClient();
+
+  const { error } = await supabase.from("pacientes").delete().eq("id", id);
+
+  if (error) throw new Error(error.message);
+}

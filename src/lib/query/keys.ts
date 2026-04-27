@@ -19,4 +19,14 @@ export const queryKeys = {
     distribuicaoPorLocal: ["home", "distribuicaoPorLocal"] as const,
     ultimosPacientes: ["home", "ultimosPacientes"] as const,
   },
+  relatorios: {
+    geral: ["relatorios", "geral"] as const,
+    distribuicaoResultados: ["relatorios", "distribuicaoResultados"] as const,
+    distribuicaoPorExtensionista: [
+      "relatorios",
+      "distribuicaoPorExtensionista",
+    ] as const,
+    laudosPorMes: ["relatorios", "laudosPorMes"] as const,
+    distribuicaoPorLocal: ["relatorios", "distribuicaoPorLocal"] as const,
+  },
 };
