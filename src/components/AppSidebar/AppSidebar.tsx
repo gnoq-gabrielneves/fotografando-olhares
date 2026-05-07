@@ -14,7 +14,7 @@ import { NavMain } from "./NavMain";
 import { NavUser } from "./NavUser";
 
 export function AppSidebar() {
-  const { profile, isLoading } = useProfile();
+  const { profile } = useProfile();
 
   const navItems = [
     { title: "Início", href: "/home", icon: Home },
@@ -28,7 +28,6 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-slate-800 bg-slate-900">
-      {/* Header */}
       <SidebarHeader className="border-b border-slate-800 px-4 flex justify-center items-start h-20">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-950 border border-cyan-800/50 shrink-0">
@@ -43,7 +42,6 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      {/* Nav */}
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs text-slate-600 uppercase tracking-wider px-2 mb-1">
@@ -53,9 +51,8 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer com usuário */}
       <SidebarFooter className="border-t border-slate-800 px-2 py-3">
-        {!isLoading && profile && <NavUser profile={profile} />}
+        <NavUser />
       </SidebarFooter>
 
       <SidebarRail />

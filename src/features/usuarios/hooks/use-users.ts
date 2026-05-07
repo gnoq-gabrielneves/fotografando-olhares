@@ -54,6 +54,7 @@ export function useAtualizarUsuario(id: string, onSuccess?: () => void) {
       atualizarUsuario(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.usuarios.lista });
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
       toast.success("Usuário atualizado com sucesso!");
       onSuccess?.();
     },
