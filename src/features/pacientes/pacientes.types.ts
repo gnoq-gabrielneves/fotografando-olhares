@@ -1,0 +1,21 @@
+export type NovoPacienteInput = {
+  nome_completo: string;
+  sexo: "M" | "F";
+  cpf_cns?: string;
+  data_nascimento?: string;
+  local_atendimento_id?: string;
+  prontuario?: string;
+  termo_assinado?: boolean;
+  medicamentos_em_uso?: string;
+  insulina?: boolean;
+  tempo_diagnostico_dm?: "<1 ano" | "1 a 5 anos" | "5 a 10 anos" | ">10 anos";
+  tempo_diagnostico_has?: "<1 ano" | "1 a 5 anos" | "5 a 10 anos" | ">10 anos";
+  zona?: "Urbana" | "Rural" | "Periurbana";
+  fez_exame_oftalmologico?: boolean;
+  qt_tempo_ultimo_exame?: string;
+  tabagista?: boolean;
+  atividade_fisica?: boolean;
+  av_od?: string;
+  av_oe?: string;
+  outras_obs?: string;
+};

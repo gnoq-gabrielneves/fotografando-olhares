@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import {
   atualizarPaciente,
   getLocaisAtendimento,
-} from "../../queries/queries-pacientes";
+} from "../../services/pacientes.services";
 
 type FormData = {
   nome_completo: string;
@@ -32,6 +32,8 @@ type FormData = {
   medicamentos_em_uso: string;
   insulina: boolean;
   tempo_diagnostico_dm: string;
+  tempo_diagnostico_has: string;
+  zona: string;
   fez_exame_oftalmologico: boolean;
   tabagista: boolean;
   atividade_fisica: boolean;
@@ -66,7 +68,7 @@ const inputClass =
 const labelClass = "text-slate-400 text-xs mb-1.5 block";
 const errClass = "text-red-400 text-xs mt-1";
 const selectClass =
-  "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10";
+  "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10 w-full";
 
 export function EditarPacienteForm({ paciente }: Props) {
   const router = useRouter();
@@ -82,6 +84,8 @@ export function EditarPacienteForm({ paciente }: Props) {
     medicamentos_em_uso: paciente.medicamentos_em_uso ?? "",
     insulina: paciente.insulina ?? false,
     tempo_diagnostico_dm: paciente.tempo_diagnostico_dm ?? "",
+    tempo_diagnostico_has: paciente.tempo_diagnostico_has ?? "",
+    zona: paciente.zona ?? "",
     fez_exame_oftalmologico: paciente.fez_exame_oftalmologico ?? false,
     tabagista: paciente.tabagista ?? false,
     atividade_fisica: paciente.atividade_fisica ?? false,
@@ -110,6 +114,13 @@ export function EditarPacienteForm({ paciente }: Props) {
             | "1 a 5 anos"
             | "5 a 10 anos"
             | ">10 anos") || undefined,
+        tempo_diagnostico_has:
+          (data.tempo_diagnostico_has as
+            | "<1 ano"
+            | "1 a 5 anos"
+            | "5 a 10 anos"
+            | ">10 anos") || undefined,
+        zona: (data.zona as "Urbana" | "Rural" | "Periurbana") || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -225,23 +236,44 @@ export function EditarPacienteForm({ paciente }: Props) {
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className={labelClass}>Local de atendimento</label>
-          <Select
-            value={form.local_atendimento_id}
-            onValueChange={(v) => set("local_atendimento_id", v)}
-          >
-            <SelectTrigger className={selectClass}>
-              <SelectValue placeholder="Selecione o local" />
-            </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
-              {locais?.map((l) => (
-                <SelectItem key={l.id} value={l.id}>
-                  {l.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className={labelClass}>Local de atendimento</label>
+            <Select
+              value={form.local_atendimento_id}
+              onValueChange={(v) => set("local_atendimento_id", v)}
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione o local" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
+                {locais?.map((l) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    {l.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClass}>Zona</label>
+            <Select
+              value={form.zona}
+              onValueChange={(v) =>
+                set("zona", v as "Urbana" | "Rural" | "Periurbana")
+              }
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
+                <SelectItem value="Urbana">Urbana</SelectItem>
+                <SelectItem value="Rural">Rural</SelectItem>
+                <SelectItem value="Periurbana">Periurbana</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -280,21 +312,39 @@ export function EditarPacienteForm({ paciente }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <label className={labelClass}>Acuidade visual</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                value={form.av_od}
-                onChange={(e) => set("av_od", e.target.value)}
-                placeholder="OD"
-                className={selectClass}
-              />
-              <Input
-                value={form.av_oe}
-                onChange={(e) => set("av_oe", e.target.value)}
-                placeholder="OE"
-                className={selectClass}
-              />
-            </div>
+            <label className={labelClass}>Tempo de diagnóstico HAS</label>
+            <Select
+              value={form.tempo_diagnostico_has}
+              onValueChange={(v) => set("tempo_diagnostico_has", v)}
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
+                <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
+                <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
+                <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
+                <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelClass}>Acuidade visual</label>
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              value={form.av_od}
+              onChange={(e) => set("av_od", e.target.value)}
+              placeholder="OD"
+              className={selectClass}
+            />
+            <Input
+              value={form.av_oe}
+              onChange={(e) => set("av_oe", e.target.value)}
+              placeholder="OE"
+              className={selectClass}
+            />
           </div>
         </div>
 

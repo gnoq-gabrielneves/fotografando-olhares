@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import {
   criarPaciente,
   getLocaisAtendimento,
-} from "../queries/queries-pacientes";
+} from "../services/pacientes.services";
 
 type FormData = {
   nome_completo: string;
@@ -36,6 +36,8 @@ type FormData = {
   av_od: string;
   av_oe: string;
   outras_obs: string;
+  zona: "Urbana" | "Rural" | "Periurbana" | "";
+  tempo_diagnostico_has: string;
 };
 
 type Props = {
@@ -58,7 +60,7 @@ const inputClass =
 const labelClass = "text-slate-400 text-xs mb-1.5 block";
 const errClass = "text-red-400 text-xs mt-1";
 const selectClass =
-  "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10";
+  "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10 w-full";
 
 export function NovoPacienteForm({ onSuccess }: Props) {
   const queryClient = useQueryClient();
@@ -79,6 +81,8 @@ export function NovoPacienteForm({ onSuccess }: Props) {
     av_od: "",
     av_oe: "",
     outras_obs: "",
+    zona: "",
+    tempo_diagnostico_has: "",
   });
 
   const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
@@ -147,6 +151,13 @@ export function NovoPacienteForm({ onSuccess }: Props) {
       av_od: form.av_od || undefined,
       av_oe: form.av_oe || undefined,
       outras_obs: form.outras_obs || undefined,
+      zona: (form.zona as "Urbana" | "Rural" | "Periurbana") || undefined,
+      tempo_diagnostico_has:
+        (form.tempo_diagnostico_has as
+          | "<1 ano"
+          | "1 a 5 anos"
+          | "5 a 10 anos"
+          | ">10 anos") || undefined,
     });
   }
 
@@ -179,7 +190,10 @@ export function NovoPacienteForm({ onSuccess }: Props) {
               <SelectTrigger className={selectClass}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
+              <SelectContent
+                className="bg-slate-800 border-slate-700 text-slate-300"
+                position="popper"
+              >
                 <SelectItem value="M">Masculino</SelectItem>
                 <SelectItem value="F">Feminino</SelectItem>
               </SelectContent>
@@ -235,7 +249,10 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             <SelectTrigger className={selectClass}>
               <SelectValue placeholder="Selecione o local" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
+            <SelectContent
+              className="bg-slate-800 border-slate-700 text-slate-300"
+              position="popper"
+            >
               {locais?.map((l) => (
                 <SelectItem key={l.id} value={l.id}>
                   {l.nome}
@@ -267,6 +284,51 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             <Select
               value={form.tempo_diagnostico_dm}
               onValueChange={(v) => set("tempo_diagnostico_dm", v)}
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent
+                className="bg-slate-800 border-slate-700 text-slate-300"
+                position="popper"
+              >
+                <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
+                <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
+                <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
+                <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Zona */}
+          <div className="space-y-1.5">
+            <label className={labelClass}>Zona</label>
+            <Select
+              value={form.zona}
+              onValueChange={(v) =>
+                set("zona", v as "Urbana" | "Rural" | "Periurbana")
+              }
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent
+                className="bg-slate-800 border-slate-700 text-slate-300"
+                position="popper"
+              >
+                <SelectItem value="Urbana">Urbana</SelectItem>
+                <SelectItem value="Rural">Rural</SelectItem>
+                <SelectItem value="Periurbana">Periurbana</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Tempo diagnóstico HAS */}
+          <div className="space-y-1.5">
+            <label className={labelClass}>Tempo de diagnóstico HAS</label>
+            <Select
+              value={form.tempo_diagnostico_has}
+              onValueChange={(v) => set("tempo_diagnostico_has", v)}
             >
               <SelectTrigger className={selectClass}>
                 <SelectValue placeholder="Selecione" />

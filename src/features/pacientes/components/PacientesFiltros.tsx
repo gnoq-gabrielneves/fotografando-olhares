@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { getLocaisAtendimento } from "../queries/queries-pacientes";
+import { getLocaisAtendimento } from "../services/pacientes.services";
 
 type Props = {
   busca: string;

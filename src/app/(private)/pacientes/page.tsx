@@ -1,3 +1,4 @@
+import { ExportarButton } from "@/components/ExportarButton/ExportarButton";
 import { NovoPacienteSheet } from "@/features/pacientes/components/NovoPacienteSheet";
 import { PacientesTabela } from "@/features/pacientes/components/PacientesTabela";
 
@@ -11,7 +12,10 @@ export default function PacientesPage() {
             Gerencie os pacientes cadastrados no projeto
           </p>
         </div>
-        <NovoPacienteSheet />
+        <div className="flex flex-row gap-2">
+          <ExportarButton />
+          <NovoPacienteSheet />
+        </div>
       </div>
       <PacientesTabela />
     </div>

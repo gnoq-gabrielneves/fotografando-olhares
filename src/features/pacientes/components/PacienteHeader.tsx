@@ -18,7 +18,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, FileText, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { excluirPaciente } from "../queries/queries-pacientes";
+import { excluirPaciente } from "../services/pacientes.services";
 
 function calcularIdade(data: string | null) {
   if (!data) return null;

@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
-import { criarLaudo } from "../../queries/queries-pacientes";
+import { criarLaudo } from "../../services/pacientes.services";
 
 type FormData = {
   resultado_rd: ResultadoRD | "";

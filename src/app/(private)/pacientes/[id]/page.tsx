@@ -3,7 +3,7 @@ import { PacienteHeader } from "@/features/pacientes/components/PacienteHeader";
 import { PacienteInfo } from "@/features/pacientes/components/PacienteInfo";
 import { PacienteLaudos } from "@/features/pacientes/components/PacienteLaudos";
 import { PacienteSkeleton } from "@/features/pacientes/components/PacienteSkeleton";
-import { getPacienteById } from "@/features/pacientes/queries/queries-pacientes";
+import { getPacienteById } from "@/features/pacientes/services/pacientes.services";
 import { queryKeys } from "@/lib/query/keys";
 import { LaudoComLaudador, PacienteDetalhado } from "@/types";
 import { useQuery } from "@tanstack/react-query";

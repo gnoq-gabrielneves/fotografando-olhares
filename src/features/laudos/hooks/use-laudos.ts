@@ -3,7 +3,7 @@ import { getLaudos } from "@/features/laudos/services/getLaudos";
 import {
   criarLaudo,
   NovoLaudoInput,
-} from "@/features/pacientes/queries/queries-pacientes";
+} from "@/features/pacientes/services/pacientes.services";
 import { queryKeys } from "@/lib/query/keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

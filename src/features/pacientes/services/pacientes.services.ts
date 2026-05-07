@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { PacienteTabela, ResultadoRD } from "@/types";
+import { NovoPacienteInput } from "../pacientes.types";
 
 export type FiltrosPacientes = {
   busca?: string;
@@ -90,26 +91,6 @@ export async function getLocaisAtendimento() {
   if (error) throw new Error(error.message);
   return data;
 }
-
-export type NovoPacienteInput = {
-  nome_completo: string;
-  sexo: "M" | "F";
-  cpf_cns?: string;
-  data_nascimento?: string;
-  local_atendimento_id?: string;
-  prontuario?: string;
-  termo_assinado?: boolean;
-  medicamentos_em_uso?: string;
-  insulina?: boolean;
-  tempo_diagnostico_dm?: "<1 ano" | "1 a 5 anos" | "5 a 10 anos" | ">10 anos";
-  fez_exame_oftalmologico?: boolean;
-  qt_tempo_ultimo_exame?: string;
-  tabagista?: boolean;
-  atividade_fisica?: boolean;
-  av_od?: string;
-  av_oe?: string;
-  outras_obs?: string;
-};
 
 export async function criarPaciente(input: NovoPacienteInput) {
   const supabase = createClient();
@@ -206,4 +187,22 @@ export async function excluirPaciente(id: string) {
   const { error } = await supabase.from("pacientes").delete().eq("id", id);
 
   if (error) throw new Error(error.message);
+}
+
+export async function getTodosPacientes() {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("pacientes")
+    .select(
+      `
+      *,
+      locais_atendimento(nome),
+      profiles!pacientes_extensionista_id_fkey(full_name)
+    `,
+    )
+    .order("nome_completo", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return data;
 }

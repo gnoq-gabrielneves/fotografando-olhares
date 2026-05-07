@@ -1,6 +1,6 @@
 "use client";
 import { EditarPacienteForm } from "@/features/pacientes/components/EditarPaciente/editar-paciente-form";
-import { getPacienteById } from "@/features/pacientes/queries/queries-pacientes";
+import { getPacienteById } from "@/features/pacientes/services/pacientes.services";
 import { queryKeys } from "@/lib/query/keys";
 import { PacienteDetalhado } from "@/types";
 import { useQuery } from "@tanstack/react-query";
@@ -17,7 +17,7 @@ export default function EditarPacientePage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="w-full mx-auto space-y-6">
       {/* Header */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
         <button

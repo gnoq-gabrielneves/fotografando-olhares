@@ -1,6 +1,6 @@
 "use client";
 import { LaudoForm } from "@/features/pacientes/components/Laudos/LaudoForm";
-import { getPacienteById } from "@/features/pacientes/queries/queries-pacientes";
+import { getPacienteById } from "@/features/pacientes/services/pacientes.services";
 import { queryKeys } from "@/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Eye } from "lucide-react";

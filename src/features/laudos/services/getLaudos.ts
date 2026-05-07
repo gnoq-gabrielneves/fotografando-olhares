@@ -50,3 +50,21 @@ export async function getLaudos(filtros: FiltrosLaudos = {}): Promise<{
     count: count ?? 0,
   };
 }
+
+export async function getTodosLaudos() {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("laudos")
+    .select(
+      `
+      *,
+      pacientes(id, nome_completo),
+      profiles!laudos_laudador_id_fkey(full_name)
+    `,
+    )
+    .order("data_laudo", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data;
+}

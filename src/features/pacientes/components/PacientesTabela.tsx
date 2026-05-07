@@ -16,7 +16,7 @@ import { ArrowRight, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { getPacientes } from "../queries/queries-pacientes";
+import { getPacientes } from "../services/pacientes.services";
 import { PacientesFiltros } from "./PacientesFiltros";
 import { PacientesPaginacao } from "./PacientesPaginacao";
 

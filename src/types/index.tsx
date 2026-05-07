@@ -49,6 +49,13 @@ export type Paciente = {
   extensionista_id: string | null;
   created_at: string;
   updated_at: string;
+  zona: "Urbana" | "Rural" | "Periurbana" | null;
+  tempo_diagnostico_has:
+    | "<1 ano"
+    | "1 a 5 anos"
+    | "5 a 10 anos"
+    | ">10 anos"
+    | null;
 };
 
 export type ResultadoRD =

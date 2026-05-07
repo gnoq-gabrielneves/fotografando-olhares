@@ -68,8 +68,11 @@ export async function getDistribuicaoPorExtensionista() {
 
   const contagem: Record<string, number> = {};
   data.forEach((p) => {
-    const profiles = p.profiles as { full_name: string }[] | null;
-    const nome = profiles?.[0]?.full_name ?? "Não informado";
+    const raw = p.profiles as unknown;
+    const profile = Array.isArray(raw)
+      ? (raw[0] as { full_name: string } | undefined)
+      : (raw as { full_name: string } | null);
+    const nome = profile?.full_name ?? "Não informado";
     contagem[nome] = (contagem[nome] ?? 0) + 1;
   });
 
@@ -117,9 +120,10 @@ export async function getDistribuicaoPorLocal() {
 
   const contagem: Record<string, number> = {};
   data.forEach((p) => {
-    const local = Array.isArray(p.locais_atendimento)
-      ? (p.locais_atendimento[0] as { nome: string } | undefined)
-      : (p.locais_atendimento as { nome: string } | null);
+    const raw = p.locais_atendimento as unknown;
+    const local = Array.isArray(raw)
+      ? (raw[0] as { nome: string } | undefined)
+      : (raw as { nome: string } | null);
     const nome = local?.nome ?? "Não informado";
     contagem[nome] = (contagem[nome] ?? 0) + 1;
   });
