@@ -9,35 +9,22 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useProfile } from "@/hooks/use-profile";
-import { BarChart2, Eye, FileText, Home, Users } from "lucide-react";
+import { BarChart2, Eye, FileText, Home, UserCog, Users } from "lucide-react";
 import { NavMain } from "./NavMain";
 import { NavUser } from "./NavUser";
 
-const navItems = [
-  {
-    title: "Início",
-    href: "/home",
-    icon: Home,
-  },
-  {
-    title: "Pacientes",
-    href: "/pacientes",
-    icon: Users,
-  },
-  {
-    title: "Laudos",
-    href: "/laudos",
-    icon: FileText,
-  },
-  {
-    title: "Relatórios",
-    href: "/relatorios",
-    icon: BarChart2,
-  },
-];
-
 export function AppSidebar() {
   const { profile, isLoading } = useProfile();
+
+  const navItems = [
+    { title: "Início", href: "/home", icon: Home },
+    { title: "Pacientes", href: "/pacientes", icon: Users },
+    { title: "Laudos", href: "/laudos", icon: FileText },
+    { title: "Relatórios", href: "/relatorios", icon: BarChart2 },
+    ...(profile?.role === "admin"
+      ? [{ title: "Usuários", href: "/usuarios", icon: UserCog }]
+      : []),
+  ];
 
   return (
     <Sidebar className="border-r border-slate-800 bg-slate-900">

@@ -29,4 +29,8 @@ export const queryKeys = {
     laudosPorMes: ["relatorios", "laudosPorMes"] as const,
     distribuicaoPorLocal: ["relatorios", "distribuicaoPorLocal"] as const,
   },
+  usuarios: {
+    all: ["usuarios"] as const,
+    lista: ["usuarios", "lista"] as const,
+  },
 };

@@ -1,5 +1,4 @@
 "use client";
-import { signOut } from "@/actions/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,6 +15,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Profile } from "@/lib/types";
+import { signOut } from "@/services/auth";
 import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
 
 export function NavUser({ profile }: { profile: Profile }) {
