@@ -18,10 +18,12 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import { signOut } from "@/services/auth";
 import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { profile, isLoading } = useProfile();
+  const router = useRouter();
 
   if (isLoading || !profile)
     return (
@@ -99,7 +101,10 @@ export function NavUser() {
 
             <DropdownMenuSeparator className="bg-slate-100" />
 
-            <DropdownMenuItem className="gap-2 cursor-pointer hover:bg-slate-100 focus:bg-slate-100 text-slate-700">
+            <DropdownMenuItem
+              onClick={() => router.push("/profile")}
+              className="gap-2 cursor-pointer hover:bg-slate-100 focus:bg-slate-100 text-slate-700"
+            >
               <BadgeCheck className="w-4 h-4 text-slate-400" />
               Meu perfil
             </DropdownMenuItem>
