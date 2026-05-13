@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -26,15 +27,15 @@ export function EditarUsuarioSheet({ usuario }: Props) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0 text-slate-500 hover:text-cyan-400 hover:bg-slate-800"
+          className="h-8 w-8 p-0 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50"
         >
           <Pencil className="w-4 h-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="bg-slate-900 border-slate-800 text-white w-full sm:max-w-lg overflow-y-auto px-6">
+      <SheetContent className="bg-white border-slate-200 text-slate-800 w-full sm:max-w-lg overflow-y-auto px-6">
         <SheetHeader className="mb-6 pt-2">
-          <SheetTitle className="text-white">Editar usuário</SheetTitle>
-          <SheetDescription className="text-slate-400">
+          <SheetTitle className="text-slate-800">Editar usuário</SheetTitle>
+          <SheetDescription className="text-slate-500">
             Atualize os dados de {usuario.full_name}.
           </SheetDescription>
         </SheetHeader>

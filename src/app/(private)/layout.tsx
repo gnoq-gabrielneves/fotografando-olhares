@@ -1,6 +1,6 @@
 import { AppHeader } from "@/components/AppHeader/AppHeader";
 import { AppSidebar } from "@/components/AppSidebar/AppSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/lib/query/provider";
 
@@ -13,19 +13,19 @@ export default function PrivateLayout({
     <QueryProvider>
       <SidebarProvider>
         <AppSidebar />
-        <section className="w-full bg-slate-950">
+        <SidebarInset className="bg-slate-50">
           <AppHeader />
-          <main className="p-5 mt-20">{children}</main>
-        </section>
+          <main className="p-5">{children}</main>
+        </SidebarInset>
         <Toaster
           position="bottom-right"
           toastOptions={{
             classNames: {
-              toast: "bg-slate-900 border-slate-800 text-white",
-              title: "text-white",
-              description: "text-slate-400",
-              error: "bg-red-950 border-red-900 text-red-400",
-              success: "bg-cyan-950 border-cyan-900 text-cyan-400",
+              toast: "bg-white border-slate-200 text-slate-800",
+              title: "text-slate-800",
+              description: "text-slate-500",
+              error: "bg-red-50 border-red-200 text-red-600",
+              success: "bg-cyan-50 border-cyan-200 text-cyan-700",
             },
           }}
         />

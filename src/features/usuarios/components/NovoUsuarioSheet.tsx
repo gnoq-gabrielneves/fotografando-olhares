@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -23,10 +24,10 @@ export function NovoUsuarioSheet() {
           Novo usuário
         </Button>
       </SheetTrigger>
-      <SheetContent className="bg-slate-900 border-slate-800 text-white w-full sm:max-w-lg overflow-y-auto px-6">
+      <SheetContent className="bg-white border-slate-200 text-slate-800 w-full sm:max-w-lg overflow-y-auto px-6">
         <SheetHeader className="mb-6 pt-2">
-          <SheetTitle className="text-white">Criar usuário</SheetTitle>
-          <SheetDescription className="text-slate-400">
+          <SheetTitle className="text-slate-800">Criar usuário</SheetTitle>
+          <SheetDescription className="text-slate-500">
             Preencha os dados para criar um novo usuário no sistema.
           </SheetDescription>
         </SheetHeader>

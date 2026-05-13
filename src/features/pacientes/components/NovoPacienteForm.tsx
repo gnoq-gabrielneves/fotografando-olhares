@@ -47,20 +47,20 @@ type Props = {
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 pt-2">
-      <span className="text-xs font-medium text-cyan-500 uppercase tracking-wider whitespace-nowrap">
+      <span className="text-xs font-medium text-cyan-600 uppercase tracking-wider whitespace-nowrap">
         {children}
       </span>
-      <div className="h-px bg-slate-800 flex-1" />
+      <div className="h-px bg-slate-200 flex-1" />
     </div>
   );
 }
 
 const inputClass =
-  "w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
-const labelClass = "text-slate-400 text-xs mb-1.5 block";
-const errClass = "text-red-400 text-xs mt-1";
+  "w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
+const labelClass = "text-slate-600 text-xs mb-1.5 block";
+const errClass = "text-red-500 text-xs mt-1";
 const selectClass =
-  "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10 w-full";
+  "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 focus-visible:ring-cyan-500 h-10 w-full";
 
 export function NovoPacienteForm({ onSuccess }: Props) {
   const queryClient = useQueryClient();
@@ -191,7 +191,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent
-                className="bg-slate-800 border-slate-700 text-slate-300"
+                className="bg-white border-slate-200 text-slate-700"
                 position="popper"
               >
                 <SelectItem value="M">Masculino</SelectItem>
@@ -250,7 +250,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
               <SelectValue placeholder="Selecione o local" />
             </SelectTrigger>
             <SelectContent
-              className="bg-slate-800 border-slate-700 text-slate-300"
+              className="bg-white border-slate-200 text-slate-700"
               position="popper"
             >
               {locais?.map((l) => (
@@ -274,7 +274,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             onChange={(e) => set("medicamentos_em_uso", e.target.value)}
             placeholder="Liste os medicamentos e doses..."
             rows={3}
-            className="w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 py-2 text-sm resize-none outline-none"
+            className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 py-2 text-sm resize-none outline-none"
           />
         </div>
 
@@ -289,7 +289,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent
-                className="bg-slate-800 border-slate-700 text-slate-300"
+                className="bg-white border-slate-200 text-slate-700"
                 position="popper"
               >
                 <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
@@ -300,7 +300,27 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             </Select>
           </div>
 
-          {/* Zona */}
+          <div className="space-y-1.5">
+            <label className={labelClass}>Tempo de diagnóstico HAS</label>
+            <Select
+              value={form.tempo_diagnostico_has}
+              onValueChange={(v) => set("tempo_diagnostico_has", v)}
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent
+                className="bg-white border-slate-200 text-slate-700"
+                position="popper"
+              >
+                <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
+                <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
+                <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
+                <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-1.5">
             <label className={labelClass}>Zona</label>
             <Select
@@ -313,31 +333,12 @@ export function NovoPacienteForm({ onSuccess }: Props) {
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent
-                className="bg-slate-800 border-slate-700 text-slate-300"
+                className="bg-white border-slate-200 text-slate-700"
                 position="popper"
               >
                 <SelectItem value="Urbana">Urbana</SelectItem>
                 <SelectItem value="Rural">Rural</SelectItem>
                 <SelectItem value="Periurbana">Periurbana</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Tempo diagnóstico HAS */}
-          <div className="space-y-1.5">
-            <label className={labelClass}>Tempo de diagnóstico HAS</label>
-            <Select
-              value={form.tempo_diagnostico_has}
-              onValueChange={(v) => set("tempo_diagnostico_has", v)}
-            >
-              <SelectTrigger className={selectClass}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
-                <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
-                <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
-                <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
-                <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -373,15 +374,15 @@ export function NovoPacienteForm({ onSuccess }: Props) {
           ].map(({ field: f, label: l }) => (
             <label
               key={f}
-              className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-slate-800/50 border border-slate-800 hover:border-slate-700 transition-colors"
+              className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors"
             >
               <input
                 type="checkbox"
                 checked={form[f]}
                 onChange={(e) => set(f, e.target.checked)}
-                className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-cyan-500 shrink-0"
+                className="w-4 h-4 rounded border-slate-300 bg-white accent-cyan-600 shrink-0"
               />
-              <span className="text-slate-300 text-sm leading-tight">{l}</span>
+              <span className="text-slate-600 text-sm leading-tight">{l}</span>
             </label>
           ))}
         </div>
@@ -395,7 +396,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
           onChange={(e) => set("outras_obs", e.target.value)}
           placeholder="Observações adicionais sobre o paciente..."
           rows={3}
-          className="w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 py-2 text-sm resize-none outline-none"
+          className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 py-2 text-sm resize-none outline-none"
         />
       </div>
 

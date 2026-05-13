@@ -12,9 +12,9 @@ function InfoRow({
   value: string | null | undefined;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-3 border-b border-slate-800 last:border-0">
+    <div className="flex items-start justify-between gap-4 py-3 border-b border-slate-100 last:border-0">
       <span className="text-slate-500 text-sm shrink-0">{label}</span>
-      <span className="text-slate-200 text-sm text-right">{value || "—"}</span>
+      <span className="text-slate-800 text-sm text-right">{value || "—"}</span>
     </div>
   );
 }
@@ -27,16 +27,16 @@ function BoolRow({
   value: boolean | null | undefined;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-3 border-b border-slate-800 last:border-0">
+    <div className="flex items-start justify-between gap-4 py-3 border-b border-slate-100 last:border-0">
       <span className="text-slate-500 text-sm shrink-0">{label}</span>
       {value === null || value === undefined ? (
-        <span className="text-slate-200 text-sm">—</span>
+        <span className="text-slate-800 text-sm">—</span>
       ) : (
         <span
           className={`text-xs px-2 py-0.5 rounded-md font-medium border ${
             value
-              ? "bg-cyan-950 text-cyan-400 border-cyan-900/50"
-              : "bg-slate-800 text-slate-500 border-slate-700"
+              ? "bg-cyan-50 text-cyan-700 border-cyan-200"
+              : "bg-slate-100 text-slate-500 border-slate-200"
           }`}
         >
           {value ? "Sim" : "Não"}
@@ -55,8 +55,8 @@ export function PacienteInfo({ paciente }: Props) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Dados pessoais */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-xs font-medium text-cyan-500 uppercase tracking-wider mb-2">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider mb-2">
           Dados pessoais
         </h2>
         <InfoRow label="CPF / CNS" value={paciente.cpf_cns} />
@@ -77,14 +77,19 @@ export function PacienteInfo({ paciente }: Props) {
       </div>
 
       {/* Dados clínicos */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-xs font-medium text-cyan-500 uppercase tracking-wider mb-2">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider mb-2">
           Dados clínicos
         </h2>
         <InfoRow
           label="Tempo de diagnóstico DM"
           value={paciente.tempo_diagnostico_dm}
         />
+        <InfoRow
+          label="Tempo de diagnóstico HAS"
+          value={paciente.tempo_diagnostico_has}
+        />
+        <InfoRow label="Zona" value={paciente.zona} />
         <InfoRow label="Acuidade visual OD" value={paciente.av_od} />
         <InfoRow label="Acuidade visual OE" value={paciente.av_oe} />
         <BoolRow label="Usa insulina" value={paciente.insulina} />
@@ -102,11 +107,11 @@ export function PacienteInfo({ paciente }: Props) {
 
       {/* Medicamentos */}
       {paciente.medicamentos_em_uso && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 lg:col-span-2">
-          <h2 className="text-xs font-medium text-cyan-500 uppercase tracking-wider mb-3">
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-2">
+          <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider mb-3">
             Medicamentos em uso
           </h2>
-          <p className="text-slate-300 text-sm leading-relaxed">
+          <p className="text-slate-600 text-sm leading-relaxed">
             {paciente.medicamentos_em_uso}
           </p>
         </div>
@@ -114,11 +119,11 @@ export function PacienteInfo({ paciente }: Props) {
 
       {/* Observações */}
       {paciente.outras_obs && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 lg:col-span-2">
-          <h2 className="text-xs font-medium text-cyan-500 uppercase tracking-wider mb-3">
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-2">
+          <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider mb-3">
             Observações
           </h2>
-          <p className="text-slate-300 text-sm leading-relaxed">
+          <p className="text-slate-600 text-sm leading-relaxed">
             {paciente.outras_obs}
           </p>
         </div>

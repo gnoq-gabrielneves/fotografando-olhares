@@ -21,6 +21,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
     <SidebarMenu>
       {items.map((item) => {
         const isActive = pathname === item.href;
+
         return (
           <SidebarMenuItem key={item.href}>
             <SidebarMenuButton
@@ -28,8 +29,8 @@ export function NavMain({ items }: { items: NavItem[] }) {
               isActive={isActive}
               className={
                 isActive
-                  ? "bg-cyan-950 text-cyan-400 hover:bg-cyan-950 hover:text-cyan-400"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  ? "bg-cyan-50 text-cyan-600 hover:bg-cyan-50 hover:text-cyan-600"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }
             >
               <Link href={item.href}>

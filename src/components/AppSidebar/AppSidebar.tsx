@@ -1,4 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
+
 import {
   Sidebar,
   SidebarContent,
@@ -9,7 +11,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useProfile } from "@/hooks/use-profile";
-import { BarChart2, Eye, FileText, Home, UserCog, Users } from "lucide-react";
+import { BarChart2, FileText, Home, UserCog, Users } from "lucide-react";
 import { NavMain } from "./NavMain";
 import { NavUser } from "./NavUser";
 
@@ -27,31 +29,25 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar className="border-r border-slate-800 bg-slate-900">
-      <SidebarHeader className="border-b border-slate-800 px-4 flex justify-center items-start h-20">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-950 border border-cyan-800/50 shrink-0">
-            <Eye className="w-4 h-4 text-cyan-400" />
-          </div>
-          <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold text-white">
-              Fotografando Olhares
-            </span>
-            <span className="text-xs text-slate-500 line-clamp-1">LAOF</span>
-          </div>
-        </div>
+    <Sidebar className="border-r border-slate-200 bg-white">
+      <SidebarHeader className="border-b border-slate-200 h-20 flex items-center justify-center">
+        <img
+          src="/fotografandoolhares.png"
+          alt="Fotografando Olhares"
+          className="h-25 w-auto object-contain"
+        />
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs text-slate-600 uppercase tracking-wider px-2 mb-1">
+          <SidebarGroupLabel className="text-xs text-slate-400 uppercase tracking-wider px-2 mb-1">
             Menu
           </SidebarGroupLabel>
           <NavMain items={navItems} />
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-slate-800 px-2 py-3">
+      <SidebarFooter className="border-t border-slate-200 px-2 py-3">
         <NavUser />
       </SidebarFooter>
 

@@ -1,4 +1,5 @@
 "use client";
+
 import { queryKeys } from "@/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -19,14 +20,15 @@ export function RelatorioLocais() {
   });
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-      <h2 className="text-white font-medium text-sm mb-6">
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+      <h2 className="text-slate-700 font-medium text-sm mb-6">
         Pacientes por local de atendimento
       </h2>
+
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-8 bg-slate-800 rounded animate-pulse" />
+            <div key={i} className="h-8 bg-slate-100 rounded animate-pulse" />
           ))}
         </div>
       ) : (
@@ -38,31 +40,32 @@ export function RelatorioLocais() {
           >
             <XAxis
               type="number"
-              tick={{ fill: "#64748b", fontSize: 12 }}
+              tick={{ fill: "#94a3b8", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fill: "#94a3b8", fontSize: 12 }}
+              tick={{ fill: "#475569", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
               width={140}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#0f172a",
-                border: "1px solid #1e293b",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e2e8f0",
                 borderRadius: "8px",
-                color: "#fff",
+                color: "#1e293b",
                 fontSize: "13px",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               }}
-              cursor={{ fill: "#1e293b" }}
+              cursor={{ fill: "#f1f5f9" }}
             />
             <Bar dataKey="value" radius={[0, 4, 4, 0]} name="Pacientes">
               {data?.map((_, index) => (
-                <Cell key={index} fill="#22d3ee" fillOpacity={0.8} />
+                <Cell key={index} fill="#0891b2" fillOpacity={0.8} />
               ))}
             </Bar>
           </BarChart>

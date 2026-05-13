@@ -1,4 +1,5 @@
 "use client";
+
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 
@@ -19,21 +20,22 @@ const pageInfo: Record<string, { title: string; description: string }> = {
     title: "Relatórios",
     description: "Análises e estatísticas do projeto",
   },
+  "/usuarios": {
+    title: "Usuários",
+    description: "Gerencie os usuários do sistema",
+  },
 };
 
 export function AppHeader() {
   const pathname = usePathname();
-
-  // pega a rota base (ex: /pacientes/123 → /pacientes)
   const baseRoute = "/" + pathname.split("/")[1];
   const info = pageInfo[baseRoute] ?? { title: "", description: "" };
 
   return (
-    <header className="fixed flex items-center gap-3 px-4 border-b border-slate-800 bg-slate-900 shrink-0 h-20 w-full">
-      <SidebarTrigger className="text-slate-400 hover:text-white hover:bg-slate-800" />
-
+    <header className="flex items-center gap-3 h-20 px-4 border-b border-slate-200 bg-white shrink-0 sticky top-0 z-10">
+      <SidebarTrigger className="text-slate-400 hover:text-slate-600 hover:bg-slate-100" />
       <div className="flex flex-col">
-        <span className="text-sm font-medium text-white leading-tight">
+        <span className="text-sm font-medium text-slate-800 leading-tight">
           {info.title}
         </span>
         <span className="text-xs text-slate-500 leading-tight">

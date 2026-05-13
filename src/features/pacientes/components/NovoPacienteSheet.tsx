@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -24,10 +25,10 @@ export function NovoPacienteSheet() {
       </SheetTrigger>
       <SheetContent
         showCloseButton={false}
-        className="bg-slate-900 pt-5 border-slate-800 text-white w-full sm:max-w-lg overflow-y-auto px-6"
+        className="bg-white pt-5 border-slate-200 text-slate-800 w-full sm:max-w-lg overflow-y-auto px-6"
       >
         <SheetHeader className="p-0">
-          <SheetTitle className="text-white"></SheetTitle>
+          <SheetTitle className="text-slate-800"></SheetTitle>
         </SheetHeader>
         <NovoPacienteForm onSuccess={() => setOpen(false)} />
       </SheetContent>

@@ -1,4 +1,5 @@
 "use client";
+
 import { queryKeys } from "@/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -19,16 +20,19 @@ export function RelatorioPorMes() {
   });
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-      <h2 className="text-white font-medium text-sm mb-6">Laudos por mês</h2>
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+      <h2 className="text-slate-700 font-medium text-sm mb-6">
+        Laudos por mês
+      </h2>
+
       {isLoading ? (
         <div className="h-64 flex items-center justify-center">
-          <div className="w-32 h-32 rounded-full border-4 border-slate-800 border-t-cyan-500 animate-spin" />
+          <div className="w-32 h-32 rounded-full border-4 border-slate-100 border-t-cyan-500 animate-spin" />
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={data} margin={{ left: 0, right: 16 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
               dataKey="mes"
               tick={{ fill: "#94a3b8", fontSize: 12 }}
@@ -36,26 +40,27 @@ export function RelatorioPorMes() {
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: "#64748b", fontSize: 12 }}
+              tick={{ fill: "#94a3b8", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
               width={32}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#0f172a",
-                border: "1px solid #1e293b",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e2e8f0",
                 borderRadius: "8px",
-                color: "#fff",
+                color: "#1e293b",
                 fontSize: "13px",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               }}
             />
             <Line
               type="monotone"
               dataKey="total"
-              stroke="#22d3ee"
+              stroke="#0891b2"
               strokeWidth={2}
-              dot={{ fill: "#22d3ee", r: 4 }}
+              dot={{ fill: "#0891b2", r: 4 }}
               activeDot={{ r: 6 }}
               name="Laudos"
             />

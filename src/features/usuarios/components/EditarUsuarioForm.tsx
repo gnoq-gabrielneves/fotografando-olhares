@@ -1,4 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAvatarUpload } from "@/hooks/use-avatar";
@@ -22,18 +24,18 @@ type Props = {
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 pt-2">
-      <span className="text-xs font-medium text-cyan-500 uppercase tracking-wider whitespace-nowrap">
+      <span className="text-xs font-medium text-cyan-600 uppercase tracking-wider whitespace-nowrap">
         {children}
       </span>
-      <div className="h-px bg-slate-800 flex-1" />
+      <div className="h-px bg-slate-200 flex-1" />
     </div>
   );
 }
 
 const inputClass =
-  "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500 h-10";
-const labelClass = "text-slate-400 text-xs mb-1.5 block";
-const errClass = "text-red-400 text-xs mt-1";
+  "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 focus-visible:ring-cyan-500 h-10";
+const labelClass = "text-slate-600 text-xs mb-1.5 block";
+const errClass = "text-red-500 text-xs mt-1";
 
 const roles: { value: FormData["role"]; label: string }[] = [
   { value: "extensionista", label: "Extensionista" },
@@ -90,12 +92,10 @@ export function EditarUsuarioForm({ usuario, onSuccess }: Props) {
       setErros(novosErros);
       return;
     }
-
     let avatar_url: string | undefined;
     if (avatar) {
       avatar_url = await upload(avatar);
     }
-
     atualizar({
       full_name: form.full_name,
       role: form.role,
@@ -110,7 +110,7 @@ export function EditarUsuarioForm({ usuario, onSuccess }: Props) {
       <div className="space-y-4">
         <SectionTitle>Foto de perfil</SectionTitle>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+          <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
             {avatarPreview ? (
               <img
                 src={avatarPreview}
@@ -118,7 +118,7 @@ export function EditarUsuarioForm({ usuario, onSuccess }: Props) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-slate-500 text-xl font-medium">
+              <span className="text-slate-400 text-xl font-medium">
                 {form.full_name?.[0]?.toUpperCase() || "?"}
               </span>
             )}
@@ -131,7 +131,7 @@ export function EditarUsuarioForm({ usuario, onSuccess }: Props) {
                 onChange={handleAvatar}
                 className="hidden"
               />
-              <span className="inline-flex items-center gap-2 px-3 h-9 rounded-md text-sm font-medium border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors">
+              <span className="inline-flex items-center gap-2 px-3 h-9 rounded-md text-sm font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
                 <Upload className="w-4 h-4" />
                 Trocar foto
               </span>
@@ -143,7 +143,7 @@ export function EditarUsuarioForm({ usuario, onSuccess }: Props) {
                   setAvatar(null);
                   setAvatarPreview(null);
                 }}
-                className="h-9 w-9 flex items-center justify-center rounded-md border border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                className="h-9 w-9 flex items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -202,7 +202,7 @@ export function EditarUsuarioForm({ usuario, onSuccess }: Props) {
               className={`h-10 rounded-lg text-sm font-medium border transition-all ${
                 form.role === r.value
                   ? "bg-cyan-600 border-cyan-500 text-white"
-                  : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"
+                  : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"
               }`}
             >
               {r.label}

@@ -1,4 +1,5 @@
 "use client";
+
 import { queryKeys } from "@/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Clock, FileText, Users } from "lucide-react";
@@ -9,33 +10,33 @@ const cards = [
     key: "totalPacientes",
     label: "Total de pacientes",
     icon: Users,
-    color: "text-cyan-400",
-    bg: "bg-cyan-950",
-    border: "border-cyan-900/50",
+    color: "text-cyan-600",
+    bg: "bg-cyan-50",
+    border: "border-cyan-200",
   },
   {
     key: "totalLaudos",
     label: "Total de laudos",
     icon: FileText,
-    color: "text-violet-400",
-    bg: "bg-violet-950",
-    border: "border-violet-900/50",
+    color: "text-violet-600",
+    bg: "bg-violet-50",
+    border: "border-violet-200",
   },
   {
     key: "totalPendentes",
     label: "Pendentes de laudo",
     icon: Clock,
-    color: "text-amber-400",
-    bg: "bg-amber-950",
-    border: "border-amber-900/50",
+    color: "text-amber-600",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
   },
   {
     key: "totalComRD",
     label: "Casos com RD",
     icon: AlertTriangle,
-    color: "text-red-400",
-    bg: "bg-red-950",
-    border: "border-red-900/50",
+    color: "text-red-600",
+    bg: "bg-red-50",
+    border: "border-red-200",
   },
 ] as const;
 
@@ -50,18 +51,18 @@ export function RelatorioMetricas() {
       {cards.map((card) => (
         <div
           key={card.key}
-          className="bg-slate-900 border border-slate-800 rounded-xl p-6"
+          className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm"
         >
           <div className="flex items-center justify-between mb-4">
-            <span className="text-slate-400 text-sm">{card.label}</span>
+            <span className="text-slate-500 text-sm">{card.label}</span>
             <div className={`p-2 rounded-lg ${card.bg} border ${card.border}`}>
               <card.icon className={`w-4 h-4 ${card.color}`} />
             </div>
           </div>
           {isLoading ? (
-            <div className="h-8 w-16 bg-slate-800 rounded animate-pulse" />
+            <div className="h-8 w-16 bg-slate-100 rounded animate-pulse" />
           ) : (
-            <p className="text-3xl font-semibold text-white">
+            <p className="text-3xl font-semibold text-slate-800">
               {data?.[card.key] ?? 0}
             </p>
           )}

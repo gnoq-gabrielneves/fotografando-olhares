@@ -1,4 +1,5 @@
 "use client";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,10 +55,10 @@ export function PacienteHeader({ paciente }: Props) {
   });
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
+    <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-4 shadow-sm">
       <button
         onClick={() => router.push("/pacientes")}
-        className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-sm transition-colors"
+        className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 text-sm transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Voltar para pacientes
@@ -66,23 +67,23 @@ export function PacienteHeader({ paciente }: Props) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="space-y-2">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-semibold text-white">
+            <h1 className="text-2xl font-semibold text-slate-800">
               {paciente.nome_completo}
             </h1>
             {resultado ? (
               <span
-                className={`text-xs px-2.5 py-1 rounded-md font-medium border ${resultadoBadge[resultado as ResultadoRD] ?? "bg-slate-800 text-slate-400 border-slate-700"}`}
+                className={`text-xs px-2.5 py-1 rounded-md font-medium border ${resultadoBadge[resultado as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
               >
                 {resultado}
               </span>
             ) : (
-              <span className="text-xs px-2.5 py-1 rounded-md font-medium bg-slate-800 text-slate-500 border border-slate-700">
+              <span className="text-xs px-2.5 py-1 rounded-md font-medium bg-slate-100 text-slate-500 border border-slate-200">
                 Sem laudo
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-slate-400 flex-wrap">
+          <div className="flex items-center gap-3 text-sm text-slate-500 flex-wrap">
             <span>
               {paciente.sexo === "M"
                 ? "Masculino"
@@ -92,13 +93,13 @@ export function PacienteHeader({ paciente }: Props) {
             </span>
             {idade && (
               <>
-                <span className="text-slate-700">·</span>
+                <span className="text-slate-300">·</span>
                 <span>{idade} anos</span>
               </>
             )}
             {paciente.locais_atendimento?.nome && (
               <>
-                <span className="text-slate-700">·</span>
+                <span className="text-slate-300">·</span>
                 <span>{paciente.locais_atendimento.nome}</span>
               </>
             )}
@@ -111,30 +112,30 @@ export function PacienteHeader({ paciente }: Props) {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 bg-transparent border-red-900/50 text-red-400 hover:bg-red-950/50 hover:text-red-400 hover:border-red-800"
+                className="gap-2 bg-transparent border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
               >
                 <Trash2 className="w-4 h-4" />
                 Excluir
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="bg-slate-900 border-slate-800 max-w-xs! w-[calc(100%-2rem)] p-6 rounded-xl">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-950 border border-red-900/50 mx-auto mb-4">
-                <Trash2 className="w-5 h-5 text-red-400" />
+            <AlertDialogContent className="bg-white border-slate-200 !max-w-xs w-[calc(100%-2rem)] p-6 rounded-xl">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 border border-red-200 mx-auto mb-4">
+                <Trash2 className="w-5 h-5 text-red-500" />
               </div>
               <AlertDialogHeader className="text-center space-y-1">
-                <AlertDialogTitle className="text-white text-base">
+                <AlertDialogTitle className="text-slate-800 text-base">
                   Excluir paciente?
                 </AlertDialogTitle>
-                <AlertDialogDescription className="text-slate-400 text-sm">
+                <AlertDialogDescription className="text-slate-500 text-sm">
                   Todos os laudos de{" "}
-                  <span className="text-white font-medium">
+                  <span className="text-slate-800 font-medium">
                     {paciente.nome_completo}
                   </span>{" "}
                   serão excluídos permanentemente.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="mt-4 flex gap-2 sm:flex-row">
-                <AlertDialogCancel className="flex-1 bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <AlertDialogCancel className="flex-1 bg-transparent border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800">
                   Cancelar
                 </AlertDialogCancel>
                 <AlertDialogAction
@@ -152,7 +153,7 @@ export function PacienteHeader({ paciente }: Props) {
             onClick={() => router.push(`/pacientes/${paciente.id}/editar`)}
             variant="outline"
             size="sm"
-            className="gap-2 bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+            className="gap-2 bg-transparent border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800"
           >
             <Pencil className="w-4 h-4" />
             Editar

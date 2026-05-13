@@ -25,33 +25,33 @@ type Props = {
 const resultados: { value: ResultadoRD; activeClass: string }[] = [
   {
     value: "Exame de retinografia normal",
-    activeClass: "bg-cyan-950 border-cyan-500 text-cyan-400",
+    activeClass: "bg-cyan-50 border-cyan-500 text-cyan-700",
   },
   {
     value: "Retinopatia diabética não proliferativa",
-    activeClass: "bg-amber-950 border-amber-500 text-amber-400",
+    activeClass: "bg-amber-50 border-amber-500 text-amber-700",
   },
   {
     value: "Retinopatia diabética proliferativa",
-    activeClass: "bg-red-950 border-red-500 text-red-400",
+    activeClass: "bg-red-50 border-red-500 text-red-700",
   },
   {
     value: "Retinopatia hipertensiva",
-    activeClass: "bg-orange-950 border-orange-500 text-orange-400",
+    activeClass: "bg-orange-50 border-orange-500 text-orange-700",
   },
   {
     value: "Outras alterações",
-    activeClass: "bg-violet-950 border-violet-500 text-violet-400",
+    activeClass: "bg-violet-50 border-violet-500 text-violet-700",
   },
   {
     value: "Qualidade da imagem ruim",
-    activeClass: "bg-slate-700 border-slate-500 text-slate-300",
+    activeClass: "bg-slate-100 border-slate-400 text-slate-600",
   },
 ];
 
 const inputClass =
-  "w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
-const labelClass = "text-slate-400 text-xs mb-1.5 block";
+  "w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
+const labelClass = "text-slate-600 text-xs mb-1.5 block";
 
 export function LaudoForm({ pacienteId }: Props) {
   const router = useRouter();
@@ -130,12 +130,11 @@ export function LaudoForm({ pacienteId }: Props) {
                 key={r.value}
                 type="button"
                 onClick={() => set("resultado_rd", r.value)}
-                className={`h-11 rounded-lg text-sm font-medium border transition-all px-2
-                  ${
-                    isActive
-                      ? r.activeClass
-                      : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-                  }`}
+                className={`h-11 rounded-lg text-sm font-medium border transition-all px-2 ${
+                  isActive
+                    ? r.activeClass
+                    : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                }`}
               >
                 {r.value}
               </button>
@@ -143,7 +142,7 @@ export function LaudoForm({ pacienteId }: Props) {
           })}
         </div>
         {erros.resultado_rd && (
-          <p className="text-red-400 text-xs mt-1">{erros.resultado_rd}</p>
+          <p className="text-red-500 text-xs mt-1">{erros.resultado_rd}</p>
         )}
       </div>
 
@@ -165,7 +164,7 @@ export function LaudoForm({ pacienteId }: Props) {
             }}
           />
           {erros.data_laudo && (
-            <p className="text-red-400 text-xs mt-1">{erros.data_laudo}</p>
+            <p className="text-red-500 text-xs mt-1">{erros.data_laudo}</p>
           )}
         </div>
 
@@ -188,7 +187,7 @@ export function LaudoForm({ pacienteId }: Props) {
           onChange={(e) => set("descricao", e.target.value)}
           placeholder="Descreva os achados do laudo..."
           rows={5}
-          className="w-full bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 py-2.5 text-sm resize-none outline-none"
+          className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 py-2.5 text-sm resize-none outline-none"
         />
       </div>
 
@@ -197,7 +196,7 @@ export function LaudoForm({ pacienteId }: Props) {
           type="button"
           variant="outline"
           onClick={() => router.push(`/pacientes/${pacienteId}`)}
-          className="flex-1 h-11 bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+          className="flex-1 h-11 bg-transparent border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800"
         >
           Cancelar
         </Button>

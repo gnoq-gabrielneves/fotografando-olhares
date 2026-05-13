@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,7 +40,7 @@ export function ExportarButton() {
         <Button
           variant="outline"
           disabled={isLoading}
-          className="gap-2 bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+          className="gap-2 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -51,18 +52,18 @@ export function ExportarButton() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="bg-slate-900 border-slate-800 text-slate-300"
+        className="bg-white border-slate-200 text-slate-700"
       >
         <DropdownMenuItem
           onClick={() => handleExportar("pacientes")}
-          className="gap-2 cursor-pointer hover:bg-slate-800 focus:bg-slate-800"
+          className="gap-2 cursor-pointer hover:bg-slate-100 focus:bg-slate-100"
         >
           <Download className="w-4 h-4 text-slate-400" />
           Exportar pacientes
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => handleExportar("laudos")}
-          className="gap-2 cursor-pointer hover:bg-slate-800 focus:bg-slate-800"
+          className="gap-2 cursor-pointer hover:bg-slate-100 focus:bg-slate-100"
         >
           <Download className="w-4 h-4 text-slate-400" />
           Exportar laudos

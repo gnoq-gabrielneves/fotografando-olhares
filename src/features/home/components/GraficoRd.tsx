@@ -1,4 +1,5 @@
 "use client";
+
 import { queryKeys } from "@/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -11,7 +12,7 @@ import {
 } from "recharts";
 import { getDistribuicaoRD } from "../queries/queries-home";
 
-const COLORS = ["#22d3ee", "#a78bfa", "#f59e0b", "#f87171"];
+const COLORS = ["#0891b2", "#7c3aed", "#d97706", "#dc2626"];
 
 export function GraficoRD() {
   const { data, isLoading } = useQuery({
@@ -20,14 +21,14 @@ export function GraficoRD() {
   });
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-      <h2 className="text-white font-medium text-sm mb-6">
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+      <h2 className="text-slate-700 font-medium text-sm mb-6">
         Distribuição por resultado
       </h2>
 
       {isLoading ? (
         <div className="h-64 flex items-center justify-center">
-          <div className="w-32 h-32 rounded-full border-4 border-slate-800 border-t-cyan-500 animate-spin" />
+          <div className="w-32 h-32 rounded-full border-4 border-slate-100 border-t-cyan-500 animate-spin" />
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={260}>
@@ -51,18 +52,19 @@ export function GraficoRD() {
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: "#0f172a",
-                border: "1px solid #1e293b",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e2e8f0",
                 borderRadius: "8px",
-                color: "#fff",
+                color: "#1e293b",
                 fontSize: "13px",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               }}
             />
             <Legend
               iconType="circle"
               iconSize={8}
               formatter={(value) => (
-                <span style={{ color: "#94a3b8", fontSize: "12px" }}>
+                <span style={{ color: "#64748b", fontSize: "12px" }}>
                   {value}
                 </span>
               )}

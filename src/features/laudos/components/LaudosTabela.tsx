@@ -65,39 +65,39 @@ export function LaudosTabela() {
         }
       />
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow className="border-slate-800 hover:bg-transparent">
-              <TableHead className="text-slate-400 font-medium">
+            <TableRow className="border-slate-200 hover:bg-transparent bg-slate-50">
+              <TableHead className="text-slate-500 font-medium">
                 Paciente
               </TableHead>
-              <TableHead className="text-slate-400 font-medium">
+              <TableHead className="text-slate-500 font-medium">
                 Resultado
               </TableHead>
-              <TableHead className="text-slate-400 font-medium">
+              <TableHead className="text-slate-500 font-medium">
                 Laudador
               </TableHead>
-              <TableHead className="text-slate-400 font-medium">Data</TableHead>
-              <TableHead className="text-slate-400 font-medium w-16" />
+              <TableHead className="text-slate-500 font-medium">Data</TableHead>
+              <TableHead className="text-slate-500 font-medium w-16" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                <TableRow key={i} className="border-slate-800">
+                <TableRow key={i} className="border-slate-200">
                   {Array.from({ length: 5 }).map((_, j) => (
                     <TableCell key={j}>
-                      <div className="h-4 bg-slate-800 rounded animate-pulse" />
+                      <div className="h-4 bg-slate-100 rounded animate-pulse" />
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : data?.data.length === 0 ? (
-              <TableRow className="border-slate-800">
+              <TableRow className="border-slate-200">
                 <TableCell
                   colSpan={5}
-                  className="text-center py-12 text-slate-500"
+                  className="text-center py-12 text-slate-400"
                 >
                   Nenhum laudo encontrado
                 </TableCell>
@@ -106,31 +106,31 @@ export function LaudosTabela() {
               data?.data.map((laudo: LaudoTabela) => (
                 <TableRow
                   key={laudo.id}
-                  className="border-slate-800 hover:bg-slate-800/50 cursor-pointer"
+                  className="border-slate-200 hover:bg-slate-50 cursor-pointer"
                   onClick={() =>
                     router.push(`/pacientes/${laudo.pacientes?.id}`)
                   }
                 >
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="text-slate-800 font-medium">
                     {laudo.pacientes?.nome_completo ?? "—"}
                   </TableCell>
                   <TableCell>
                     {laudo.resultado_rd ? (
                       <span
-                        className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[laudo.resultado_rd as ResultadoRD] ?? "bg-slate-800 text-slate-400 border-slate-700"}`}
+                        className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[laudo.resultado_rd as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
                       >
                         {laudo.resultado_rd}
                       </span>
                     ) : (
-                      <span className="text-xs px-2 py-1 rounded-md font-medium bg-slate-800 text-slate-500 border border-slate-700">
+                      <span className="text-xs px-2 py-1 rounded-md font-medium bg-slate-100 text-slate-500 border border-slate-200">
                         Sem resultado
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className="text-slate-400">
+                  <TableCell className="text-slate-600">
                     {laudo.profiles?.full_name ?? "—"}
                   </TableCell>
-                  <TableCell className="text-slate-400">
+                  <TableCell className="text-slate-600">
                     {formatarData(laudo.data_laudo)}
                   </TableCell>
                   <TableCell>
@@ -141,7 +141,7 @@ export function LaudosTabela() {
                         e.stopPropagation();
                         router.push(`/pacientes/${laudo.pacientes?.id}`);
                       }}
-                      className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-800"
+                      className="h-8 w-8 p-0 text-slate-400 hover:text-slate-700 hover:bg-slate-100"
                       title="Ver paciente"
                     >
                       <ArrowRight className="w-4 h-4" />
@@ -154,7 +154,6 @@ export function LaudosTabela() {
         </Table>
       </div>
 
-      {/* Paginação */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <span className="text-xs text-slate-500">
@@ -166,7 +165,7 @@ export function LaudosTabela() {
               size="sm"
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="h-8 w-8 p-0 bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
+              className="h-8 w-8 p-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40"
             >
               ‹
             </Button>
@@ -175,7 +174,7 @@ export function LaudosTabela() {
               size="sm"
               disabled={page === totalPages}
               onClick={() => setPage(page + 1)}
-              className="h-8 w-8 p-0 bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
+              className="h-8 w-8 p-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40"
             >
               ›
             </Button>

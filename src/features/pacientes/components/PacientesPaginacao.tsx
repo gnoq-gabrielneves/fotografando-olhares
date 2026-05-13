@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -30,7 +31,7 @@ export function PacientesPaginacao({
           size="sm"
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
-          className="h-8 w-8 p-0 bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
+          className="h-8 w-8 p-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40"
         >
           <ChevronLeft className="w-4 h-4" />
         </Button>
@@ -39,7 +40,7 @@ export function PacientesPaginacao({
           size="sm"
           disabled={page === totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="h-8 w-8 p-0 bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
+          className="h-8 w-8 p-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40"
         >
           <ChevronRight className="w-4 h-4" />
         </Button>

@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -61,49 +62,51 @@ export function PacientesTabela() {
         resultadoRd={resultadoRd}
         localId={localId}
         onBuscaChange={(v) => handleFiltroChange(() => setBusca(v))}
-        onResultadoChange={(v) => handleFiltroChange(() => setResultadoRd(v))}
-        onLocalChange={(v) => handleFiltroChange(() => setLocalId(v))}
+        onResultadoChange={(v: string) =>
+          handleFiltroChange(() => setResultadoRd(v))
+        }
+        onLocalChange={(v: string) => handleFiltroChange(() => setLocalId(v))}
       />
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow className="border-slate-800 hover:bg-transparent">
-              <TableHead className="text-slate-400 font-medium">
+            <TableRow className="border-slate-200 hover:bg-transparent bg-slate-50">
+              <TableHead className="text-slate-500 font-medium">
                 Paciente
               </TableHead>
-              <TableHead className="text-slate-400 font-medium">Sexo</TableHead>
-              <TableHead className="text-slate-400 font-medium">
+              <TableHead className="text-slate-500 font-medium">Sexo</TableHead>
+              <TableHead className="text-slate-500 font-medium">
                 Idade
               </TableHead>
-              <TableHead className="text-slate-400 font-medium">
+              <TableHead className="text-slate-500 font-medium">
                 Local
               </TableHead>
-              <TableHead className="text-slate-400 font-medium">
+              <TableHead className="text-slate-500 font-medium">
                 Extensionista
               </TableHead>
-              <TableHead className="text-slate-400 font-medium">
+              <TableHead className="text-slate-500 font-medium">
                 Laudo
               </TableHead>
-              <TableHead className="text-slate-400 font-medium w-24" />
+              <TableHead className="text-slate-500 font-medium w-24" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                <TableRow key={i} className="border-slate-800">
+                <TableRow key={i} className="border-slate-200">
                   {Array.from({ length: 7 }).map((_, j) => (
                     <TableCell key={j}>
-                      <div className="h-4 bg-slate-800 rounded animate-pulse" />
+                      <div className="h-4 bg-slate-100 rounded animate-pulse" />
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : data?.data.length === 0 ? (
-              <TableRow className="border-slate-800">
+              <TableRow className="border-slate-200">
                 <TableCell
                   colSpan={7}
-                  className="text-center py-12 text-slate-500"
+                  className="text-center py-12 text-slate-400"
                 >
                   Nenhum paciente encontrado
                 </TableCell>
@@ -118,35 +121,35 @@ export function PacientesTabela() {
                 return (
                   <TableRow
                     key={paciente.id}
-                    className="border-slate-800 hover:bg-slate-800/50 cursor-pointer"
+                    className="border-slate-200 hover:bg-slate-50 cursor-pointer"
                     onClick={() => router.push(`/pacientes/${paciente.id}`)}
                   >
-                    <TableCell className="text-white font-medium">
+                    <TableCell className="text-slate-800 font-medium">
                       {paciente.nome_completo}
                     </TableCell>
-                    <TableCell className="text-slate-400">
+                    <TableCell className="text-slate-600">
                       {paciente.sexo === "M"
                         ? "Masculino"
                         : paciente.sexo === "F"
                           ? "Feminino"
                           : "—"}
                     </TableCell>
-                    <TableCell className="text-slate-400">
+                    <TableCell className="text-slate-600">
                       {idade ? `${idade} anos` : "—"}
                     </TableCell>
-                    <TableCell className="text-slate-400">{local}</TableCell>
-                    <TableCell className="text-slate-400">
+                    <TableCell className="text-slate-600">{local}</TableCell>
+                    <TableCell className="text-slate-600">
                       {extensionista}
                     </TableCell>
                     <TableCell>
                       {resultado ? (
                         <span
-                          className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[resultado as ResultadoRD] ?? "bg-slate-800 text-slate-400 border-slate-700"}`}
+                          className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[resultado as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
                         >
                           {resultado}
                         </span>
                       ) : (
-                        <span className="text-xs px-2 py-1 rounded-md font-medium bg-slate-800 text-slate-500 border border-slate-700">
+                        <span className="text-xs px-2 py-1 rounded-md font-medium bg-slate-100 text-slate-500 border border-slate-200">
                           Sem laudo
                         </span>
                       )}
@@ -163,7 +166,7 @@ export function PacientesTabela() {
                             e.stopPropagation();
                             router.push(`/pacientes/${paciente.id}/laudo`);
                           }}
-                          className="h-8 w-8 p-0 text-slate-400 hover:text-cyan-400 hover:bg-slate-800"
+                          className="h-8 w-8 p-0 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50"
                           title="Adicionar laudo"
                         >
                           <FileText className="w-4 h-4" />
@@ -175,7 +178,7 @@ export function PacientesTabela() {
                             e.stopPropagation();
                             router.push(`/pacientes/${paciente.id}`);
                           }}
-                          className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-800"
+                          className="h-8 w-8 p-0 text-slate-400 hover:text-slate-700 hover:bg-slate-100"
                           title="Ver detalhes"
                         >
                           <ArrowRight className="w-4 h-4" />
