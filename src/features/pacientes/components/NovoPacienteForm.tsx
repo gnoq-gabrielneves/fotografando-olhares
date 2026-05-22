@@ -20,24 +20,27 @@ import {
   getLocaisAtendimento,
 } from "../services/pacientes.services";
 
+type TempoDiagnostico = "<1 ano" | "1 a 5 anos" | "5 a 10 anos" | ">10 anos";
+type Zona = "Urbana" | "Rural" | "Periurbana";
+
 type FormData = {
   nome_completo: string;
-  sexo: "M" | "F" | "";
+  sexo: "M" | "F" | undefined;
   cpf_cns: string;
   data_nascimento: string;
-  local_atendimento_id: string;
+  local_atendimento_id: string | undefined;
   prontuario: string;
   medicamentos_em_uso: string;
   insulina: boolean;
-  tempo_diagnostico_dm: string;
+  tempo_diagnostico_dm: TempoDiagnostico | undefined;
   fez_exame_oftalmologico: boolean;
   tabagista: boolean;
   atividade_fisica: boolean;
   av_od: string;
   av_oe: string;
   outras_obs: string;
-  zona: "Urbana" | "Rural" | "Periurbana" | "";
-  tempo_diagnostico_has: string;
+  zona: Zona | undefined;
+  tempo_diagnostico_has: TempoDiagnostico | undefined;
 };
 
 type Props = {
@@ -59,7 +62,7 @@ const inputClass =
   "w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
 const labelClass = "text-slate-600 text-xs mb-1.5 block";
 const errClass = "text-red-500 text-xs mt-1";
-const selectClass =
+const fieldClass =
   "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 focus-visible:ring-cyan-500 h-10 w-full";
 
 export function NovoPacienteForm({ onSuccess }: Props) {
@@ -67,22 +70,22 @@ export function NovoPacienteForm({ onSuccess }: Props) {
 
   const [form, setForm] = useState<FormData>({
     nome_completo: "",
-    sexo: "",
+    sexo: undefined,
     cpf_cns: "",
     data_nascimento: "",
-    local_atendimento_id: "",
+    local_atendimento_id: undefined,
     prontuario: "",
     medicamentos_em_uso: "",
     insulina: false,
-    tempo_diagnostico_dm: "",
+    tempo_diagnostico_dm: undefined,
     fez_exame_oftalmologico: false,
     tabagista: false,
     atividade_fisica: false,
     av_od: "",
     av_oe: "",
     outras_obs: "",
-    zona: "",
-    tempo_diagnostico_has: "",
+    zona: undefined,
+    tempo_diagnostico_has: undefined,
   });
 
   const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
@@ -132,32 +135,22 @@ export function NovoPacienteForm({ onSuccess }: Props) {
     }
     mutate({
       nome_completo: form.nome_completo,
-      sexo: form.sexo as "M" | "F",
+      sexo: form.sexo!,
       cpf_cns: form.cpf_cns || undefined,
       data_nascimento: form.data_nascimento || undefined,
-      local_atendimento_id: form.local_atendimento_id || undefined,
+      local_atendimento_id: form.local_atendimento_id,
       prontuario: form.prontuario || undefined,
       medicamentos_em_uso: form.medicamentos_em_uso || undefined,
       insulina: form.insulina,
-      tempo_diagnostico_dm:
-        (form.tempo_diagnostico_dm as
-          | "<1 ano"
-          | "1 a 5 anos"
-          | "5 a 10 anos"
-          | ">10 anos") || undefined,
+      tempo_diagnostico_dm: form.tempo_diagnostico_dm,
       fez_exame_oftalmologico: form.fez_exame_oftalmologico,
       tabagista: form.tabagista,
       atividade_fisica: form.atividade_fisica,
       av_od: form.av_od || undefined,
       av_oe: form.av_oe || undefined,
       outras_obs: form.outras_obs || undefined,
-      zona: (form.zona as "Urbana" | "Rural" | "Periurbana") || undefined,
-      tempo_diagnostico_has:
-        (form.tempo_diagnostico_has as
-          | "<1 ano"
-          | "1 a 5 anos"
-          | "5 a 10 anos"
-          | ">10 anos") || undefined,
+      zona: form.zona,
+      tempo_diagnostico_has: form.tempo_diagnostico_has,
     });
   }
 
@@ -173,7 +166,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             value={form.nome_completo}
             onChange={(e) => set("nome_completo", e.target.value)}
             placeholder="Nome completo do paciente"
-            className={selectClass}
+            className={fieldClass}
           />
           {erros.nome_completo && (
             <p className={errClass}>{erros.nome_completo}</p>
@@ -187,7 +180,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
               value={form.sexo}
               onValueChange={(v) => set("sexo", v as "M" | "F")}
             >
-              <SelectTrigger className={selectClass}>
+              <SelectTrigger className={fieldClass}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent
@@ -235,7 +228,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
               value={form.prontuario}
               onChange={(e) => set("prontuario", e.target.value)}
               placeholder="Nº do prontuário"
-              className={selectClass}
+              className={fieldClass}
             />
           </div>
         </div>
@@ -246,7 +239,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             value={form.local_atendimento_id}
             onValueChange={(v) => set("local_atendimento_id", v)}
           >
-            <SelectTrigger className={selectClass}>
+            <SelectTrigger className={fieldClass}>
               <SelectValue placeholder="Selecione o local" />
             </SelectTrigger>
             <SelectContent
@@ -283,9 +276,11 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             <label className={labelClass}>Tempo de diagnóstico DM</label>
             <Select
               value={form.tempo_diagnostico_dm}
-              onValueChange={(v) => set("tempo_diagnostico_dm", v)}
+              onValueChange={(v) =>
+                set("tempo_diagnostico_dm", v as TempoDiagnostico)
+              }
             >
-              <SelectTrigger className={selectClass}>
+              <SelectTrigger className={fieldClass}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent
@@ -304,9 +299,11 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             <label className={labelClass}>Tempo de diagnóstico HAS</label>
             <Select
               value={form.tempo_diagnostico_has}
-              onValueChange={(v) => set("tempo_diagnostico_has", v)}
+              onValueChange={(v) =>
+                set("tempo_diagnostico_has", v as TempoDiagnostico)
+              }
             >
-              <SelectTrigger className={selectClass}>
+              <SelectTrigger className={fieldClass}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent
@@ -325,11 +322,9 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             <label className={labelClass}>Zona</label>
             <Select
               value={form.zona}
-              onValueChange={(v) =>
-                set("zona", v as "Urbana" | "Rural" | "Periurbana")
-              }
+              onValueChange={(v) => set("zona", v as Zona)}
             >
-              <SelectTrigger className={selectClass}>
+              <SelectTrigger className={fieldClass}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent
@@ -350,13 +345,13 @@ export function NovoPacienteForm({ onSuccess }: Props) {
                 value={form.av_od}
                 onChange={(e) => set("av_od", e.target.value)}
                 placeholder="OD"
-                className={selectClass}
+                className={fieldClass}
               />
               <Input
                 value={form.av_oe}
                 onChange={(e) => set("av_oe", e.target.value)}
                 placeholder="OE"
-                className={selectClass}
+                className={fieldClass}
               />
             </div>
           </div>
