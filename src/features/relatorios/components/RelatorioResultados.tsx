@@ -94,29 +94,34 @@ export function RelatorioResultados() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="h-10 bg-slate-100 rounded animate-pulse"
+                className="h-14 bg-slate-100 rounded animate-pulse"
               />
             ))}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {data?.map((item) => (
-              <div
-                key={item.name}
-                className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200"
-              >
-                <span
-                  className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[item.name as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
-                >
-                  {item.name}
-                </span>
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-800 font-medium text-sm">
-                    {item.value}
+              <div key={item.name} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-md font-medium border ${resultadoBadge[item.name as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
+                  >
+                    {item.name}
                   </span>
-                  <span className="text-slate-400 text-xs w-10 text-right">
-                    {item.percentual}%
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-800 font-semibold text-sm">
+                      {item.value}
+                    </span>
+                    <span className="text-slate-400 text-xs w-8 text-right">
+                      {item.percentual}%
+                    </span>
+                  </div>
+                </div>
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-cyan-400 rounded-full transition-all"
+                    style={{ width: `${item.percentual}%` }}
+                  />
                 </div>
               </div>
             ))}

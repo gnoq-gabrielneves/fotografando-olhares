@@ -2,15 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Profile } from "@/types";
-import { Pencil } from "lucide-react";
+import { Pencil, UserCog } from "lucide-react";
 import { useState } from "react";
 import { EditarUsuarioForm } from "./EditarUsuarioForm";
 
@@ -22,8 +21,8 @@ export function EditarUsuarioSheet({ usuario }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button
           variant="ghost"
           size="sm"
@@ -31,16 +30,24 @@ export function EditarUsuarioSheet({ usuario }: Props) {
         >
           <Pencil className="w-4 h-4" />
         </Button>
-      </SheetTrigger>
-      <SheetContent className="bg-white border-slate-200 text-slate-800 w-full sm:max-w-lg overflow-y-auto px-6">
-        <SheetHeader className="mb-6 pt-2">
-          <SheetTitle className="text-slate-800">Editar usuário</SheetTitle>
-          <SheetDescription className="text-slate-500">
-            Atualize os dados de {usuario.full_name}.
-          </SheetDescription>
-        </SheetHeader>
-        <EditarUsuarioForm usuario={usuario} onSuccess={() => setOpen(false)} />
-      </SheetContent>
-    </Sheet>
+      </DialogTrigger>
+      <DialogContent className="p-0 gap-0 bg-white border-slate-200 w-[calc(100vw-2rem)] max-w-2xl sm:max-w-2xl max-h-[90vh] flex flex-col">
+        <VisuallyHidden><DialogTitle>Editar usuário</DialogTitle></VisuallyHidden>
+        <div className="px-6 py-5 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0">
+              <UserCog className="w-4 h-4 text-cyan-600" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-slate-800">Editar usuário</h2>
+              <p className="text-xs text-slate-400 mt-0.5">{usuario.full_name}</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 pt-5">
+          <EditarUsuarioForm usuario={usuario} onSuccess={() => setOpen(false)} />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

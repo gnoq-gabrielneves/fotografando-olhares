@@ -6,6 +6,8 @@ export type FiltrosPacientes = {
   busca?: string;
   resultado_rd?: string;
   local_id?: string;
+  data_inicio?: string;
+  data_fim?: string;
   page?: number;
   pageSize?: number;
 };
@@ -15,7 +17,7 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
   count: number;
 }> {
   const supabase = createClient();
-  const { busca, resultado_rd, local_id, page = 1, pageSize = 10 } = filtros;
+  const { busca, resultado_rd, local_id, data_inicio, data_fim, page = 1, pageSize = 10 } = filtros;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -38,7 +40,15 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
     .range(from, to);
 
   if (busca) {
-    query = query.ilike("nome_completo", `%${busca}%`);
+    query = query.or(`nome_completo.ilike.%${busca}%,cpf_cns.ilike.%${busca}%`);
+  }
+
+  if (data_inicio) {
+    query = query.gte("created_at", `${data_inicio}T00:00:00`);
+  }
+
+  if (data_fim) {
+    query = query.lte("created_at", `${data_fim}T23:59:59`);
   }
 
   if (local_id && local_id !== "todos") {

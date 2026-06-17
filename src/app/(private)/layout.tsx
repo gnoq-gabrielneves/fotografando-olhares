@@ -15,7 +15,7 @@ export default function PrivateLayout({
         <AppSidebar />
         <SidebarInset className="bg-slate-50">
           <AppHeader />
-          <main className="p-5">{children}</main>
+          <main className="p-3 sm:p-5">{children}</main>
         </SidebarInset>
         <Toaster
           position="bottom-right"

@@ -37,12 +37,16 @@ export function PacientesTabela() {
   const [busca, setBusca] = useState("");
   const [resultadoRd, setResultadoRd] = useState("todos");
   const [localId, setLocalId] = useState("todos");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
   const [buscaDebounced] = useDebounce(busca, 400);
 
   const filtros = {
     busca: buscaDebounced,
     resultado_rd: resultadoRd,
     local_id: localId,
+    data_inicio: dataInicio,
+    data_fim: dataFim,
     page,
     pageSize: PAGE_SIZE,
   };
@@ -63,28 +67,39 @@ export function PacientesTabela() {
         busca={busca}
         resultadoRd={resultadoRd}
         localId={localId}
+        dataInicio={dataInicio}
+        dataFim={dataFim}
         onBuscaChange={(v) => handleFiltroChange(() => setBusca(v))}
-        onResultadoChange={(v: string) =>
-          handleFiltroChange(() => setResultadoRd(v))
-        }
+        onResultadoChange={(v: string) => handleFiltroChange(() => setResultadoRd(v))}
         onLocalChange={(v: string) => handleFiltroChange(() => setLocalId(v))}
+        onDataInicioChange={(v) => handleFiltroChange(() => setDataInicio(v))}
+        onDataFimChange={(v) => handleFiltroChange(() => setDataFim(v))}
       />
 
+      {!isLoading && data && (
+        <p className="text-xs text-slate-400">
+          {data.count === 0
+            ? "Nenhum paciente encontrado"
+            : `${data.count} paciente${data.count !== 1 ? "s" : ""} encontrado${data.count !== 1 ? "s" : ""}`}
+        </p>
+      )}
+
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-slate-200 hover:bg-transparent bg-slate-50">
               <TableHead className="text-slate-500 font-medium">
                 Paciente
               </TableHead>
-              <TableHead className="text-slate-500 font-medium">Sexo</TableHead>
-              <TableHead className="text-slate-500 font-medium">
+              <TableHead className="text-slate-500 font-medium hidden sm:table-cell">Sexo</TableHead>
+              <TableHead className="text-slate-500 font-medium hidden sm:table-cell">
                 Idade
               </TableHead>
-              <TableHead className="text-slate-500 font-medium">
+              <TableHead className="text-slate-500 font-medium hidden md:table-cell">
                 Local
               </TableHead>
-              <TableHead className="text-slate-500 font-medium">
+              <TableHead className="text-slate-500 font-medium hidden lg:table-cell">
                 Extensionista
               </TableHead>
               <TableHead className="text-slate-500 font-medium">
@@ -129,18 +144,18 @@ export function PacientesTabela() {
                     <TableCell className="text-slate-800 font-medium">
                       {paciente.nome_completo}
                     </TableCell>
-                    <TableCell className="text-slate-600">
+                    <TableCell className="text-slate-600 hidden sm:table-cell">
                       {paciente.sexo === "M"
                         ? "Masculino"
                         : paciente.sexo === "F"
                           ? "Feminino"
                           : "—"}
                     </TableCell>
-                    <TableCell className="text-slate-600">
+                    <TableCell className="text-slate-600 hidden sm:table-cell">
                       {idade ? `${idade} anos` : "—"}
                     </TableCell>
-                    <TableCell className="text-slate-600">{local}</TableCell>
-                    <TableCell className="text-slate-600">
+                    <TableCell className="text-slate-600 hidden md:table-cell">{local}</TableCell>
+                    <TableCell className="text-slate-600 hidden lg:table-cell">
                       {extensionista}
                     </TableCell>
                     <TableCell>
@@ -151,7 +166,7 @@ export function PacientesTabela() {
                           {resultado}
                         </span>
                       ) : (
-                        <span className="text-xs px-2 py-1 rounded-md font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                        <span className="text-xs px-2 py-1 rounded-md font-medium bg-orange-50 text-orange-600 border border-orange-200">
                           Sem laudo
                         </span>
                       )}
@@ -193,6 +208,7 @@ export function PacientesTabela() {
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       <PacientesPaginacao

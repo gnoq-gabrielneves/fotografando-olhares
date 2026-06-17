@@ -21,7 +21,7 @@ export function GraficoRD() {
   });
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm h-full">
       <h2 className="text-slate-700 font-medium text-sm mb-6">
         Distribuição por resultado
       </h2>

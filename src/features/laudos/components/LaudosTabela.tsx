@@ -66,6 +66,7 @@ export function LaudosTabela() {
       />
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-slate-200 hover:bg-transparent bg-slate-50">
@@ -75,10 +76,10 @@ export function LaudosTabela() {
               <TableHead className="text-slate-500 font-medium">
                 Resultado
               </TableHead>
-              <TableHead className="text-slate-500 font-medium">
+              <TableHead className="text-slate-500 font-medium hidden sm:table-cell">
                 Laudador
               </TableHead>
-              <TableHead className="text-slate-500 font-medium">Data</TableHead>
+              <TableHead className="text-slate-500 font-medium hidden sm:table-cell">Data</TableHead>
               <TableHead className="text-slate-500 font-medium w-16" />
             </TableRow>
           </TableHeader>
@@ -127,10 +128,10 @@ export function LaudosTabela() {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className="text-slate-600">
+                  <TableCell className="text-slate-600 hidden sm:table-cell">
                     {laudo.profiles?.full_name ?? "—"}
                   </TableCell>
-                  <TableCell className="text-slate-600">
+                  <TableCell className="text-slate-600 hidden sm:table-cell">
                     {formatarData(laudo.data_laudo)}
                   </TableCell>
                   <TableCell>
@@ -152,6 +153,7 @@ export function LaudosTabela() {
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {totalPages > 1 && (

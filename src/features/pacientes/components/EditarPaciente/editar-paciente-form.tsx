@@ -177,7 +177,7 @@ export function EditarPacienteForm({ paciente }: Props) {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className={labelClass}>Sexo *</label>
             <Select
@@ -214,7 +214,7 @@ export function EditarPacienteForm({ paciente }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className={labelClass}>CPF / CNS</label>
             <IMaskInput
@@ -236,7 +236,7 @@ export function EditarPacienteForm({ paciente }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className={labelClass}>Local de atendimento</label>
             <Select
@@ -292,7 +292,7 @@ export function EditarPacienteForm({ paciente }: Props) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className={labelClass}>Tempo de diagnóstico DM</label>
             <Select
@@ -348,7 +348,7 @@ export function EditarPacienteForm({ paciente }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             { field: "insulina" as const, label: "Usa insulina" },
             { field: "tabagista" as const, label: "Tabagista" },

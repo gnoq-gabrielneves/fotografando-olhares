@@ -27,6 +27,7 @@ export const queryKeys = {
       "distribuicaoPorExtensionista",
     ] as const,
     laudosPorMes: ["relatorios", "laudosPorMes"] as const,
+    cadastrosPorMes: ["relatorios", "cadastrosPorMes"] as const,
     distribuicaoPorLocal: ["relatorios", "distribuicaoPorLocal"] as const,
   },
   usuarios: {

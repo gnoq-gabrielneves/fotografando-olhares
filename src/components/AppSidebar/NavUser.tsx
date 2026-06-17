@@ -59,7 +59,7 @@ export function NavUser() {
               className="text-slate-700 hover:bg-slate-100 hover:text-slate-900 data-[state=open]:bg-slate-100"
             >
               <Avatar className="w-8 h-8 border border-slate-200">
-                <AvatarImage src={profile.avatar_url ?? undefined} />
+                <AvatarImage src={profile.avatar_url || undefined} />
                 <AvatarFallback className="bg-cyan-50 text-cyan-600 text-xs font-medium">
                   {initials}
                 </AvatarFallback>
@@ -84,7 +84,7 @@ export function NavUser() {
           >
             <DropdownMenuLabel className="flex items-center gap-2 p-2">
               <Avatar className="w-8 h-8 border border-slate-200">
-                <AvatarImage src={profile.avatar_url ?? undefined} />
+                <AvatarImage src={profile.avatar_url || undefined} />
                 <AvatarFallback className="bg-cyan-50 text-cyan-600 text-xs font-medium">
                   {initials}
                 </AvatarFallback>

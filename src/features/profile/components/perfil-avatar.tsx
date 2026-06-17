@@ -2,7 +2,7 @@
 "use client";
 import { useAvatarUpload } from "@/hooks/use-avatar";
 import { useProfile } from "@/hooks/use-profile";
-import { Loader2, Upload } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { useAtualizarPerfil } from "../hooks/use-profile";
@@ -13,8 +13,14 @@ const roleLabel: Record<string, string> = {
   laudador: "Laudador",
 };
 
+const roleBadge: Record<string, string> = {
+  admin: "bg-purple-50 text-purple-600 border-purple-200",
+  extensionista: "bg-cyan-50 text-cyan-600 border-cyan-200",
+  laudador: "bg-emerald-50 text-emerald-600 border-emerald-200",
+};
+
 export function PerfilAvatar() {
-  const { profile } = useProfile();
+  const { profile, user } = useProfile();
   const { upload, isUploading } = useAvatarUpload();
   const { mutate: atualizar, isPending } = useAtualizarPerfil();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,6 +31,14 @@ export function PerfilAvatar() {
     .map((n) => n[0])
     .join("")
     .toUpperCase();
+
+  const memberSince = profile?.created_at
+    ? new Date(profile.created_at).toLocaleDateString("pt-BR", {
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      })
+    : null;
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -40,47 +54,65 @@ export function PerfilAvatar() {
   const isLoading = isUploading || isPending;
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative">
-        <div className="w-24 h-24 rounded-full border-2 border-slate-200 overflow-hidden bg-slate-100 flex items-center justify-center">
-          {profile?.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt={profile.full_name}
-              className="w-full h-full object-cover"
+    <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="h-20 bg-gradient-to-r from-cyan-500 to-cyan-600" />
+      <div className="px-6 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-10">
+          <div className="relative w-fit">
+            <div className="w-20 h-20 rounded-full border-4 border-white shadow-sm overflow-hidden bg-slate-100 flex items-center justify-center">
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url || undefined}
+                  alt={profile.full_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-slate-500 text-2xl font-semibold">
+                  {initials}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => inputRef.current?.click()}
+              disabled={isLoading}
+              className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center shadow-md transition-colors disabled:opacity-50 border-2 border-white"
+            >
+              {isLoading ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Camera className="w-3 h-3" />
+              )}
+            </button>
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFile}
+              className="hidden"
             />
-          ) : (
-            <span className="text-slate-400 text-3xl font-medium">
-              {initials}
-            </span>
-          )}
+          </div>
+
+          <div className="pb-1">
+            {profile?.role && (
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-md border ${roleBadge[profile.role] ?? "bg-slate-50 text-slate-600 border-slate-200"}`}>
+                {roleLabel[profile.role] ?? profile.role}
+              </span>
+            )}
+          </div>
         </div>
-        <button
-          onClick={() => inputRef.current?.click()}
-          disabled={isLoading}
-          className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center shadow-md transition-colors disabled:opacity-50"
-        >
-          {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Upload className="w-4 h-4" />
-          )}
-        </button>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFile}
-          className="hidden"
-        />
-      </div>
-      <div className="text-center">
-        <p className="text-slate-800 font-semibold text-lg">
-          {profile?.full_name}
-        </p>
-        <p className="text-slate-500 text-sm">
-          {roleLabel[profile?.role ?? ""] ?? profile?.role}
-        </p>
+
+        <div className="mt-3">
+          <h2 className="text-lg font-semibold text-slate-800">{profile?.full_name}</h2>
+          <div className="flex flex-wrap items-center gap-3 mt-0.5">
+            <span className="text-sm text-slate-400">{user?.email}</span>
+            {memberSince && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="text-sm text-slate-400">Membro desde {memberSince}</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

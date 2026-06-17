@@ -6,15 +6,12 @@ export async function getRelatorioGeral() {
   const [
     { count: totalPacientes },
     { count: totalLaudos },
-    { count: totalPendentes },
+    laudosData,
     { count: totalComRD },
   ] = await Promise.all([
     supabase.from("pacientes").select("*", { count: "exact", head: true }),
     supabase.from("laudos").select("*", { count: "exact", head: true }),
-    supabase
-      .from("pacientes")
-      .select("*", { count: "exact", head: true })
-      .not("id", "in", "(select paciente_id from laudos)"),
+    supabase.from("laudos").select("paciente_id"),
     supabase
       .from("laudos")
       .select("*", { count: "exact", head: true })
@@ -24,10 +21,13 @@ export async function getRelatorioGeral() {
       ]),
   ]);
 
+  const idsComLaudo = new Set(laudosData.data?.map((l) => l.paciente_id) ?? []);
+  const totalPendentes = (totalPacientes ?? 0) - idsComLaudo.size;
+
   return {
     totalPacientes: totalPacientes ?? 0,
     totalLaudos: totalLaudos ?? 0,
-    totalPendentes: totalPendentes ?? 0,
+    totalPendentes: Math.max(0, totalPendentes),
     totalComRD: totalComRD ?? 0,
   };
 }
@@ -101,11 +101,42 @@ export async function getLaudosPorMes() {
   });
 
   return Object.entries(contagem).map(([mes, total]) => ({
-    mes: new Date(mes + "-01").toLocaleDateString("pt-BR", {
+    mesRaw: mes,
+    mesLabel: new Date(mes + "-01T12:00:00").toLocaleDateString("pt-BR", {
       month: "short",
       year: "2-digit",
+      timeZone: "UTC",
     }),
     total,
+  }));
+}
+
+export async function getCadastrosPorMes() {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("pacientes")
+    .select("created_at")
+    .order("created_at", { ascending: true });
+
+  if (error) throw new Error(error.message);
+
+  const contagem: Record<string, number> = {};
+  data.forEach((p) => {
+    if (p.created_at) {
+      const mes = p.created_at.substring(0, 7);
+      contagem[mes] = (contagem[mes] ?? 0) + 1;
+    }
+  });
+
+  return Object.entries(contagem).map(([mes, total]) => ({
+    mes,
+    total,
+    label: new Date(mes + "-01T12:00:00").toLocaleDateString("pt-BR", {
+      month: "short",
+      year: "2-digit",
+      timeZone: "UTC",
+    }),
   }));
 }
 

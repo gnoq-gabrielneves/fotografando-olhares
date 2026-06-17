@@ -7,25 +7,25 @@ export async function getMetricas() {
   const [
     { count: totalPacientes },
     { count: totalLaudos },
-    { count: totalSemLaudo },
+    laudosData,
     { count: totalComRD },
   ] = await Promise.all([
     supabase.from("pacientes").select("*", { count: "exact", head: true }),
     supabase.from("laudos").select("*", { count: "exact", head: true }),
-    supabase
-      .from("pacientes")
-      .select("*", { count: "exact", head: true })
-      .not("id", "in", `(select paciente_id from laudos)`),
+    supabase.from("laudos").select("paciente_id"),
     supabase
       .from("laudos")
       .select("*", { count: "exact", head: true })
       .in("resultado_rd", ["Não proliferativa", "Proliferativa"]),
   ]);
 
+  const idsComLaudo = new Set(laudosData.data?.map((l) => l.paciente_id) ?? []);
+  const totalSemLaudo = Math.max(0, (totalPacientes ?? 0) - idsComLaudo.size);
+
   return {
     totalPacientes: totalPacientes ?? 0,
     totalLaudos: totalLaudos ?? 0,
-    totalSemLaudo: totalSemLaudo ?? 0,
+    totalSemLaudo,
     totalComRD: totalComRD ?? 0,
   };
 }
@@ -93,7 +93,7 @@ export async function getUltimosPacientes(): Promise<PacienteResumo[]> {
     `,
     )
     .order("created_at", { ascending: false })
-    .limit(8);
+    .limit(5);
 
   if (error) throw new Error(error.message);
   return data as unknown as PacienteResumo[];
