@@ -25,7 +25,7 @@ const PAGE_SIZE = 10;
 
 function formatarData(data: string | null) {
   if (!data) return "—";
-  return new Date(data).toLocaleDateString("pt-BR");
+  return new Date(data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
 }
 
 export function LaudosTabela() {

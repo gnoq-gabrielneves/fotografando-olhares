@@ -71,7 +71,7 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
                     <>
                       <span className="text-slate-300">·</span>
                       <span>
-                        {new Date(laudo.data_laudo).toLocaleDateString("pt-BR")}
+                        {new Date(laudo.data_laudo).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
                       </span>
                     </>
                   )}

@@ -23,7 +23,9 @@ import { excluirPaciente } from "../services/pacientes.services";
 
 function calcularIdade(data: string | null) {
   if (!data) return null;
-  const diff = Date.now() - new Date(data).getTime();
+  const [y, m, d] = data.split("-").map(Number);
+  const nascimento = new Date(y, m - 1, d);
+  const diff = Date.now() - nascimento.getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
 }
 

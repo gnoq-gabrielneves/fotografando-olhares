@@ -4,10 +4,10 @@ export function SkeletonCards() {
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="bg-slate-900 border border-slate-800 rounded-xl p-6 animate-pulse"
+          className="bg-white border border-slate-200 rounded-xl p-6 animate-pulse shadow-sm"
         >
-          <div className="h-3 w-24 bg-slate-800 rounded mb-3" />
-          <div className="h-8 w-16 bg-slate-800 rounded" />
+          <div className="h-3 w-24 bg-slate-100 rounded mb-3" />
+          <div className="h-8 w-16 bg-slate-100 rounded" />
         </div>
       ))}
     </div>

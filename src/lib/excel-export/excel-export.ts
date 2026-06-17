@@ -16,7 +16,7 @@ export function exportarPacientes(pacientes: PacienteExport[]) {
     Nome: p.nome_completo,
     Sexo: p.sexo === "M" ? "Masculino" : p.sexo === "F" ? "Feminino" : "",
     "Data de Nascimento": p.data_nascimento
-      ? new Date(p.data_nascimento).toLocaleDateString("pt-BR")
+      ? new Date(p.data_nascimento).toLocaleDateString("pt-BR", { timeZone: "UTC" })
       : "",
     "CPF / CNS": p.cpf_cns ?? "",
     Prontuário: p.prontuario ?? "",
@@ -71,7 +71,7 @@ export function exportarLaudos(laudos: LaudoExport[]) {
     Resultado: l.resultado_rd ?? "",
     Laudador: l.profiles?.full_name ?? "",
     "Data do Laudo": l.data_laudo
-      ? new Date(l.data_laudo).toLocaleDateString("pt-BR")
+      ? new Date(l.data_laudo).toLocaleDateString("pt-BR", { timeZone: "UTC" })
       : "",
     Dilatação: l.dilatacao ?? "",
     Descrição: l.descricao ?? "",
