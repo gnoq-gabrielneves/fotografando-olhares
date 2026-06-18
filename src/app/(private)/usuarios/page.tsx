@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { NovoUsuarioSheet } from "@/features/usuarios/components/NovoUsuarioSheet";
+
+export const metadata: Metadata = {
+  title: "Usuários | Fotografando Olhares",
+  description: "Gerenciamento de usuários do sistema: admins, extensionistas e laudadores.",
+};
 import { UsuariosLista } from "@/features/usuarios/components/UsuariosLista";
 
 export default function UsuariosPage() {

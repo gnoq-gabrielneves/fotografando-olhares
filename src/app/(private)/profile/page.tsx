@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { PerfilAvatar } from "@/features/profile/components/perfil-avatar";
+
+export const metadata: Metadata = {
+  title: "Meu Perfil | Fotografando Olhares",
+  description: "Edite suas informações pessoais, foto e senha de acesso.",
+};
 import { PerfilDados } from "@/features/profile/components/perfil-dados";
 import { PerfilSenha } from "@/features/profile/components/perfil-senha";
 

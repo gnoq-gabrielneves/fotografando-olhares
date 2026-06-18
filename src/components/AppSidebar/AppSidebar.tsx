@@ -11,7 +11,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useProfile } from "@/hooks/use-profile";
-import { BarChart2, FileText, Home, UserCog, Users } from "lucide-react";
+import { Activity, BarChart2, FileText, Home, UserCog, Users } from "lucide-react";
 import { NavMain } from "./NavMain";
 import { NavUser } from "./NavUser";
 
@@ -24,7 +24,10 @@ export function AppSidebar() {
     { title: "Laudos", href: "/laudos", icon: FileText },
     { title: "Relatórios", href: "/relatorios", icon: BarChart2 },
     ...(profile?.role === "admin"
-      ? [{ title: "Usuários", href: "/usuarios", icon: UserCog }]
+      ? [
+          { title: "Usuários", href: "/usuarios", icon: UserCog },
+          { title: "Atividade", href: "/atividade", icon: Activity },
+        ]
       : []),
   ];
 

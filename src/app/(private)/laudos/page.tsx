@@ -1,5 +1,11 @@
 import { ExportarButton } from "@/components/ExportarButton/ExportarButton";
 import { LaudosTabela } from "@/features/laudos/components/LaudosTabela";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Laudos | Fotografando Olhares",
+  description: "Laudos oftalmológicos emitidos no projeto de rastreamento de retinopatia diabética.",
+};
 
 export default function LaudosPage() {
   return (

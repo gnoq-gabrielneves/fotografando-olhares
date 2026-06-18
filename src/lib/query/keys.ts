@@ -34,4 +34,9 @@ export const queryKeys = {
     all: ["usuarios"] as const,
     lista: ["usuarios", "lista"] as const,
   },
+  atividade: {
+    recente: ["atividade", "recente"] as const,
+    paginada: (filtros: object) => ["atividade", "paginada", filtros] as const,
+    usuarios: ["atividade", "usuarios"] as const,
+  },
 };

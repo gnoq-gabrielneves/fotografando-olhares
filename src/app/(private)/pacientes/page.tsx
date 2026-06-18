@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { ExportarButton } from "@/components/ExportarButton/ExportarButton";
+
+export const metadata: Metadata = {
+  title: "Pacientes | Fotografando Olhares",
+  description: "Cadastro e acompanhamento dos pacientes triados pelo projeto.",
+};
 import { NovoPacienteSheet } from "@/features/pacientes/components/NovoPacienteSheet";
 import { PacientesTabela } from "@/features/pacientes/components/PacientesTabela";
 

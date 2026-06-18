@@ -1,3 +1,4 @@
+import { logActivity } from "@/lib/activity/log-activity";
 import { createClient } from "@/lib/supabase/client";
 import { PacienteTabela, ResultadoRD } from "@/types";
 import { NovoPacienteInput } from "../pacientes.types";
@@ -117,6 +118,15 @@ export async function criarPaciente(input: NovoPacienteInput) {
     .single();
 
   if (error) throw new Error(error.message);
+
+  await logActivity({
+    user_id: user.id,
+    action: "paciente_criado",
+    entity_type: "paciente",
+    entity_id: data.id,
+    description: `cadastrou o paciente ${input.nome_completo}`,
+  });
+
   return data;
 }
 
@@ -171,6 +181,15 @@ export async function criarLaudo(input: NovoLaudoInput) {
     .single();
 
   if (error) throw new Error(error.message);
+
+  await logActivity({
+    user_id: user.id,
+    action: "laudo_criado",
+    entity_type: "laudo",
+    entity_id: data.id,
+    description: `emitiu um laudo${input.resultado_rd ? ` — ${input.resultado_rd}` : ""}`,
+  });
+
   return data;
 }
 
@@ -180,6 +199,10 @@ export async function atualizarPaciente(
 ) {
   const supabase = createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from("pacientes")
     .update(input)
@@ -188,6 +211,17 @@ export async function atualizarPaciente(
     .single();
 
   if (error) throw new Error(error.message);
+
+  if (user) {
+    await logActivity({
+      user_id: user.id,
+      action: "paciente_editado",
+      entity_type: "paciente",
+      entity_id: id,
+      description: `editou o paciente ${input.nome_completo ?? ""}`.trim(),
+    });
+  }
+
   return data;
 }
 

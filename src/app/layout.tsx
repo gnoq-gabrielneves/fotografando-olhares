@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Fotografando Olhares",
-  description: "Liga Academica de Oftalmologia",
+  description: "Sistema de rastreamento de retinopatia diabética da Liga Acadêmica de Oftalmologia.",
 };
 
 export default function RootLayout({

@@ -48,8 +48,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Protege /usuarios — só admins
-  if (user && request.nextUrl.pathname.startsWith("/usuarios")) {
+  // Protege /usuarios e /atividade — só admins
+  const adminRoutes = ["/usuarios", "/atividade"];
+  if (user && adminRoutes.some((r) => request.nextUrl.pathname.startsWith(r))) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")

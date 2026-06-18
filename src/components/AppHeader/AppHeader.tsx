@@ -6,23 +6,31 @@ import { usePathname } from "next/navigation";
 const pageInfo: Record<string, { title: string; description: string }> = {
   "/home": {
     title: "Início",
-    description: "Visão geral do projeto de triagem",
+    description: "Visão geral do projeto: métricas, últimos cadastros e atividade recente.",
   },
   "/pacientes": {
     title: "Pacientes",
-    description: "Gerencie os pacientes cadastrados no projeto",
+    description: "Cadastro e acompanhamento dos pacientes triados pelo projeto.",
   },
   "/laudos": {
     title: "Laudos",
-    description: "Gerencie os laudos oftalmológicos emitidos",
+    description: "Laudos oftalmológicos emitidos no rastreamento de retinopatia diabética.",
   },
   "/relatorios": {
     title: "Relatórios",
-    description: "Análises e estatísticas do projeto",
+    description: "Estatísticas e gráficos sobre pacientes, laudos e evolução do projeto.",
   },
   "/usuarios": {
     title: "Usuários",
-    description: "Gerencie os usuários do sistema",
+    description: "Gerenciamento de usuários: admins, extensionistas e laudadores.",
+  },
+  "/atividade": {
+    title: "Atividade",
+    description: "Histórico de ações realizadas no sistema pelos usuários.",
+  },
+  "/profile": {
+    title: "Meu Perfil",
+    description: "Edite suas informações pessoais, foto e senha de acesso.",
   },
 };
 

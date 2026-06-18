@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { RelatorioExtensionistas } from "@/features/relatorios/components/RelatorioExtensionistas";
+
+export const metadata: Metadata = {
+  title: "Relatórios | Fotografando Olhares",
+  description: "Estatísticas e gráficos sobre pacientes, laudos e evolução do projeto.",
+};
 import { RelatorioLocais } from "@/features/relatorios/components/RelatorioLocais";
 import { RelatorioMetricas } from "@/features/relatorios/components/RelatorioMetricas";
 import { RelatorioPorMes } from "@/features/relatorios/components/RelatorioPorMes";

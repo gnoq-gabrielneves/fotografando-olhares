@@ -1,4 +1,5 @@
 "use server";
+import { logActivityServer } from "@/lib/activity/log-activity-server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
@@ -56,6 +57,19 @@ export async function criarUsuario(input: CriarUsuarioInput) {
   });
 
   if (profileError) throw new Error(profileError.message);
+
+  const supabase = await createClient();
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+  if (currentUser) {
+    await logActivityServer({
+      user_id: currentUser.id,
+      action: "usuario_criado",
+      entity_type: "usuario",
+      entity_id: data.user.id,
+      description: `criou o usuário ${input.full_name} (${input.role})`,
+    });
+  }
+
   return data.user;
 }
 
