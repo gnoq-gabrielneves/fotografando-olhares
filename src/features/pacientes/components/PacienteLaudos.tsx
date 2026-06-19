@@ -9,7 +9,7 @@ import { FileText, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { excluirLaudo } from "../services/pacientes.services";
+import { excluirLaudo } from "../services/laudos.actions";
 
 type Props = {
   laudos: LaudoComLaudador[];
@@ -23,14 +23,35 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
 
   const { mutate: deletar, isPending } = useMutation({
     mutationFn: excluirLaudo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.byId(pacienteId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.home.metricas });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.pacientes.byId(pacienteId),
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.laudos.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.home.metricas }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.home.distribuicaoRD,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.home.ultimosPacientes,
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.relatorios.geral }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.relatorios.distribuicaoResultados,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.relatorios.laudosPorMes,
+        }),
+      ]);
+      router.refresh();
       setConfirmandoId(null);
       toast.success("Laudo excluído.");
     },
-    onError: () => toast.error("Erro ao excluir laudo."),
+    onError: (error: Error) => {
+      toast.error("Erro ao excluir laudo", { description: error.message });
+    },
   });
 
   return (
@@ -94,6 +115,7 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs text-slate-500">Excluir?</span>
                       <button
+                        type="button"
                         onClick={() => deletar(laudo.id)}
                         disabled={isPending}
                         className="text-xs text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
@@ -102,6 +124,7 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
                       </button>
                       <span className="text-slate-300 text-xs">·</span>
                       <button
+                        type="button"
                         onClick={() => setConfirmandoId(null)}
                         className="text-xs text-slate-400 hover:text-slate-600"
                       >
@@ -110,11 +133,15 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
                     </div>
                   ) : (
                     <button
+                      type="button"
                       onClick={() => setConfirmandoId(laudo.id)}
-                      className="text-slate-300 hover:text-red-400 transition-colors"
+                      disabled={isPending}
+                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+                      aria-label="Excluir laudo"
                       title="Excluir laudo"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
+                      Excluir
                     </button>
                   )}
                 </div>
