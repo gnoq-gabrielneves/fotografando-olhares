@@ -2,15 +2,15 @@ import { ResultadoRD } from "@/types";
 
 export const resultadoBadge: Record<ResultadoRD, string> = {
   "Exame de retinografia normal":
-    "bg-cyan-950 text-cyan-400 border border-cyan-900/50",
+    "bg-cyan-50 text-cyan-700 border border-cyan-200",
   "Retinopatia diabética não proliferativa":
-    "bg-amber-950 text-amber-400 border border-amber-900/50",
+    "bg-amber-50 text-amber-700 border border-amber-200",
   "Retinopatia diabética proliferativa":
-    "bg-red-950 text-red-400 border border-red-900/50",
+    "bg-red-50 text-red-700 border border-red-200",
   "Retinopatia hipertensiva":
-    "bg-orange-950 text-orange-400 border border-orange-900/50",
+    "bg-orange-50 text-orange-700 border border-orange-200",
   "Outras alterações":
-    "bg-violet-950 text-violet-400 border border-violet-900/50",
+    "bg-violet-50 text-violet-700 border border-violet-200",
   "Qualidade da imagem ruim":
-    "bg-slate-800 text-slate-400 border border-slate-700",
+    "bg-slate-100 text-slate-600 border border-slate-200",
 };

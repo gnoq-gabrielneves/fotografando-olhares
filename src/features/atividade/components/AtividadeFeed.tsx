@@ -46,7 +46,7 @@ function iniciais(name: string) {
 export function AtividadeFeed() {
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.atividade.recente,
-    queryFn: () => getAtividadeRecente(5),
+    queryFn: () => getAtividadeRecente(4),
     refetchInterval: 30000,
   });
 
