@@ -8,8 +8,6 @@ export async function uploadAvatar(
 ): Promise<string> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log("KEY exists:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   if (!url || !key) throw new Error("Variáveis de ambiente não configuradas");
 

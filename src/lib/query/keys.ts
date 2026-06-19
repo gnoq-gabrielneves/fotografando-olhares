@@ -12,6 +12,7 @@ export const queryKeys = {
     all: ["laudos"] as const,
     lista: (filtros: object) => ["laudos", "lista", filtros] as const,
     byPaciente: (pacienteId: string) => ["laudos", pacienteId] as const,
+    byId: (id: string) => ["laudos", "detalhe", id] as const,
   },
   home: {
     metricas: ["home", "metricas"] as const,

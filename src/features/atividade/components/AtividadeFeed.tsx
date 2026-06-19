@@ -20,6 +20,7 @@ const actionConfig: Record<
   paciente_editado: { icon: Pencil, color: "text-slate-500", bg: "bg-slate-100" },
   paciente_excluido: { icon: Pencil, color: "text-red-500", bg: "bg-red-50" },
   laudo_criado: { icon: FilePlus, color: "text-violet-600", bg: "bg-violet-50" },
+  laudo_editado: { icon: Pencil, color: "text-violet-600", bg: "bg-violet-50" },
   usuario_criado: { icon: FileText, color: "text-emerald-600", bg: "bg-emerald-50" },
 };
 

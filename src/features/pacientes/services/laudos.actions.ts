@@ -1,17 +1,6 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
-
-function getAdminClient() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceRoleKey) throw new Error("Chave de serviço do Supabase não configurada.");
-
-  return createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey,
-  );
-}
 
 export async function excluirLaudo(id: string) {
   const supabase = await createClient();
@@ -21,8 +10,7 @@ export async function excluirLaudo(id: string) {
 
   if (!user) throw new Error("Não autenticado");
 
-  const admin = getAdminClient();
-  const { data, error } = await admin
+  const { data, error } = await supabase
     .from("laudos")
     .delete()
     .eq("id", id)

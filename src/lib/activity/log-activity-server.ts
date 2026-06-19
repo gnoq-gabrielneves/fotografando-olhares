@@ -5,6 +5,7 @@ type LogAction =
   | "paciente_editado"
   | "paciente_excluido"
   | "laudo_criado"
+  | "laudo_editado"
   | "usuario_criado";
 
 export async function logActivityServer({

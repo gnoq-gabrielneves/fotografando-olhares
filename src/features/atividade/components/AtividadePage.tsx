@@ -34,6 +34,7 @@ const ACTION_OPTIONS = [
   { value: "paciente_editado", label: "Paciente editado" },
   { value: "paciente_excluido", label: "Paciente excluído" },
   { value: "laudo_criado", label: "Laudo emitido" },
+  { value: "laudo_editado", label: "Laudo editado" },
   { value: "usuario_criado", label: "Usuário criado" },
 ];
 
@@ -68,6 +69,14 @@ const actionConfig: Record<
   laudo_criado: {
     icon: FilePlus,
     label: "Laudo emitido",
+    color: "text-violet-600",
+    bg: "bg-violet-50",
+    border: "border-violet-200",
+    text: "text-violet-700",
+  },
+  laudo_editado: {
+    icon: Pencil,
+    label: "Laudo editado",
     color: "text-violet-600",
     bg: "bg-violet-50",
     border: "border-violet-200",

@@ -1,7 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+function clearSupabaseCookies(request: NextRequest, response: NextResponse) {
+  request.cookies.getAll().forEach((cookie) => {
+    if (!cookie.name.startsWith("sb-")) return;
+
+    request.cookies.delete(cookie.name);
+    response.cookies.set(cookie.name, "", {
+      maxAge: 0,
+      path: "/",
+    });
+  });
+}
+
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -27,6 +39,7 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
 
   const publicRoutes = ["/login", "/esqueci-senha", "/atualizar-senha"];
@@ -34,21 +47,29 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route),
   );
 
-  // Redireciona para /login se não estiver autenticado
+  if (authError?.code === "session_expired") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+
+    const response = isPublicRoute
+      ? supabaseResponse
+      : NextResponse.redirect(url);
+    clearSupabaseCookies(request, response);
+    return response;
+  }
+
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redireciona para /dashboard se já estiver logado e tentar acessar /login
   if (user && request.nextUrl.pathname.startsWith("/login")) {
     const url = request.nextUrl.clone();
     url.pathname = "/home";
     return NextResponse.redirect(url);
   }
 
-  // Protege /usuarios e /atividade — só admins
   const adminRoutes = ["/usuarios", "/atividade"];
   if (user && adminRoutes.some((r) => request.nextUrl.pathname.startsWith(r))) {
     const { data: profile } = await supabase
