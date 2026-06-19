@@ -1,6 +1,7 @@
 "use client";
 
 import { queryKeys } from "@/lib/query/keys";
+import { getResultadoChartColor } from "@/lib/utils/resultado-badge";
 import { useQuery } from "@tanstack/react-query";
 import {
   Cell,
@@ -11,8 +12,6 @@ import {
   Tooltip,
 } from "recharts";
 import { getDistribuicaoRD } from "../queries/queries-home";
-
-const COLORS = ["#0891b2", "#7c3aed", "#d97706", "#dc2626"];
 
 export function GraficoRD() {
   const { data, isLoading } = useQuery({
@@ -42,10 +41,10 @@ export function GraficoRD() {
               paddingAngle={3}
               dataKey="value"
             >
-              {data?.map((_, index) => (
+              {data?.map((item) => (
                 <Cell
-                  key={index}
-                  fill={COLORS[index % COLORS.length]}
+                  key={item.name}
+                  fill={getResultadoChartColor(item.name)}
                   stroke="transparent"
                 />
               ))}

@@ -14,9 +14,9 @@ const roleLabel: Record<string, string> = {
 };
 
 const roleBadge: Record<string, string> = {
-  admin: "bg-purple-50 text-purple-600 border-purple-200",
-  extensionista: "bg-cyan-50 text-cyan-600 border-cyan-200",
-  laudador: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  admin: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
+  extensionista: "bg-blue-50 text-blue-700 border-blue-200",
+  laudador: "bg-lime-50 text-lime-700 border-lime-200",
 };
 
 export function PerfilAvatar() {

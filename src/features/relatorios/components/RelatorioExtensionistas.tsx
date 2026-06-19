@@ -19,6 +19,8 @@ export function RelatorioExtensionistas() {
     queryFn: getDistribuicaoPorExtensionista,
   });
 
+  const chartHeight = Math.max(260, (data?.length ?? 0) * 34);
+
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
       <h2 className="text-slate-700 font-medium text-sm mb-6">
@@ -32,11 +34,11 @@ export function RelatorioExtensionistas() {
           ))}
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ left: 8, right: 24 }}
+            margin={{ left: 12, right: 24 }}
           >
             <XAxis
               type="number"
@@ -50,7 +52,9 @@ export function RelatorioExtensionistas() {
               tick={{ fill: "#475569", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
-              width={120}
+              interval={0}
+              tickMargin={12}
+              width={220}
             />
             <Tooltip
               contentStyle={{

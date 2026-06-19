@@ -1,7 +1,11 @@
 "use client";
 
 import { queryKeys } from "@/lib/query/keys";
-import { resultadoBadge } from "@/lib/utils/resultado-badge";
+import {
+  getResultadoChartColor,
+  getResultadoProgressColor,
+  resultadoBadge,
+} from "@/lib/utils/resultado-badge";
 import { ResultadoRD } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -13,15 +17,6 @@ import {
   Tooltip,
 } from "recharts";
 import { getDistribuicaoResultados } from "../services/relatorios-services";
-
-const COLORS = [
-  "#0891b2",
-  "#d97706",
-  "#dc2626",
-  "#ea580c",
-  "#7c3aed",
-  "#64748b",
-];
 
 export function RelatorioResultados() {
   const { data, isLoading } = useQuery({
@@ -52,10 +47,10 @@ export function RelatorioResultados() {
                 paddingAngle={3}
                 dataKey="value"
               >
-                {data?.map((_, index) => (
+                {data?.map((item) => (
                   <Cell
-                    key={index}
-                    fill={COLORS[index % COLORS.length]}
+                    key={item.name}
+                    fill={getResultadoChartColor(item.name)}
                     stroke="transparent"
                   />
                 ))}
@@ -119,7 +114,7 @@ export function RelatorioResultados() {
                 </div>
                 <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-cyan-400 rounded-full transition-all"
+                    className={`h-full rounded-full transition-all ${getResultadoProgressColor(item.name)}`}
                     style={{ width: `${item.percentual}%` }}
                   />
                 </div>

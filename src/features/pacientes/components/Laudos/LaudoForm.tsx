@@ -25,19 +25,19 @@ type Props = {
 const resultados: { value: ResultadoRD; activeClass: string }[] = [
   {
     value: "Exame de retinografia normal",
-    activeClass: "bg-cyan-50 border-cyan-500 text-cyan-700",
+    activeClass: "bg-emerald-50 border-emerald-500 text-emerald-700",
   },
   {
     value: "Retinopatia diabética não proliferativa",
-    activeClass: "bg-amber-50 border-amber-500 text-amber-700",
+    activeClass: "bg-amber-50 border-amber-500 text-amber-800",
   },
   {
     value: "Retinopatia diabética proliferativa",
-    activeClass: "bg-red-50 border-red-500 text-red-700",
+    activeClass: "bg-rose-50 border-rose-500 text-rose-700",
   },
   {
     value: "Retinopatia hipertensiva",
-    activeClass: "bg-orange-50 border-orange-500 text-orange-700",
+    activeClass: "bg-sky-50 border-sky-500 text-sky-700",
   },
   {
     value: "Outras alterações",

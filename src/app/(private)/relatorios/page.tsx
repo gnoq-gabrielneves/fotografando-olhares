@@ -36,9 +36,13 @@ export default function RelatoriosPage() {
 
       <section className="space-y-4">
         <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Atendimentos</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RelatorioExtensionistas />
-          <RelatorioLocais />
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          <div className="xl:col-span-3">
+            <RelatorioExtensionistas />
+          </div>
+          <div className="xl:col-span-2">
+            <RelatorioLocais />
+          </div>
         </div>
       </section>
 
