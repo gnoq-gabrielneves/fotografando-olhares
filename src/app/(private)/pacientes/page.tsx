@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ExportarButton } from "@/components/ExportarButton/ExportarButton";
+import { NovoPacienteSheet } from "@/features/pacientes/components/NovoPacienteSheet";
+import { PacientesTabela } from "@/features/pacientes/components/PacientesTabela";
 
 export const metadata: Metadata = {
   title: "Pacientes | Fotografando Olhares",
   description: "Cadastro e acompanhamento dos pacientes triados pelo projeto.",
 };
-import { NovoPacienteSheet } from "@/features/pacientes/components/NovoPacienteSheet";
-import { PacientesTabela } from "@/features/pacientes/components/PacientesTabela";
 
 export default function PacientesPage() {
   return (
@@ -23,7 +24,9 @@ export default function PacientesPage() {
           <NovoPacienteSheet />
         </div>
       </div>
-      <PacientesTabela />
+      <Suspense>
+        <PacientesTabela />
+      </Suspense>
     </div>
   );
 }

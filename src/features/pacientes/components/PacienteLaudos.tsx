@@ -1,10 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { queryKeys } from "@/lib/query/keys";
 import { resultadoBadge } from "@/lib/utils/resultado-badge";
 import { LaudoComLaudador, ResultadoRD } from "@/types";
-import { FileText, Plus } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { FileText, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { excluirLaudo } from "../services/pacientes.services";
 
 type Props = {
   laudos: LaudoComLaudador[];
@@ -13,6 +18,20 @@ type Props = {
 
 export function PacienteLaudos({ laudos, pacienteId }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [confirmandoId, setConfirmandoId] = useState<string | null>(null);
+
+  const { mutate: deletar, isPending } = useMutation({
+    mutationFn: excluirLaudo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.byId(pacienteId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.home.metricas });
+      setConfirmandoId(null);
+      toast.success("Laudo excluído.");
+    },
+    onError: () => toast.error("Erro ao excluir laudo."),
+  });
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
@@ -47,9 +66,7 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-3">
                   {laudo.resultado_rd ? (
-                    <span
-                      className={`text-xs px-2.5 py-1 rounded-md font-medium border ${resultadoBadge[laudo.resultado_rd as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
-                    >
+                    <span className={`text-xs px-2.5 py-1 rounded-md font-medium border ${resultadoBadge[laudo.resultado_rd as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}>
                       {laudo.resultado_rd}
                     </span>
                   ) : (
@@ -58,22 +75,47 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
                     </span>
                   )}
                   {laudo.dilatacao && (
-                    <span className="text-xs text-slate-400">
-                      Dilatação: {laudo.dilatacao}
-                    </span>
+                    <span className="text-xs text-slate-400">Dilatação: {laudo.dilatacao}</span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 text-xs text-slate-400">
-                  {laudo.profiles?.full_name && (
-                    <span>{laudo.profiles.full_name}</span>
-                  )}
-                  {laudo.data_laudo && (
-                    <>
-                      <span className="text-slate-300">·</span>
-                      <span>
-                        {new Date(laudo.data_laudo).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
-                      </span>
-                    </>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 text-xs text-slate-400">
+                    {laudo.profiles?.full_name && <span>{laudo.profiles.full_name}</span>}
+                    {laudo.data_laudo && (
+                      <>
+                        <span className="text-slate-300">·</span>
+                        <span>{new Date(laudo.data_laudo).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {confirmandoId === laudo.id ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-slate-500">Excluir?</span>
+                      <button
+                        onClick={() => deletar(laudo.id)}
+                        disabled={isPending}
+                        className="text-xs text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
+                      >
+                        Sim
+                      </button>
+                      <span className="text-slate-300 text-xs">·</span>
+                      <button
+                        onClick={() => setConfirmandoId(null)}
+                        className="text-xs text-slate-400 hover:text-slate-600"
+                      >
+                        Não
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmandoId(laudo.id)}
+                      className="text-slate-300 hover:text-red-400 transition-colors"
+                      title="Excluir laudo"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   )}
                 </div>
               </div>

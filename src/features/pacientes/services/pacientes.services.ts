@@ -225,6 +225,12 @@ export async function atualizarPaciente(
   return data;
 }
 
+export async function excluirLaudo(id: string) {
+  const supabase = createClient();
+  const { error } = await supabase.from("laudos").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
 export async function excluirPaciente(id: string) {
   const supabase = createClient();
 
