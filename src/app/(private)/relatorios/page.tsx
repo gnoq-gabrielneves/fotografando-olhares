@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { RelatorioEsteiraClinica } from "@/features/relatorios/components/RelatorioEsteiraClinica";
 import { RelatorioExtensionistas } from "@/features/relatorios/components/RelatorioExtensionistas";
+import { PageHeader } from "@/shared/components/PageHeader/PageHeader";
 
 export const metadata: Metadata = {
   title: "Relatórios | Fotografando Olhares",
@@ -14,19 +16,20 @@ import { BarChart2 } from "lucide-react";
 export default function RelatoriosPage() {
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0">
-          <BarChart2 className="w-5 h-5 text-cyan-600" />
-        </div>
-        <div>
-          <h1 className="text-xl font-semibold text-slate-800">Relatórios</h1>
-          <p className="text-slate-400 text-sm">Análises e estatísticas do projeto</p>
-        </div>
-      </div>
+      <PageHeader
+        icon={BarChart2}
+        title="Relatórios"
+        description="Análises e estatísticas do projeto"
+      />
 
       <section className="space-y-4">
         <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Visão geral</h2>
         <RelatorioMetricas />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Esteira clínica</h2>
+        <RelatorioEsteiraClinica />
       </section>
 
       <section className="space-y-4">

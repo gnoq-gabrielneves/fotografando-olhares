@@ -1,14 +1,19 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { PageHeader } from "@/shared/components/PageHeader/PageHeader";
+import {
+  formatDisplayTextOrDash,
+  formatSentenceStart,
+} from "@/shared/lib/format/text";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { queryKeys } from "@/lib/query/keys";
+} from "@/shared/components/ui/select";
+import { queryKeys } from "@/shared/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
@@ -167,21 +172,18 @@ export function AtividadePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
-          <Activity className="w-5 h-5 text-violet-600" />
-        </div>
-        <div>
-          <h1 className="text-xl font-semibold text-slate-800">Atividade</h1>
-          <p className="text-slate-400 text-sm">Histórico de ações do sistema</p>
-        </div>
-        {data && (
+      <PageHeader
+        icon={Activity}
+        title="Atividade"
+        description="Histórico de ações do sistema"
+        meta={
+          data ? (
           <span className="ml-auto text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
             {data.count} {data.count === 1 ? "registro" : "registros"}
           </span>
-        )}
-      </div>
+          ) : null
+        }
+      />
 
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -206,7 +208,7 @@ export function AtividadePage() {
             <SelectItem value="todos">Todos os usuários</SelectItem>
             {usuarios?.map((u) => (
               <SelectItem key={u.id} value={u.id}>
-                {u.full_name}
+                {formatDisplayTextOrDash(u.full_name)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -237,14 +239,16 @@ export function AtividadePage() {
           Object.entries(grupos).map(([dia, items]) => (
             <div key={dia}>
               <div className="px-6 py-2 bg-slate-50 border-b border-slate-100">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider capitalize">
-                  {dia}
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  {formatSentenceStart(dia)}
                 </p>
               </div>
               {items.map((log) => {
                 const cfg = actionConfig[log.action] ?? fallback;
                 const Icon = cfg.icon;
-                const nome = log.profiles?.full_name ?? "Usuário";
+                const nome = log.profiles?.full_name
+                  ? formatDisplayTextOrDash(log.profiles.full_name)
+                  : "Usuário";
 
                 return (
                   <div

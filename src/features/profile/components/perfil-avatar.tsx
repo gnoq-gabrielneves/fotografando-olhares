@@ -1,19 +1,22 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useAvatarUpload } from "@/hooks/use-avatar";
-import { useProfile } from "@/hooks/use-profile";
+import { useAvatarUpload } from "@/shared/hooks/use-avatar";
+import { useProfile } from "@/shared/hooks/use-profile";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import { Camera, Loader2 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { useAtualizarPerfil } from "../hooks/use-profile";
 
 const roleLabel: Record<string, string> = {
+  developer: "Desenvolvedor",
   admin: "Administrador",
   extensionista: "Extensionista",
   laudador: "Laudador",
 };
 
 const roleBadge: Record<string, string> = {
+  developer: "bg-slate-900 text-white border-slate-800",
   admin: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
   extensionista: "bg-blue-50 text-blue-700 border-blue-200",
   laudador: "bg-lime-50 text-lime-700 border-lime-200",
@@ -102,7 +105,9 @@ export function PerfilAvatar() {
         </div>
 
         <div className="mt-3">
-          <h2 className="text-lg font-semibold text-slate-800">{profile?.full_name}</h2>
+          <h2 className="text-lg font-semibold text-slate-800">
+            {formatDisplayTextOrDash(profile?.full_name)}
+          </h2>
           <div className="flex flex-wrap items-center gap-3 mt-0.5">
             <span className="text-sm text-slate-400">{user?.email}</span>
             {memberSince && (

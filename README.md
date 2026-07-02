@@ -1,4 +1,16 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fotografando Olhares
+
+Plataforma para cadastro de pacientes, acompanhamento de laudos de retinografia e relatorios de triagens oftalmologicas.
+
+Hoje o app atende a Liga de Oftalmologia da PUC. O roadmap do produto esta em [docs/roadmap.md](docs/roadmap.md), com a evolucao para suporte multi-instituicao, esteira clinica, imagens de exame, laudos em PDF e auditoria/LGPD.
+
+## Architecture
+
+The source tree follows the `app/features/shared` structure documented in [docs/architecture.md](docs/architecture.md):
+
+- `src/app`: Next.js routes and layouts.
+- `src/features`: business modules.
+- `src/shared`: reusable UI, hooks, libraries, services and shared domain types.
 
 ## Getting Started
 
@@ -14,11 +26,25 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To run on the development port used in this workspace:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev -- --port 3001
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3001](http://localhost:3001) with your browser to see the app.
+
+## Database migrations
+
+SQL migrations live in `supabase/migrations`.
+
+The first productization migration is:
+
+```text
+supabase/migrations/20260702161000_add_organizations.sql
+```
+
+Apply it in Supabase before wiring the application queries to `organization_id`.
 
 ## Learn More
 

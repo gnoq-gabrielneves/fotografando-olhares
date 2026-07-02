@@ -1,6 +1,8 @@
-import { logActivity } from "@/lib/activity/log-activity";
-import { createClient } from "@/lib/supabase/client";
-import { ResultadoRD } from "@/types";
+import { logActivity } from "@/shared/lib/activity/log-activity";
+import { getOrganizationOverrideId } from "@/shared/lib/organization/current-client";
+import { getOrganizationIdFromRecord } from "@/shared/lib/organization/scope";
+import { createClient } from "@/shared/lib/supabase/client";
+import { ResultadoRD } from "@/shared/types";
 
 export type LaudoDetalhe = {
   id: string;
@@ -17,8 +19,9 @@ export type LaudoDetalhe = {
 
 export async function getLaudoById(id: string): Promise<LaudoDetalhe> {
   const supabase = createClient();
+  const organizationId = await getCurrentOrganizationId();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("laudos")
     .select(
       `
@@ -34,8 +37,13 @@ export async function getLaudoById(id: string): Promise<LaudoDetalhe> {
       profiles!laudos_laudador_id_fkey(full_name)
       `,
     )
-    .eq("id", id)
-    .single();
+    .eq("id", id);
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query.single();
 
   if (error) throw new Error(error.message);
   return data as unknown as LaudoDetalhe;
@@ -54,11 +62,18 @@ export async function atualizarLaudo(id: string, input: AtualizarLaudoInput) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const organizationId = user ? await getCurrentOrganizationId() : undefined;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("laudos")
     .update(input)
-    .eq("id", id)
+    .eq("id", id);
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query
     .select("id, paciente_id, pacientes(nome_completo)")
     .single();
 
@@ -75,8 +90,30 @@ export async function atualizarLaudo(id: string, input: AtualizarLaudoInput) {
       entity_type: "laudo",
       entity_id: id,
       description: `editou o laudo de ${paciente?.nome_completo ?? "um paciente"}`,
+      organization_id: organizationId,
     });
   }
 
   return data;
+}
+
+async function getCurrentOrganizationId() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return undefined;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (data?.role === "developer") {
+    return getOrganizationOverrideId() ?? getOrganizationIdFromRecord(data);
+  }
+
+  return getOrganizationIdFromRecord(data);
 }

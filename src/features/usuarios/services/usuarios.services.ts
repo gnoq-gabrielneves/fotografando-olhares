@@ -1,14 +1,31 @@
 "use server";
-import { logActivityServer } from "@/lib/activity/log-activity-server";
-import { createClient } from "@/lib/supabase/server";
+import { logActivityServer } from "@/shared/lib/activity/log-activity-server";
+import {
+  getOrganizationIdFromRecord,
+  withOrganizationId,
+} from "@/shared/lib/organization/scope";
+import { createClient } from "@/shared/lib/supabase/server";
+import type { UserRole } from "@/shared/types";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 type CriarUsuarioInput = {
   full_name: string;
   email: string;
   password: string;
-  role: "admin" | "extensionista" | "laudador";
+  role: UserRole;
+  organization_id?: string;
   avatar_url?: string;
+};
+
+type AdminProfile = {
+  role?: UserRole | null;
+  organization_id?: string | null;
+};
+
+export type OrganizacaoOpcao = {
+  id: string;
+  name: string;
+  slug: string;
 };
 
 function getAdminClient() {
@@ -27,17 +44,22 @@ async function verificarAdmin() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("*")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "admin") throw new Error("Sem permissão");
-  return { supabase, user };
+  const adminProfile = profile as AdminProfile | null;
+  if (adminProfile?.role !== "admin" && adminProfile?.role !== "developer") {
+    throw new Error("Sem permissão");
+  }
+  return { supabase, user, profile: adminProfile };
 }
 
 export async function criarUsuario(input: CriarUsuarioInput) {
-  await verificarAdmin();
+  const { profile } = await verificarAdmin();
   const admin = getAdminClient();
+  assertPodeAtribuirRole(profile, input.role);
+  const organizationId = getTargetOrganizationId(profile, input.organization_id);
 
   const { data, error } = await admin.auth.admin.createUser({
     email: input.email,
@@ -49,12 +71,17 @@ export async function criarUsuario(input: CriarUsuarioInput) {
   if (error) throw new Error(error.message);
   if (!data.user) throw new Error("Erro ao criar usuário");
 
-  const { error: profileError } = await admin.from("profiles").upsert({
-    id: data.user.id,
-    full_name: input.full_name,
-    role: input.role,
-    avatar_url: input.avatar_url ?? null,
-  });
+  const { error: profileError } = await admin.from("profiles").upsert(
+    withOrganizationId(
+      {
+        id: data.user.id,
+        full_name: input.full_name,
+        role: input.role,
+        avatar_url: input.avatar_url ?? null,
+      },
+      organizationId,
+    ),
+  );
 
   if (profileError) throw new Error(profileError.message);
 
@@ -67,6 +94,7 @@ export async function criarUsuario(input: CriarUsuarioInput) {
       entity_type: "usuario",
       entity_id: data.user.id,
       description: `criou o usuário ${input.full_name} (${input.role})`,
+      organization_id: organizationId,
     });
   }
 
@@ -74,23 +102,32 @@ export async function criarUsuario(input: CriarUsuarioInput) {
 }
 
 export async function listarUsuarios() {
-  const { supabase } = await verificarAdmin();
+  const { supabase, profile } = await verificarAdmin();
+  const organizationId = getOrganizationIdFromRecord(profile);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("profiles")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (profile?.role !== "developer" && organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw new Error(error.message);
   return data;
 }
 
 export async function excluirUsuario(id: string) {
-  const { user } = await verificarAdmin();
+  const { user, profile } = await verificarAdmin();
   if (user.id === id)
     throw new Error("Você não pode excluir sua própria conta");
 
   const admin = getAdminClient();
+  await assertUsuarioNaMesmaOrganizacao(admin, id, profile);
+
   const { error } = await admin.auth.admin.deleteUser(id);
   if (error) throw new Error(error.message);
 }
@@ -101,12 +138,15 @@ export async function atualizarUsuario(
     full_name?: string;
     email?: string;
     password?: string;
-    role?: "admin" | "extensionista" | "laudador";
+    role?: UserRole;
+    organization_id?: string;
     avatar_url?: string;
   },
 ) {
-  const { user } = await verificarAdmin();
+  const { profile } = await verificarAdmin();
   const admin = getAdminClient();
+  await assertUsuarioNaMesmaOrganizacao(admin, id, profile);
+  if (input.role) assertPodeAtribuirRole(profile, input.role);
 
   if (input.email || input.password) {
     const authUpdate: { email?: string; password?: string } = {};
@@ -122,9 +162,72 @@ export async function atualizarUsuario(
     .update({
       full_name: input.full_name,
       role: input.role,
+      organization_id: getTargetOrganizationId(profile, input.organization_id),
       avatar_url: input.avatar_url,
     })
     .eq("id", id);
 
   if (profileError) throw new Error(profileError.message);
+}
+
+export async function listarOrganizacoes(): Promise<OrganizacaoOpcao[]> {
+  const { profile } = await verificarAdmin();
+  if (profile?.role !== "developer") return [];
+
+  const admin = getAdminClient();
+  const { data, error } = await admin
+    .from("organizations")
+    .select("id, name, slug")
+    .order("name");
+
+  if (error) {
+    if (error.code === "42P01" || error.message.includes("does not exist")) {
+      return [];
+    }
+    throw new Error(error.message);
+  }
+
+  return data ?? [];
+}
+
+async function assertUsuarioNaMesmaOrganizacao(
+  admin: ReturnType<typeof getAdminClient>,
+  userId: string,
+  adminProfile: AdminProfile | null,
+) {
+  const organizationId = getOrganizationIdFromRecord(adminProfile);
+  if (adminProfile?.role === "developer" || !organizationId) return;
+
+  const { data, error } = await admin
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  const targetOrganizationId = getOrganizationIdFromRecord(
+    data as AdminProfile | null,
+  );
+
+  if (targetOrganizationId !== organizationId) {
+    throw new Error("Usuário não pertence à sua organização");
+  }
+}
+
+function assertPodeAtribuirRole(profile: AdminProfile | null, role: UserRole) {
+  if (role === "developer" && profile?.role !== "developer") {
+    throw new Error("Apenas desenvolvedores podem atribuir esse nível de acesso");
+  }
+}
+
+function getTargetOrganizationId(
+  profile: AdminProfile | null,
+  requestedOrganizationId?: string,
+) {
+  if (profile?.role === "developer") {
+    return requestedOrganizationId || getOrganizationIdFromRecord(profile);
+  }
+
+  return getOrganizationIdFromRecord(profile);
 }

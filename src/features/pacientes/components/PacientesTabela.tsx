@@ -1,6 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
+import { QueryErrorState } from "@/shared/components/states/EmptyState";
+import { TableSkeletonRows } from "@/shared/components/states/TableSkeletonRows";
 import {
   Table,
   TableBody,
@@ -8,10 +10,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { queryKeys } from "@/lib/query/keys";
-import { resultadoBadge } from "@/lib/utils/resultado-badge";
-import { PacienteTabela, ResultadoRD } from "@/types";
+} from "@/shared/components/ui/table";
+import { queryKeys } from "@/shared/lib/query/keys";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import {
+  getPacienteStatusBadge,
+  getPacienteStatusLabel,
+} from "@/shared/lib/utils/paciente-status";
+import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
+import { PacienteTabela, ResultadoRD } from "@/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, FileText } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -39,6 +46,7 @@ export function PacientesTabela() {
 
   const busca = searchParams.get("busca") ?? "";
   const resultadoRd = searchParams.get("resultado") ?? "todos";
+  const statusOperacional = searchParams.get("status") ?? "todos";
   const localId = searchParams.get("local") ?? "todos";
   const dataInicio = searchParams.get("de") ?? "";
   const dataFim = searchParams.get("ate") ?? "";
@@ -49,6 +57,7 @@ export function PacientesTabela() {
   const filtros = {
     busca: buscaDebounced,
     resultado_rd: resultadoRd,
+    status_operacional: statusOperacional,
     local_id: localId,
     data_inicio: dataInicio,
     data_fim: dataFim,
@@ -56,7 +65,7 @@ export function PacientesTabela() {
     pageSize: PAGE_SIZE,
   };
 
-  const { data, isLoading } = useQuery({
+  const { data, error, isError, isLoading } = useQuery({
     queryKey: queryKeys.pacientes.lista(filtros),
     queryFn: () => getPacientes(filtros),
   });
@@ -99,11 +108,13 @@ export function PacientesTabela() {
       <PacientesFiltros
         busca={busca}
         resultadoRd={resultadoRd}
+        statusOperacional={statusOperacional}
         localId={localId}
         dataInicio={dataInicio}
         dataFim={dataFim}
         onBuscaChange={(v) => setParam({ busca: v })}
         onResultadoChange={(v) => setParam({ resultado: v })}
+        onStatusChange={(v) => setParam({ status: v })}
         onLocalChange={(v) => setParam({ local: v })}
         onDataInicioChange={(v) => setParam({ de: v })}
         onDataFimChange={(v) => setParam({ ate: v })}
@@ -117,6 +128,9 @@ export function PacientesTabela() {
         </p>
       )}
 
+      {isError ? (
+        <QueryErrorState message={error.message} />
+      ) : (
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <Table>
@@ -126,6 +140,7 @@ export function PacientesTabela() {
                 <TableHead className="text-slate-500 font-medium hidden sm:table-cell">Sexo</TableHead>
                 <TableHead className="text-slate-500 font-medium hidden sm:table-cell">Idade</TableHead>
                 <TableHead className="text-slate-500 font-medium hidden md:table-cell">Local</TableHead>
+                <TableHead className="text-slate-500 font-medium hidden xl:table-cell">Status</TableHead>
                 <TableHead className="text-slate-500 font-medium hidden lg:table-cell">Extensionista</TableHead>
                 <TableHead className="text-slate-500 font-medium">Laudo</TableHead>
                 <TableHead className="text-slate-500 font-medium w-24" />
@@ -133,27 +148,24 @@ export function PacientesTabela() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                  <TableRow key={i} className="border-slate-200">
-                    {Array.from({ length: 7 }).map((_, j) => (
-                      <TableCell key={j}>
-                        <div className="h-4 bg-slate-100 rounded animate-pulse" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                <TableSkeletonRows rows={PAGE_SIZE} columns={8} />
               ) : data?.data.length === 0 ? (
                 <TableRow className="border-slate-200">
-                  <TableCell colSpan={7} className="text-center py-12 text-slate-400">
+                  <TableCell colSpan={8} className="text-center py-12 text-slate-400">
                     Nenhum paciente encontrado
                   </TableCell>
                 </TableRow>
               ) : (
                 data?.data.map((paciente: PacienteTabela) => {
                   const resultado = paciente.laudos?.[0]?.resultado_rd;
-                  const local = paciente.locais_atendimento?.nome ?? "—";
-                  const extensionista = paciente.profiles?.full_name ?? "—";
+                  const local = formatDisplayTextOrDash(
+                    paciente.locais_atendimento?.nome,
+                  );
+                  const extensionista = formatDisplayTextOrDash(
+                    paciente.profiles?.full_name,
+                  );
                   const idade = calcularIdade(paciente.data_nascimento);
+                  const status = paciente.status_operacional;
 
                   return (
                     <TableRow
@@ -162,7 +174,7 @@ export function PacientesTabela() {
                       onClick={() => router.push(`/pacientes/${paciente.id}`)}
                     >
                       <TableCell className="text-slate-800 font-medium">
-                        {paciente.nome_completo}
+                        {formatDisplayTextOrDash(paciente.nome_completo)}
                       </TableCell>
                       <TableCell className="text-slate-600 hidden sm:table-cell">
                         {paciente.sexo === "M" ? "Masculino" : paciente.sexo === "F" ? "Feminino" : "—"}
@@ -171,6 +183,13 @@ export function PacientesTabela() {
                         {idade ? `${idade} anos` : "—"}
                       </TableCell>
                       <TableCell className="text-slate-600 hidden md:table-cell">{local}</TableCell>
+                      <TableCell className="hidden xl:table-cell">
+                        <span
+                          className={`text-xs px-2 py-1 rounded-md font-medium border ${getPacienteStatusBadge(status)}`}
+                        >
+                          {getPacienteStatusLabel(status)}
+                        </span>
+                      </TableCell>
                       <TableCell className="text-slate-600 hidden lg:table-cell">{extensionista}</TableCell>
                       <TableCell>
                         {resultado ? (
@@ -219,13 +238,16 @@ export function PacientesTabela() {
           </Table>
         </div>
       </div>
+      )}
 
-      <PacientesPaginacao
-        page={page}
-        pageSize={PAGE_SIZE}
-        total={data?.count ?? 0}
-        onPageChange={setPage}
-      />
+      {!isError && (
+        <PacientesPaginacao
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={data?.count ?? 0}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }

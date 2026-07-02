@@ -1,7 +1,8 @@
 "use client";
-import { queryKeys } from "@/lib/query/keys";
-import { resultadoBadge } from "@/lib/utils/resultado-badge";
-import { PacienteResumo, ResultadoRD } from "@/types";
+import { queryKeys } from "@/shared/lib/query/keys";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
+import { PacienteResumo, ResultadoRD } from "@/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -59,9 +60,11 @@ export function UltimosPacientes() {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-800 truncate">
-                      {paciente.nome_completo}
+                      {formatDisplayTextOrDash(paciente.nome_completo)}
                     </p>
-                    <p className="text-xs text-slate-400 truncate">{local}</p>
+                    <p className="text-xs text-slate-400 truncate">
+                      {formatDisplayTextOrDash(local)}
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 ml-3">

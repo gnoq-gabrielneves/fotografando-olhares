@@ -1,6 +1,13 @@
 "use client";
 
-import { queryKeys } from "@/lib/query/keys";
+import { ChartCard } from "@/shared/components/charts/ChartCard";
+import {
+  chartAxisTick,
+  chartCategoryTick,
+  chartCursor,
+  chartTooltipStyle,
+} from "@/shared/lib/charts/styles";
+import { queryKeys } from "@/shared/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import {
   Bar,
@@ -22,11 +29,7 @@ export function RelatorioExtensionistas() {
   const chartHeight = Math.max(260, (data?.length ?? 0) * 34);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-      <h2 className="text-slate-700 font-medium text-sm mb-6">
-        Pacientes por extensionista
-      </h2>
-
+    <ChartCard title="Pacientes por extensionista">
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -42,31 +45,21 @@ export function RelatorioExtensionistas() {
           >
             <XAxis
               type="number"
-              tick={{ fill: "#94a3b8", fontSize: 12 }}
+              tick={chartAxisTick}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fill: "#475569", fontSize: 12 }}
+              tick={chartCategoryTick}
               axisLine={false}
               tickLine={false}
               interval={0}
               tickMargin={12}
               width={220}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e2e8f0",
-                borderRadius: "8px",
-                color: "#1e293b",
-                fontSize: "13px",
-                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-              }}
-              cursor={{ fill: "#f1f5f9" }}
-            />
+            <Tooltip contentStyle={chartTooltipStyle} cursor={chartCursor} />
             <Bar dataKey="value" radius={[0, 4, 4, 0]} name="Pacientes">
               {data?.map((_, index) => (
                 <Cell key={index} fill="#7c3aed" fillOpacity={0.8} />
@@ -75,6 +68,6 @@ export function RelatorioExtensionistas() {
           </BarChart>
         </ResponsiveContainer>
       )}
-    </div>
+    </ChartCard>
   );
 }

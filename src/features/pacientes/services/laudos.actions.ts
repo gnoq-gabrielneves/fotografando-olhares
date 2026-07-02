@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/shared/lib/supabase/server";
 
 export async function excluirLaudo(id: string) {
   const supabase = await createClient();

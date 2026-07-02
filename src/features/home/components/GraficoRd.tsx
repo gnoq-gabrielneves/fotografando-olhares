@@ -1,7 +1,9 @@
 "use client";
 
-import { queryKeys } from "@/lib/query/keys";
-import { getResultadoChartColor } from "@/lib/utils/resultado-badge";
+import { ChartCard, ChartLoading } from "@/shared/components/charts/ChartCard";
+import { chartTooltipStyle } from "@/shared/lib/charts/styles";
+import { queryKeys } from "@/shared/lib/query/keys";
+import { getResultadoChartColor } from "@/shared/lib/utils/resultado-badge";
 import { useQuery } from "@tanstack/react-query";
 import {
   Cell,
@@ -20,14 +22,12 @@ export function GraficoRD() {
   });
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm h-full">
-      <h2 className="text-slate-700 font-medium text-sm mb-6">
-        Distribuição por resultado
-      </h2>
-
+    <ChartCard title="Resultados dos laudos" className="h-full">
       {isLoading ? (
-        <div className="h-64 flex items-center justify-center">
-          <div className="w-32 h-32 rounded-full border-4 border-slate-100 border-t-cyan-500 animate-spin" />
+        <ChartLoading />
+      ) : !data?.length ? (
+        <div className="h-64 flex items-center justify-center text-sm text-slate-400">
+          Nenhum laudo emitido
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={260}>
@@ -49,16 +49,7 @@ export function GraficoRD() {
                 />
               ))}
             </Pie>
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e2e8f0",
-                borderRadius: "8px",
-                color: "#1e293b",
-                fontSize: "13px",
-                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-              }}
-            />
+            <Tooltip contentStyle={chartTooltipStyle} />
             <Legend
               iconType="circle"
               iconSize={8}
@@ -71,6 +62,6 @@ export function GraficoRD() {
           </PieChart>
         </ResponsiveContainer>
       )}
-    </div>
+    </ChartCard>
   );
 }

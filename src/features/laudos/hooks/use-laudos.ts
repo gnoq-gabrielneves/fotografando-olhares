@@ -4,7 +4,7 @@ import {
   criarLaudo,
   NovoLaudoInput,
 } from "@/features/pacientes/services/pacientes.services";
-import { queryKeys } from "@/lib/query/keys";
+import { queryKeys } from "@/shared/lib/query/keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -24,6 +24,7 @@ export function useCriarLaudo(pacienteId: string, onSuccess?: () => void) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.pacientes.byId(pacienteId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.all });
       queryClient.invalidateQueries({
         queryKey: queryKeys.laudos.byPaciente(pacienteId),
       });

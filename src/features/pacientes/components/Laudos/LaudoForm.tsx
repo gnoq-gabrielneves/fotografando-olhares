@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { queryKeys } from "@/lib/query/keys";
-import { ResultadoRD } from "@/types";
+import { Button } from "@/shared/components/ui/button";
+import { queryKeys } from "@/shared/lib/query/keys";
+import { ResultadoRD } from "@/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -74,6 +74,7 @@ export function LaudoForm({ pacienteId }: Props) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.pacientes.byId(pacienteId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.all });
       queryClient.invalidateQueries({
         queryKey: queryKeys.laudos.byPaciente(pacienteId),
       });
@@ -117,6 +118,12 @@ export function LaudoForm({ pacienteId }: Props) {
     });
   }
 
+  const isDirty =
+    !!form.resultado_rd ||
+    !!form.data_laudo ||
+    !!form.dilatacao ||
+    !!form.descricao;
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       {/* Resultado RD */}
@@ -130,6 +137,7 @@ export function LaudoForm({ pacienteId }: Props) {
                 key={r.value}
                 type="button"
                 onClick={() => set("resultado_rd", r.value)}
+                disabled={isPending}
                 className={`h-11 rounded-lg text-sm font-medium border transition-all px-2 ${
                   isActive
                     ? r.activeClass
@@ -191,6 +199,14 @@ export function LaudoForm({ pacienteId }: Props) {
         />
       </div>
 
+      <p className="text-xs text-slate-400">
+        {isPending
+          ? "Salvando laudo..."
+          : isDirty
+            ? "Laudo com alterações prontas para salvar."
+            : "Selecione o resultado e informe a data do laudo."}
+      </p>
+
       <div className="flex gap-3 pt-2">
         <Button
           type="button"
@@ -202,7 +218,7 @@ export function LaudoForm({ pacienteId }: Props) {
         </Button>
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || !isDirty}
           className="flex-1 h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-medium"
         >
           {isPending ? (

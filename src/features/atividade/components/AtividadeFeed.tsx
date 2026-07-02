@@ -1,6 +1,6 @@
 "use client";
 
-import { queryKeys } from "@/lib/query/keys";
+import { queryKeys } from "@/shared/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import {
   FilePlus,
@@ -9,7 +9,9 @@ import {
   FileText,
   Activity,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { EmptyState, QueryErrorState } from "@/shared/components/states/EmptyState";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import { getAtividadeRecente } from "../services/atividade-services";
 
 const actionConfig: Record<
@@ -45,7 +47,7 @@ function iniciais(name: string) {
 }
 
 export function AtividadeFeed() {
-  const { data, isLoading } = useQuery({
+  const { data, error, isError, isLoading } = useQuery({
     queryKey: queryKeys.atividade.recente,
     queryFn: () => getAtividadeRecente(4),
     refetchInterval: 30000,
@@ -59,7 +61,11 @@ export function AtividadeFeed() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {isLoading ? (
+        {isError ? (
+          <div className="p-4">
+            <QueryErrorState message={error.message} />
+          </div>
+        ) : isLoading ? (
           <div className="p-4 space-y-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3">
@@ -72,8 +78,12 @@ export function AtividadeFeed() {
             ))}
           </div>
         ) : !data?.length ? (
-          <div className="flex items-center justify-center py-12 text-slate-400 text-sm">
-            Nenhuma atividade ainda
+          <div className="p-4">
+            <EmptyState
+              title="Nenhuma atividade ainda"
+              description="As ações importantes do time aparecerão aqui conforme o uso do sistema."
+              className="border-0 shadow-none"
+            />
           </div>
         ) : (
           <div className="divide-y divide-slate-50">
@@ -84,7 +94,9 @@ export function AtividadeFeed() {
                 bg: "bg-slate-100",
               };
               const Icon = cfg.icon;
-              const nome = log.profiles?.full_name ?? "Usuário";
+              const nome = log.profiles?.full_name
+                ? formatDisplayTextOrDash(log.profiles.full_name)
+                : "Usuário";
 
               return (
                 <div key={log.id} className="flex items-start gap-3 px-5 py-3">

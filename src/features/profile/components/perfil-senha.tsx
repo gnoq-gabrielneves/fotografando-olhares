@@ -1,6 +1,6 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useAtualizarPerfil } from "../hooks/use-profile";
@@ -15,6 +15,7 @@ export function PerfilSenha() {
   const [senha, setSenha] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [erro, setErro] = useState("");
+  const isDirty = !!senha || !!confirmar;
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +76,7 @@ export function PerfilSenha() {
 
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || !isDirty}
           className="w-full h-10 bg-cyan-600 hover:bg-cyan-500 text-white font-medium"
         >
           {isPending ? (
@@ -87,6 +88,13 @@ export function PerfilSenha() {
             "Alterar senha"
           )}
         </Button>
+        <p className="text-xs text-slate-400">
+          {isPending
+            ? "Atualizando senha..."
+            : isDirty
+              ? "Senha pronta para validação."
+              : "Informe uma nova senha para alterar."}
+        </p>
       </form>
     </div>
   );

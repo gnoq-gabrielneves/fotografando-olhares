@@ -1,3 +1,5 @@
+import type { PacienteStatusOperacional } from "@/shared/types";
+
 export type NovoPacienteInput = {
   nome_completo: string;
   sexo: "M" | "F";
@@ -15,6 +17,7 @@ export type NovoPacienteInput = {
   qt_tempo_ultimo_exame?: string;
   tabagista?: boolean;
   atividade_fisica?: boolean;
+  status_operacional?: PacienteStatusOperacional;
   av_od?: string;
   av_oe?: string;
   outras_obs?: string;

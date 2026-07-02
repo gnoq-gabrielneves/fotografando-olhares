@@ -2,9 +2,10 @@ import {
   atualizarUsuario,
   criarUsuario,
   excluirUsuario,
+  listarOrganizacoes,
   listarUsuarios,
 } from "@/features/usuarios/services/usuarios.services";
-import { queryKeys } from "@/lib/query/keys";
+import { queryKeys } from "@/shared/lib/query/keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -12,6 +13,14 @@ export function useUsuarios() {
   return useQuery({
     queryKey: queryKeys.usuarios.lista,
     queryFn: listarUsuarios,
+  });
+}
+
+export function useOrganizacoes(enabled: boolean) {
+  return useQuery({
+    queryKey: ["organizacoes", "lista"],
+    queryFn: listarOrganizacoes,
+    enabled,
   });
 }
 

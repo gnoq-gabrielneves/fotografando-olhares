@@ -1,16 +1,22 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { queryKeys } from "@/lib/query/keys";
-import { PacienteDetalhado } from "@/types";
+} from "@/shared/components/ui/select";
+import { queryKeys } from "@/shared/lib/query/keys";
+import { getPacienteStatusLabel } from "@/shared/lib/utils/paciente-status";
+import {
+  PACIENTE_STATUS_OPERACIONAIS,
+  PacienteDetalhado,
+  type PacienteStatusOperacional,
+} from "@/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -40,6 +46,7 @@ type FormData = {
   av_od: string;
   av_oe: string;
   outras_obs: string;
+  status_operacional: PacienteStatusOperacional;
 };
 
 type Props = {
@@ -63,18 +70,8 @@ function formatarDataParaExibicao(data: string | null) {
   return `${d}/${m}/${y}`;
 }
 
-const inputClass =
-  "w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
-const labelClass = "text-slate-600 text-xs mb-1.5 block";
-const errClass = "text-red-500 text-xs mt-1";
-const selectClass =
-  "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 focus-visible:ring-cyan-500 h-10 w-full";
-
-export function EditarPacienteForm({ paciente }: Props) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-
-  const [form, setForm] = useState<FormData>({
+function getInitialForm(paciente: PacienteDetalhado): FormData {
+  return {
     nome_completo: paciente.nome_completo ?? "",
     sexo: paciente.sexo ?? "",
     cpf_cns: paciente.cpf_cns ?? "",
@@ -92,7 +89,23 @@ export function EditarPacienteForm({ paciente }: Props) {
     av_od: paciente.av_od ?? "",
     av_oe: paciente.av_oe ?? "",
     outras_obs: paciente.outras_obs ?? "",
-  });
+    status_operacional: paciente.status_operacional ?? "cadastrado",
+  };
+}
+
+const inputClass =
+  "w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
+const labelClass = "text-slate-600 text-xs mb-1.5 block";
+const errClass = "text-red-500 text-xs mt-1";
+const selectClass =
+  "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 focus-visible:ring-cyan-500 h-10 w-full";
+
+export function EditarPacienteForm({ paciente }: Props) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const initialForm = getInitialForm(paciente);
+  const [form, setForm] = useState<FormData>(initialForm);
 
   const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
     {},
@@ -121,6 +134,7 @@ export function EditarPacienteForm({ paciente }: Props) {
             | "5 a 10 anos"
             | ">10 anos") || undefined,
         zona: (data.zona as "Urbana" | "Rural" | "Periurbana") || undefined,
+        status_operacional: data.status_operacional as PacienteStatusOperacional,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -157,6 +171,8 @@ export function EditarPacienteForm({ paciente }: Props) {
     }
     mutate(form);
   }
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialForm);
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 pb-8">
@@ -249,7 +265,7 @@ export function EditarPacienteForm({ paciente }: Props) {
               <SelectContent className="bg-white border-slate-200 text-slate-700">
                 {locais?.map((l) => (
                   <SelectItem key={l.id} value={l.id}>
-                    {l.nome}
+                    {formatDisplayTextOrDash(l.nome)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -271,6 +287,27 @@ export function EditarPacienteForm({ paciente }: Props) {
                 <SelectItem value="Urbana">Urbana</SelectItem>
                 <SelectItem value="Rural">Rural</SelectItem>
                 <SelectItem value="Periurbana">Periurbana</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClass}>Status operacional</label>
+            <Select
+              value={form.status_operacional}
+              onValueChange={(v) =>
+                set("status_operacional", v as PacienteStatusOperacional)
+              }
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200 text-slate-700">
+                {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {getPacienteStatusLabel(status)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -386,6 +423,14 @@ export function EditarPacienteForm({ paciente }: Props) {
         />
       </div>
 
+      <p className="text-xs text-slate-400">
+        {isPending
+          ? "Salvando alterações..."
+          : isDirty
+            ? "Existem alterações não salvas."
+            : "Nenhuma alteração pendente."}
+      </p>
+
       <div className="flex gap-3 pt-2">
         <Button
           type="button"
@@ -397,7 +442,7 @@ export function EditarPacienteForm({ paciente }: Props) {
         </Button>
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || !isDirty}
           className="flex-1 h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-medium"
         >
           {isPending ? (

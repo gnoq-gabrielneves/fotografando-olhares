@@ -1,4 +1,4 @@
-import { queryKeys } from "@/lib/query/keys";
+import { queryKeys } from "@/shared/lib/query/keys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { atualizarPerfil } from "../services/profile.services";

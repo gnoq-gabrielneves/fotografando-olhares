@@ -1,4 +1,9 @@
-import { PacienteDetalhado } from "@/types";
+import { PacienteDetalhado } from "@/shared/types";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import {
+  getPacienteStatusBadge,
+  getPacienteStatusLabel,
+} from "@/shared/lib/utils/paciente-status";
 
 type Props = {
   paciente: PacienteDetalhado;
@@ -52,6 +57,8 @@ function formatarData(data: string | null) {
 }
 
 export function PacienteInfo({ paciente }: Props) {
+  const status = paciente.status_operacional ?? "cadastrado";
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Dados pessoais */}
@@ -67,9 +74,22 @@ export function PacienteInfo({ paciente }: Props) {
         />
         <InfoRow
           label="Local de atendimento"
-          value={paciente.locais_atendimento?.nome}
+          value={formatDisplayTextOrDash(paciente.locais_atendimento?.nome)}
         />
-        <InfoRow label="Extensionista" value={paciente.profiles?.full_name} />
+        <InfoRow
+          label="Extensionista"
+          value={formatDisplayTextOrDash(paciente.profiles?.full_name)}
+        />
+        <div className="flex items-start justify-between gap-4 py-3 border-b border-slate-100 last:border-0">
+          <span className="text-slate-500 text-sm shrink-0">
+            Status operacional
+          </span>
+          <span
+            className={`text-xs px-2 py-0.5 rounded-md font-medium border ${getPacienteStatusBadge(status)}`}
+          >
+            {getPacienteStatusLabel(status)}
+          </span>
+        </div>
         <InfoRow
           label="Cadastrado em"
           value={formatarData(paciente.created_at)}

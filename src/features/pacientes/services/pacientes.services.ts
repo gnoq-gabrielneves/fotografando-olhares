@@ -1,11 +1,17 @@
-import { logActivity } from "@/lib/activity/log-activity";
-import { createClient } from "@/lib/supabase/client";
-import { PacienteTabela, ResultadoRD } from "@/types";
+import { logActivity } from "@/shared/lib/activity/log-activity";
+import { getOrganizationOverrideId } from "@/shared/lib/organization/current-client";
+import {
+  getOrganizationIdFromRecord,
+  withOrganizationId,
+} from "@/shared/lib/organization/scope";
+import { createClient } from "@/shared/lib/supabase/client";
+import { PacienteStatusOperacional, PacienteTabela, ResultadoRD } from "@/shared/types";
 import { NovoPacienteInput } from "../pacientes.types";
 
 export type FiltrosPacientes = {
   busca?: string;
   resultado_rd?: string;
+  status_operacional?: string;
   local_id?: string;
   data_inicio?: string;
   data_fim?: string;
@@ -18,7 +24,17 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
   count: number;
 }> {
   const supabase = createClient();
-  const { busca, resultado_rd, local_id, data_inicio, data_fim, page = 1, pageSize = 10 } = filtros;
+  const organizationId = await getCurrentOrganizationId();
+  const {
+    busca,
+    resultado_rd,
+    status_operacional,
+    local_id,
+    data_inicio,
+    data_fim,
+    page = 1,
+    pageSize = 10,
+  } = filtros;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -31,6 +47,7 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
       sexo,
       data_nascimento,
       created_at,
+      status_operacional,
       locais_atendimento(nome),
       profiles!pacientes_extensionista_id_fkey(full_name),
       laudos(resultado_rd)
@@ -39,6 +56,10 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
     )
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
 
   if (busca) {
     query = query.or(`nome_completo.ilike.%${busca}%,cpf_cns.ilike.%${busca}%`);
@@ -56,11 +77,19 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
     query = query.eq("local_atendimento_id", local_id);
   }
 
+  if (status_operacional && status_operacional !== "todos") {
+    query = query.eq(
+      "status_operacional",
+      status_operacional as PacienteStatusOperacional,
+    );
+  }
+
   if (resultado_rd && resultado_rd !== "todos") {
     if (resultado_rd === "sem_laudo") {
       const { data: comLaudo } = await supabase
         .from("laudos")
-        .select("paciente_id");
+        .select("paciente_id")
+        .match(organizationId ? { organization_id: organizationId } : {});
 
       const ids = comLaudo?.map((l) => l.paciente_id) ?? [];
       if (ids.length > 0) {
@@ -70,7 +99,8 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
       const { data: laudosFiltrados } = await supabase
         .from("laudos")
         .select("paciente_id")
-        .eq("resultado_rd", resultado_rd);
+        .eq("resultado_rd", resultado_rd)
+        .match(organizationId ? { organization_id: organizationId } : {});
 
       const ids = laudosFiltrados?.map((l) => l.paciente_id) ?? [];
 
@@ -94,10 +124,18 @@ export async function getPacientes(filtros: FiltrosPacientes = {}): Promise<{
 
 export async function getLocaisAtendimento() {
   const supabase = createClient();
-  const { data, error } = await supabase
+  const organizationId = await getCurrentOrganizationId();
+
+  let query = supabase
     .from("locais_atendimento")
     .select("id, nome")
     .order("nome");
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw new Error(error.message);
   return data;
@@ -111,9 +149,11 @@ export async function criarPaciente(input: NovoPacienteInput) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
 
+  const organizationId = await getUserOrganizationId(user.id);
+
   const { data, error } = await supabase
     .from("pacientes")
-    .insert({ ...input, extensionista_id: user.id })
+    .insert(withOrganizationId({ ...input, extensionista_id: user.id }, organizationId))
     .select()
     .single();
 
@@ -125,6 +165,7 @@ export async function criarPaciente(input: NovoPacienteInput) {
     entity_type: "paciente",
     entity_id: data.id,
     description: `cadastrou o paciente ${input.nome_completo}`,
+    organization_id: organizationId,
   });
 
   return data;
@@ -132,8 +173,9 @@ export async function criarPaciente(input: NovoPacienteInput) {
 
 export async function getPacienteById(id: string) {
   const supabase = createClient();
+  const organizationId = await getCurrentOrganizationId();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("pacientes")
     .select(
       `
@@ -151,8 +193,13 @@ export async function getPacienteById(id: string) {
       )
       `,
     )
-    .eq("id", id)
-    .single();
+    .eq("id", id);
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query.single();
 
   if (error) throw new Error(error.message);
   return data;
@@ -174,13 +221,29 @@ export async function criarLaudo(input: NovoLaudoInput) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
 
+  const organizationId =
+    (await getUserOrganizationId(user.id)) ??
+    (await getPacienteOrganizationId(input.paciente_id));
+
   const { data, error } = await supabase
     .from("laudos")
-    .insert({ ...input, laudador_id: user.id })
+    .insert(withOrganizationId({ ...input, laudador_id: user.id }, organizationId))
     .select()
     .single();
 
   if (error) throw new Error(error.message);
+
+  let pacienteQuery = supabase
+    .from("pacientes")
+    .update({ status_operacional: "laudado" })
+    .eq("id", input.paciente_id);
+
+  if (organizationId) {
+    pacienteQuery = pacienteQuery.eq("organization_id", organizationId);
+  }
+
+  const { error: pacienteError } = await pacienteQuery;
+  if (pacienteError) throw new Error(pacienteError.message);
 
   await logActivity({
     user_id: user.id,
@@ -188,9 +251,36 @@ export async function criarLaudo(input: NovoLaudoInput) {
     entity_type: "laudo",
     entity_id: data.id,
     description: `emitiu um laudo${input.resultado_rd ? ` — ${input.resultado_rd}` : ""}`,
+    organization_id: organizationId,
   });
 
   return data;
+}
+
+async function getUserOrganizationId(userId: string) {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (data?.role === "developer") {
+    return getOrganizationOverrideId() ?? getOrganizationIdFromRecord(data);
+  }
+
+  return getOrganizationIdFromRecord(data);
+}
+
+async function getPacienteOrganizationId(pacienteId: string) {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("pacientes")
+    .select("*")
+    .eq("id", pacienteId)
+    .maybeSingle();
+
+  return getOrganizationIdFromRecord(data);
 }
 
 export async function atualizarPaciente(
@@ -203,12 +293,18 @@ export async function atualizarPaciente(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase
+  const organizationId = user ? await getUserOrganizationId(user.id) : undefined;
+
+  let query = supabase
     .from("pacientes")
     .update(input)
-    .eq("id", id)
-    .select()
-    .single();
+    .eq("id", id);
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query.select().single();
 
   if (error) throw new Error(error.message);
 
@@ -227,22 +323,35 @@ export async function atualizarPaciente(
 
 export async function excluirLaudo(id: string) {
   const supabase = createClient();
-  const { error } = await supabase.from("laudos").delete().eq("id", id);
+  const organizationId = await getCurrentOrganizationId();
+  let query = supabase.from("laudos").delete().eq("id", id);
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { error } = await query;
   if (error) throw new Error(error.message);
 }
 
 export async function excluirPaciente(id: string) {
   const supabase = createClient();
+  const organizationId = await getCurrentOrganizationId();
 
-  const { error } = await supabase.from("pacientes").delete().eq("id", id);
+  let query = supabase.from("pacientes").delete().eq("id", id);
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { error } = await query;
 
   if (error) throw new Error(error.message);
 }
 
 export async function getTodosPacientes() {
   const supabase = createClient();
+  const organizationId = await getCurrentOrganizationId();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("pacientes")
     .select(
       `
@@ -253,6 +362,22 @@ export async function getTodosPacientes() {
     )
     .order("nome_completo", { ascending: true });
 
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query;
+
   if (error) throw new Error(error.message);
   return data;
+}
+
+async function getCurrentOrganizationId() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return undefined;
+  return getUserOrganizationId(user.id);
 }

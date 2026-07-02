@@ -1,8 +1,8 @@
-import { AppHeader } from "@/components/AppHeader/AppHeader";
-import { AppSidebar } from "@/components/AppSidebar/AppSidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner";
-import { QueryProvider } from "@/lib/query/provider";
+import { AppSidebar } from "@/shared/components/AppSidebar/AppSidebar";
+import { FloatingSidebarTrigger } from "@/shared/components/AppSidebar/FloatingSidebarTrigger";
+import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
+import { Toaster } from "@/shared/components/ui/sonner";
+import { QueryProvider } from "@/shared/lib/query/provider";
 
 export default function PrivateLayout({
   children,
@@ -14,8 +14,10 @@ export default function PrivateLayout({
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="bg-slate-50">
-          <AppHeader />
-          <main className="p-3 sm:p-5">{children}</main>
+          <FloatingSidebarTrigger />
+          <main className="px-4 pb-4 pt-16 sm:px-6 sm:pb-6 md:p-6 lg:p-7">
+            {children}
+          </main>
         </SidebarInset>
         <Toaster
           position="bottom-right"

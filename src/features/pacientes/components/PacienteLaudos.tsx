@@ -1,9 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { queryKeys } from "@/lib/query/keys";
-import { resultadoBadge } from "@/lib/utils/resultado-badge";
-import { LaudoComLaudador, ResultadoRD } from "@/types";
+import { Button } from "@/shared/components/ui/button";
+import { queryKeys } from "@/shared/lib/query/keys";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
+import { LaudoComLaudador, ResultadoRD } from "@/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileText, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -102,7 +103,9 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
 
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-3 text-xs text-slate-400">
-                    {laudo.profiles?.full_name && <span>{laudo.profiles.full_name}</span>}
+                    {laudo.profiles?.full_name && (
+                      <span>{formatDisplayTextOrDash(laudo.profiles.full_name)}</span>
+                    )}
                     {laudo.data_laudo && (
                       <>
                         <span className="text-slate-300">·</span>

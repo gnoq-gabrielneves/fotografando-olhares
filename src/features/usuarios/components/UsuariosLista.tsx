@@ -10,28 +10,33 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { useProfile } from "@/hooks/use-profile";
-import { Profile } from "@/lib/types";
+} from "@/shared/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { Button } from "@/shared/components/ui/button";
+import { EmptyState, QueryErrorState } from "@/shared/components/states/EmptyState";
+import { ListSkeletonRows } from "@/shared/components/states/TableSkeletonRows";
+import { useProfile } from "@/shared/hooks/use-profile";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { Profile } from "@/shared/types";
 import { Trash2 } from "lucide-react";
 import { useExcluirUsuario, useUsuarios } from "../hooks/use-users";
 import { EditarUsuarioSheet } from "./EditarUsuarioSheet";
 
 const roleLabel: Record<string, string> = {
+  developer: "Desenvolvedor",
   admin: "Administrador",
   extensionista: "Extensionista",
   laudador: "Laudador",
 };
 
 const roleBadge: Record<string, string> = {
+  developer: "bg-slate-900 text-white border-slate-800",
   admin: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
   extensionista: "bg-blue-50 text-blue-700 border-blue-200",
   laudador: "bg-lime-50 text-lime-700 border-lime-200",
 };
 
-const roleOrder = ["admin", "extensionista", "laudador"];
+const roleOrder = ["developer", "admin", "extensionista", "laudador"];
 
 function formatarData(data: string) {
   return new Date(data).toLocaleDateString("pt-BR", {
@@ -64,7 +69,7 @@ function UsuarioCard({ usuario, isCurrentUser }: { usuario: Profile; isCurrentUs
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium text-slate-800 truncate">
-            {usuario.full_name}
+            {formatDisplayTextOrDash(usuario.full_name)}
           </span>
           {isCurrentUser && (
             <span className="text-xs text-slate-400 font-normal">(você)</span>
@@ -103,7 +108,9 @@ function UsuarioCard({ usuario, isCurrentUser }: { usuario: Profile; isCurrentUs
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-slate-500 text-sm">
                   A conta de{" "}
-                  <span className="text-slate-800 font-medium">{usuario.full_name}</span>{" "}
+                  <span className="text-slate-800 font-medium">
+                    {formatDisplayTextOrDash(usuario.full_name)}
+                  </span>{" "}
                   será excluída permanentemente.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -149,29 +156,22 @@ function RoleSection({ role, usuarios, currentUserId }: { role: string; usuarios
 
 export function UsuariosLista() {
   const { user } = useProfile();
-  const { data, isLoading } = useUsuarios();
+  const { data, error, isError, isLoading } = useUsuarios();
 
   if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 animate-pulse shadow-sm">
-            <div className="w-11 h-11 rounded-full bg-slate-100 shrink-0" />
-            <div className="space-y-2 flex-1">
-              <div className="h-4 w-40 bg-slate-100 rounded" />
-              <div className="h-3 w-28 bg-slate-100 rounded" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <ListSkeletonRows rows={4} />;
+  }
+
+  if (isError) {
+    return <QueryErrorState message={error.message} />;
   }
 
   if (!data?.length) {
     return (
-      <div className="bg-white border border-slate-200 rounded-xl p-12 text-center shadow-sm">
-        <p className="text-slate-400 text-sm">Nenhum usuário encontrado</p>
-      </div>
+      <EmptyState
+        title="Nenhum usuário encontrado"
+        description="Quando novos usuários forem cadastrados, eles aparecerão agrupados por perfil de acesso."
+      />
     );
   }
 

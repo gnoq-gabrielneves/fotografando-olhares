@@ -1,5 +1,7 @@
-import { ExportarButton } from "@/components/ExportarButton/ExportarButton";
+import { ExportarButton } from "@/shared/components/ExportarButton/ExportarButton";
 import { LaudosTabela } from "@/features/laudos/components/LaudosTabela";
+import { PageHeader } from "@/shared/components/PageHeader/PageHeader";
+import { FileText } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,15 +12,12 @@ export const metadata: Metadata = {
 export default function LaudosPage() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Laudos</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Gerencie os laudos oftalmológicos emitidos
-          </p>
-        </div>
-        <ExportarButton />
-      </div>
+      <PageHeader
+        icon={FileText}
+        title="Laudos"
+        description="Gerencie os laudos oftalmológicos emitidos"
+        actions={<ExportarButton />}
+      />
       <LaudosTabela />
     </div>
   );

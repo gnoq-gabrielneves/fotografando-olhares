@@ -1,30 +1,35 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/shared/components/ui/button";
+import { Calendar } from "@/shared/components/ui/calendar";
+import { Input } from "@/shared/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarDays, Search, X } from "lucide-react";
+import { PACIENTE_STATUS_OPERACIONAIS } from "@/shared/types";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { getPacienteStatusLabel } from "@/shared/lib/utils/paciente-status";
 import { getLocaisAtendimento } from "../services/pacientes.services";
 
 type Props = {
   busca: string;
   resultadoRd: string;
+  statusOperacional: string;
   localId: string;
   dataInicio: string;
   dataFim: string;
   onBuscaChange: (v: string) => void;
   onResultadoChange: (v: string) => void;
+  onStatusChange: (v: string) => void;
   onLocalChange: (v: string) => void;
   onDataInicioChange: (v: string) => void;
   onDataFimChange: (v: string) => void;
@@ -48,11 +53,13 @@ function labelData(de: string, ate: string) {
 export function PacientesFiltros({
   busca,
   resultadoRd,
+  statusOperacional,
   localId,
   dataInicio,
   dataFim,
   onBuscaChange,
   onResultadoChange,
+  onStatusChange,
   onLocalChange,
   onDataInicioChange,
   onDataFimChange,
@@ -98,6 +105,20 @@ export function PacientesFiltros({
         </SelectContent>
       </Select>
 
+      <Select value={statusOperacional} onValueChange={onStatusChange}>
+        <SelectTrigger className="w-full sm:w-44 h-9 text-sm bg-white border-slate-200 text-slate-700">
+          <SelectValue placeholder="Status" />
+        </SelectTrigger>
+        <SelectContent position="popper">
+          <SelectItem value="todos">Todos os status</SelectItem>
+          {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
+            <SelectItem key={status} value={status}>
+              {getPacienteStatusLabel(status)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       <Select value={localId} onValueChange={onLocalChange}>
         <SelectTrigger className="w-full sm:w-40 h-9 text-sm bg-white border-slate-200 text-slate-700">
           <SelectValue placeholder="Local" />
@@ -106,7 +127,7 @@ export function PacientesFiltros({
           <SelectItem value="todos">Todos os locais</SelectItem>
           {locais?.map((l) => (
             <SelectItem key={l.id} value={l.id}>
-              {l.nome}
+              {formatDisplayTextOrDash(l.nome)}
             </SelectItem>
           ))}
         </SelectContent>

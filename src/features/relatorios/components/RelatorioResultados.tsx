@@ -1,12 +1,14 @@
 "use client";
 
-import { queryKeys } from "@/lib/query/keys";
+import { ChartCard, ChartLoading } from "@/shared/components/charts/ChartCard";
+import { chartTooltipStyle } from "@/shared/lib/charts/styles";
+import { queryKeys } from "@/shared/lib/query/keys";
 import {
   getResultadoChartColor,
   getResultadoProgressColor,
   resultadoBadge,
-} from "@/lib/utils/resultado-badge";
-import { ResultadoRD } from "@/types";
+} from "@/shared/lib/utils/resultado-badge";
+import { ResultadoRD } from "@/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import {
   Cell,
@@ -27,13 +29,12 @@ export function RelatorioResultados() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Donut */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        <h2 className="text-slate-700 font-medium text-sm mb-6">
-          Distribuição por resultado
-        </h2>
+      <ChartCard title="Resultados dos laudos">
         {isLoading ? (
-          <div className="h-64 flex items-center justify-center">
-            <div className="w-32 h-32 rounded-full border-4 border-slate-100 border-t-cyan-500 animate-spin" />
+          <ChartLoading />
+        ) : !data?.length ? (
+          <div className="h-64 flex items-center justify-center text-sm text-slate-400">
+            Nenhum laudo emitido
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={260}>
@@ -55,16 +56,7 @@ export function RelatorioResultados() {
                   />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                  color: "#1e293b",
-                  fontSize: "13px",
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                }}
-              />
+              <Tooltip contentStyle={chartTooltipStyle} />
               <Legend
                 iconType="circle"
                 iconSize={8}
@@ -77,13 +69,10 @@ export function RelatorioResultados() {
             </PieChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </ChartCard>
 
       {/* Tabela resumo */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        <h2 className="text-slate-700 font-medium text-sm mb-6">
-          Resumo por resultado
-        </h2>
+      <ChartCard title="Resumo por resultado">
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -122,7 +111,7 @@ export function RelatorioResultados() {
             ))}
           </div>
         )}
-      </div>
+      </ChartCard>
     </div>
   );
 }

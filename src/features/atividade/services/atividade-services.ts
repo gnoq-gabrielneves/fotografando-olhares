@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/shared/lib/supabase/client";
+import { getCurrentOrganizationId } from "@/shared/lib/organization/current-client";
 
 export type AtividadeLog = {
   id: string;
@@ -19,14 +20,20 @@ export type FiltrosAtividade = {
 
 export async function getAtividadeRecente(limit = 20): Promise<AtividadeLog[]> {
   const supabase = createClient();
+  const organizationId = await getCurrentOrganizationId();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("activity_logs")
     .select(
       "id, action, entity_type, entity_id, description, created_at, profiles(full_name, avatar_url)",
     )
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .order("created_at", { ascending: false });
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query.limit(limit);
 
   if (error) throw new Error(error.message);
   return data as unknown as AtividadeLog[];
@@ -36,6 +43,7 @@ export async function getAtividadePaginada(
   filtros: FiltrosAtividade = {},
 ): Promise<{ data: AtividadeLog[]; count: number }> {
   const supabase = createClient();
+  const organizationId = await getCurrentOrganizationId();
   const { action, user_id, page = 1, pageSize = 25 } = filtros;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -48,6 +56,10 @@ export async function getAtividadePaginada(
     )
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
 
   if (action && action !== "todos") {
     query = query.eq("action", action);
@@ -70,11 +82,18 @@ export async function getUsuariosAtivos(): Promise<
   { id: string; full_name: string }[]
 > {
   const supabase = createClient();
+  const organizationId = await getCurrentOrganizationId();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("profiles")
     .select("id, full_name")
     .order("full_name");
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw new Error(error.message);
   return data ?? [];

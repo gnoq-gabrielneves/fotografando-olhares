@@ -1,14 +1,20 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { queryKeys } from "@/lib/query/keys";
+} from "@/shared/components/ui/select";
+import { queryKeys } from "@/shared/lib/query/keys";
+import { getPacienteStatusLabel } from "@/shared/lib/utils/paciente-status";
+import {
+  PACIENTE_STATUS_OPERACIONAIS,
+  type PacienteStatusOperacional,
+} from "@/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -38,12 +44,34 @@ type FormData = {
   av_od: string;
   av_oe: string;
   outras_obs: string;
+  status_operacional: PacienteStatusOperacional;
   zona: Zona | undefined;
   tempo_diagnostico_has: TempoDiagnostico | undefined;
 };
 
 type Props = {
   onSuccess: () => void;
+};
+
+const initialForm: FormData = {
+  nome_completo: "",
+  sexo: undefined,
+  cpf_cns: "",
+  data_nascimento: "",
+  local_atendimento_id: undefined,
+  prontuario: "",
+  medicamentos_em_uso: "",
+  insulina: false,
+  tempo_diagnostico_dm: undefined,
+  fez_exame_oftalmologico: false,
+  tabagista: false,
+  atividade_fisica: false,
+  av_od: "",
+  av_oe: "",
+  outras_obs: "",
+  status_operacional: "cadastrado",
+  zona: undefined,
+  tempo_diagnostico_has: undefined,
 };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -67,25 +95,7 @@ const fieldClass =
 export function NovoPacienteForm({ onSuccess }: Props) {
   const queryClient = useQueryClient();
 
-  const [form, setForm] = useState<FormData>({
-    nome_completo: "",
-    sexo: undefined,
-    cpf_cns: "",
-    data_nascimento: "",
-    local_atendimento_id: undefined,
-    prontuario: "",
-    medicamentos_em_uso: "",
-    insulina: false,
-    tempo_diagnostico_dm: undefined,
-    fez_exame_oftalmologico: false,
-    tabagista: false,
-    atividade_fisica: false,
-    av_od: "",
-    av_oe: "",
-    outras_obs: "",
-    zona: undefined,
-    tempo_diagnostico_has: undefined,
-  });
+  const [form, setForm] = useState<FormData>(initialForm);
 
   const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
     {},
@@ -148,10 +158,13 @@ export function NovoPacienteForm({ onSuccess }: Props) {
       av_od: form.av_od || undefined,
       av_oe: form.av_oe || undefined,
       outras_obs: form.outras_obs || undefined,
+      status_operacional: form.status_operacional,
       zona: form.zona,
       tempo_diagnostico_has: form.tempo_diagnostico_has,
     });
   }
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialForm);
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 pb-8">
@@ -247,7 +260,31 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             >
               {locais?.map((l) => (
                 <SelectItem key={l.id} value={l.id}>
-                  {l.nome}
+                  {formatDisplayTextOrDash(l.nome)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelClass}>Status operacional</label>
+          <Select
+            value={form.status_operacional}
+            onValueChange={(v) =>
+              set("status_operacional", v as PacienteStatusOperacional)
+            }
+          >
+            <SelectTrigger className={fieldClass}>
+              <SelectValue placeholder="Selecione o status" />
+            </SelectTrigger>
+            <SelectContent
+              className="bg-white border-slate-200 text-slate-700"
+              position="popper"
+            >
+              {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {getPacienteStatusLabel(status)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -394,9 +431,17 @@ export function NovoPacienteForm({ onSuccess }: Props) {
         />
       </div>
 
+      <p className="text-xs text-slate-400">
+        {isPending
+          ? "Cadastrando paciente..."
+          : isDirty
+            ? "Alterações prontas para cadastrar."
+            : "Preencha os dados para cadastrar um paciente."}
+      </p>
+
       <Button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || !isDirty}
         className="w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-medium transition-colors"
       >
         {isPending ? (

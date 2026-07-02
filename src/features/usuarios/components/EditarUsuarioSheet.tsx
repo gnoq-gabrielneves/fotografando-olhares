@@ -1,14 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/shared/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Profile } from "@/types";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { Profile } from "@/shared/types";
 import { Pencil, UserCog } from "lucide-react";
 import { useState } from "react";
 import { EditarUsuarioForm } from "./EditarUsuarioForm";
@@ -40,7 +41,9 @@ export function EditarUsuarioSheet({ usuario }: Props) {
             </div>
             <div>
               <h2 className="text-sm font-semibold text-slate-800">Editar usuário</h2>
-              <p className="text-xs text-slate-400 mt-0.5">{usuario.full_name}</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {formatDisplayTextOrDash(usuario.full_name)}
+              </p>
             </div>
           </div>
         </div>

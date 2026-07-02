@@ -1,18 +1,28 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useAvatarUpload } from "@/hooks/use-avatar";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { useAvatarUpload } from "@/shared/hooks/use-avatar";
+import { useProfile } from "@/shared/hooks/use-profile";
+import type { UserRole } from "@/shared/types";
 import { Loader2, Upload, X } from "lucide-react";
 import { useState } from "react";
-import { useCriarUsuario } from "../hooks/use-users";
+import { useCriarUsuario, useOrganizacoes } from "../hooks/use-users";
 
 type FormData = {
   full_name: string;
   email: string;
   password: string;
-  role: "admin" | "extensionista" | "laudador";
+  role: UserRole;
+  organization_id: string;
 };
 
 type Props = {
@@ -35,21 +45,27 @@ const inputClass =
 const labelClass = "text-slate-600 text-xs mb-1.5 block";
 const errClass = "text-red-500 text-xs mt-1";
 
-const roles: { value: FormData["role"]; label: string }[] = [
+const roles: { value: FormData["role"]; label: string; developerOnly?: boolean }[] = [
+  { value: "developer", label: "Desenvolvedor", developerOnly: true },
   { value: "extensionista", label: "Extensionista" },
   { value: "laudador", label: "Laudador" },
   { value: "admin", label: "Administrador" },
 ];
 
 export function NovoUsuarioForm({ onSuccess }: Props) {
+  const { profile } = useProfile();
+  const isDeveloper = profile?.role === "developer";
   const { upload, isUploading } = useAvatarUpload();
   const { mutate: criar, isPending } = useCriarUsuario(onSuccess);
+  const { data: organizacoes, isLoading: isLoadingOrganizacoes } =
+    useOrganizacoes(isDeveloper);
 
   const [form, setForm] = useState<FormData>({
     full_name: "",
     email: "",
     password: "",
     role: "extensionista",
+    organization_id: profile?.organization_id ?? "",
   });
   const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -76,6 +92,8 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
     if (!form.email) novosErros.email = "E-mail é obrigatório";
     if (!form.password || form.password.length < 6)
       novosErros.password = "Senha deve ter ao menos 6 caracteres";
+    if (isDeveloper && !form.organization_id)
+      novosErros.organization_id = "Selecione uma organização";
     return novosErros;
   }
 
@@ -90,8 +108,18 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
     if (avatar) {
       avatar_url = await upload(avatar);
     }
-    criar({ ...form, avatar_url });
+    criar({ ...form, organization_id: form.organization_id || undefined, avatar_url });
   }
+
+  const isDirty =
+    !!form.full_name ||
+    !!form.email ||
+    !!form.password ||
+    form.role !== "extensionista" ||
+    !!form.organization_id ||
+    !!avatar;
+  const isBusy = isPending || isUploading || isLoadingOrganizacoes;
+  const availableRoles = roles.filter((role) => !role.developerOnly || isDeveloper);
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 pb-8">
@@ -179,14 +207,43 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
         </div>
       </div>
 
+      {isDeveloper && (
+        <div className="space-y-4">
+          <SectionTitle>Organização</SectionTitle>
+          <div className="space-y-1.5">
+            <label className={labelClass}>Organização *</label>
+            <Select
+              value={form.organization_id}
+              onValueChange={(value) => set("organization_id", value)}
+              disabled={isBusy}
+            >
+              <SelectTrigger className="w-full bg-white border-slate-200 text-slate-800 focus:ring-cyan-500 h-10">
+                <SelectValue placeholder={isLoadingOrganizacoes ? "Carregando..." : "Selecione"} />
+              </SelectTrigger>
+              <SelectContent>
+                {(organizacoes ?? []).map((organizacao) => (
+                  <SelectItem key={organizacao.id} value={organizacao.id}>
+                    {organizacao.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {erros.organization_id && (
+              <p className={errClass}>{erros.organization_id}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         <SectionTitle>Permissão</SectionTitle>
-        <div className="grid grid-cols-3 gap-2">
-          {roles.map((r) => (
+        <div className="grid grid-cols-2 gap-2">
+          {availableRoles.map((r) => (
             <button
               key={r.value}
               type="button"
               onClick={() => set("role", r.value)}
+              disabled={isBusy}
               className={`h-10 rounded-lg text-sm font-medium border transition-all ${
                 form.role === r.value
                   ? "bg-cyan-600 border-cyan-500 text-white"
@@ -199,9 +256,19 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
         </div>
       </div>
 
+      <p className="text-xs text-slate-400">
+        {isBusy
+          ? isUploading
+            ? "Enviando foto..."
+            : "Salvando usuário..."
+          : isDirty
+            ? "Alterações prontas para salvar."
+            : "Preencha os dados para criar um usuário."}
+      </p>
+
       <Button
         type="submit"
-        disabled={isPending || isUploading}
+        disabled={isBusy || !isDirty}
         className="w-full h-11 bg-cyan-600 hover:bg-cyan-500 text-white font-medium"
       >
         {isUploading ? (

@@ -1,6 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
+import { QueryErrorState } from "@/shared/components/states/EmptyState";
+import { TableSkeletonRows } from "@/shared/components/states/TableSkeletonRows";
 import {
   Table,
   TableBody,
@@ -8,10 +10,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { queryKeys } from "@/lib/query/keys";
-import { resultadoBadge } from "@/lib/utils/resultado-badge";
-import { ResultadoRD } from "@/types";
+} from "@/shared/components/ui/table";
+import { queryKeys } from "@/shared/lib/query/keys";
+import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
+import { ResultadoRD } from "@/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -42,7 +45,7 @@ export function LaudosTabela() {
     pageSize: PAGE_SIZE,
   };
 
-  const { data, isLoading } = useQuery({
+  const { data, error, isError, isLoading } = useQuery({
     queryKey: queryKeys.laudos.lista(filtros),
     queryFn: () => getLaudos(filtros),
   });
@@ -65,6 +68,9 @@ export function LaudosTabela() {
         }
       />
 
+      {isError ? (
+        <QueryErrorState message={error.message} />
+      ) : (
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
         <Table>
@@ -85,15 +91,7 @@ export function LaudosTabela() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                <TableRow key={i} className="border-slate-200">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <TableCell key={j}>
-                      <div className="h-4 bg-slate-100 rounded animate-pulse" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              <TableSkeletonRows rows={PAGE_SIZE} columns={5} />
             ) : data?.data.length === 0 ? (
               <TableRow className="border-slate-200">
                 <TableCell
@@ -113,7 +111,7 @@ export function LaudosTabela() {
                   }
                 >
                   <TableCell className="text-slate-800 font-medium">
-                    {laudo.pacientes?.nome_completo ?? "—"}
+                    {formatDisplayTextOrDash(laudo.pacientes?.nome_completo)}
                   </TableCell>
                   <TableCell>
                     {laudo.resultado_rd ? (
@@ -129,7 +127,7 @@ export function LaudosTabela() {
                     )}
                   </TableCell>
                   <TableCell className="text-slate-600 hidden sm:table-cell">
-                    {laudo.profiles?.full_name ?? "—"}
+                    {formatDisplayTextOrDash(laudo.profiles?.full_name)}
                   </TableCell>
                   <TableCell className="text-slate-600 hidden sm:table-cell">
                     {formatarData(laudo.data_laudo)}
@@ -155,8 +153,9 @@ export function LaudosTabela() {
         </Table>
         </div>
       </div>
+      )}
 
-      {totalPages > 1 && (
+      {!isError && totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <span className="text-xs text-slate-500">
             {data?.count} laudos · página {page} de {totalPages}

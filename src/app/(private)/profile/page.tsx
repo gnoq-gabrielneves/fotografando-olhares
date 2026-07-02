@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { PerfilAvatar } from "@/features/profile/components/perfil-avatar";
+import { PageHeader } from "@/shared/components/PageHeader/PageHeader";
+import { UserRound } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Meu Perfil | Fotografando Olhares",
@@ -11,12 +13,11 @@ import { PerfilSenha } from "@/features/profile/components/perfil-senha";
 export default function PerfilPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-800">Meu perfil</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Gerencie suas informações pessoais e segurança
-        </p>
-      </div>
+      <PageHeader
+        icon={UserRound}
+        title="Meu perfil"
+        description="Gerencie suas informações pessoais e segurança"
+      />
 
       <PerfilAvatar />
 

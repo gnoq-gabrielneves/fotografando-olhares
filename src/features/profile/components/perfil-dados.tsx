@@ -1,7 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useProfile } from "@/hooks/use-profile";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { useProfile } from "@/shared/hooks/use-profile";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useAtualizarPerfil } from "../hooks/use-profile";
@@ -17,18 +17,29 @@ export function PerfilDados() {
   const [nome, setNome] = useState(profile?.full_name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [erro, setErro] = useState("");
+  const [touched, setTouched] = useState(false);
+  const currentNome = touched ? nome : (profile?.full_name ?? "");
+  const currentEmail = touched ? email : (user?.email ?? "");
+  const isDirty = touched &&
+    (currentNome !== (profile?.full_name ?? "") ||
+      currentEmail !== (user?.email ?? ""));
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!nome || nome.length < 3) {
+    if (!currentNome || currentNome.length < 3) {
       setErro("Nome deve ter ao menos 3 caracteres");
       return;
     }
     setErro("");
-    atualizar({
-      full_name: nome,
-      email: email !== user?.email ? email : undefined,
-    });
+    atualizar(
+      {
+        full_name: currentNome,
+        email: currentEmail !== user?.email ? currentEmail : undefined,
+      },
+      {
+        onSuccess: () => setTouched(false),
+      },
+    );
   }
 
   return (
@@ -40,8 +51,9 @@ export function PerfilDados() {
         <div className="space-y-1.5">
           <label className={labelClass}>Nome completo *</label>
           <Input
-            value={nome}
+            value={currentNome}
             onChange={(e) => {
+              setTouched(true);
               setNome(e.target.value);
               setErro("");
             }}
@@ -54,8 +66,11 @@ export function PerfilDados() {
         <div className="space-y-1.5">
           <label className={labelClass}>E-mail</label>
           <Input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={currentEmail}
+            onChange={(e) => {
+              setTouched(true);
+              setEmail(e.target.value);
+            }}
             type="email"
             placeholder="seu@email.com"
             className={inputClass}
@@ -64,7 +79,7 @@ export function PerfilDados() {
 
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || !isDirty}
           className="w-full h-10 bg-cyan-600 hover:bg-cyan-500 text-white font-medium"
         >
           {isPending ? (
@@ -76,6 +91,13 @@ export function PerfilDados() {
             "Salvar alterações"
           )}
         </Button>
+        <p className="text-xs text-slate-400">
+          {isPending
+            ? "Salvando dados..."
+            : isDirty
+              ? "Existem alterações não salvas."
+              : "Nenhuma alteração pendente."}
+        </p>
       </form>
     </div>
   );

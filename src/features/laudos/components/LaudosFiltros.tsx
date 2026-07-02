@@ -1,13 +1,13 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { Input } from "@/shared/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/components/ui/select";
 import { Search } from "lucide-react";
 
 type Props = {

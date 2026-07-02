@@ -1,4 +1,4 @@
-import { ResultadoRD } from "@/types";
+import { ResultadoRD } from "@/shared/types";
 
 export type LaudoTabela = {
   id: string;
