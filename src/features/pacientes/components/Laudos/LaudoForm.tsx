@@ -73,6 +73,9 @@ export function LaudoForm({ pacienteId, laudo }: Props) {
     dilatacao: laudo?.dilatacao ?? "",
     descricao: laudo?.descricao ?? "",
   });
+  const [dataLaudoDisplay, setDataLaudoDisplay] = useState(
+    formatIsoDateToBrazilian(laudo?.data_laudo) ?? "",
+  );
 
   const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
     {},
@@ -205,10 +208,14 @@ export function LaudoForm({ pacienteId, laudo }: Props) {
           <IMaskInput
             mask="00/00/0000"
             placeholder="DD/MM/AAAA"
-            value={formatIsoDateToBrazilian(form.data_laudo) ?? ""}
+            value={dataLaudoDisplay}
             className={inputClass}
             onAccept={(value: string) => {
-              set("data_laudo", parseBrazilianDateToIso(value));
+              setDataLaudoDisplay(value);
+              set(
+                "data_laudo",
+                value.length === 10 ? parseBrazilianDateToIso(value) : "",
+              );
             }}
           />
           {erros.data_laudo && (

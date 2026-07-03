@@ -115,6 +115,9 @@ export function EditarPacienteForm({ paciente }: Props) {
 
   const initialForm = getInitialForm(paciente);
   const [form, setForm] = useState<FormData>(initialForm);
+  const [dataNascimentoDisplay, setDataNascimentoDisplay] = useState(
+    formatarDataParaExibicao(initialForm.data_nascimento),
+  );
 
   const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
     {},
@@ -252,10 +255,14 @@ export function EditarPacienteForm({ paciente }: Props) {
             <IMaskInput
               mask="00/00/0000"
               placeholder="DD/MM/AAAA"
-              value={formatarDataParaExibicao(form.data_nascimento)}
+              value={dataNascimentoDisplay}
               className={inputClass}
               onAccept={(value: string) => {
-                set("data_nascimento", parseBrazilianDateToIso(value));
+                setDataNascimentoDisplay(value);
+                set(
+                  "data_nascimento",
+                  value.length === 10 ? parseBrazilianDateToIso(value) : "",
+                );
               }}
             />
           </div>
