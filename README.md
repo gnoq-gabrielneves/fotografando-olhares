@@ -1,8 +1,8 @@
 # Fotografando Olhares
 
-Plataforma para cadastro de pacientes, acompanhamento de laudos de retinografia e relatorios de triagens oftalmologicas.
+Plataforma clínica modular para cadastro de pacientes, acompanhamento de documentos clínicos, esteira operacional e relatórios por organização.
 
-Hoje o app atende a Liga de Oftalmologia da PUC. O roadmap do produto esta em [docs/roadmap.md](docs/roadmap.md), com a evolucao para suporte multi-instituicao, esteira clinica, imagens de exame, laudos em PDF e auditoria/LGPD.
+Hoje o app atende a Liga de Oftalmologia da PUC com o módulo inicial de Oftalmo, focado em retinografia e laudos. O roadmap do produto está em [docs/roadmap.md](docs/roadmap.md), com evolução para licenciamento multi-instituição, módulos por especialidade, esteira clínica, documentos profissionais e auditoria/LGPD.
 
 ## Architecture
 

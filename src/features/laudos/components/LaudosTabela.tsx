@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { queryKeys } from "@/shared/lib/query/keys";
+import { formatIsoDateToBrazilian } from "@/shared/lib/format/date";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
 import { ResultadoRD } from "@/shared/types";
@@ -27,8 +28,7 @@ import { LaudosFiltros } from "./LaudosFiltros";
 const PAGE_SIZE = 10;
 
 function formatarData(data: string | null) {
-  if (!data) return "—";
-  return new Date(data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+  return formatIsoDateToBrazilian(data) ?? "—";
 }
 
 export function LaudosTabela() {

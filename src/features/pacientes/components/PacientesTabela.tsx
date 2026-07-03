@@ -13,6 +13,7 @@ import {
 } from "@/shared/components/ui/table";
 import { queryKeys } from "@/shared/lib/query/keys";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { useEnabledClinicalModule } from "@/shared/hooks/use-enabled-clinical-module";
 import {
   getPacienteStatusBadge,
   getPacienteStatusLabel,
@@ -32,7 +33,9 @@ const PAGE_SIZE = 10;
 
 function calcularIdade(data: string | null) {
   if (!data) return null;
-  const [y, m, d] = data.split("-").map(Number);
+  const [datePart] = data.split("T");
+  const [y, m, d] = datePart.split("-").map(Number);
+  if (!y || !m || !d) return null;
   const nascimento = new Date(y, m - 1, d);
   const diff = Date.now() - nascimento.getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
@@ -43,6 +46,8 @@ export function PacientesTabela() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const { isEnabled: hasOftalmo, isLoading: isLoadingModules } =
+    useEnabledClinicalModule("oftalmo");
 
   const busca = searchParams.get("busca") ?? "";
   const resultadoRd = searchParams.get("resultado") ?? "todos";
@@ -56,8 +61,8 @@ export function PacientesTabela() {
 
   const filtros = {
     busca: buscaDebounced,
-    resultado_rd: resultadoRd,
-    status_operacional: statusOperacional,
+    resultado_rd: hasOftalmo ? resultadoRd : "todos",
+    status_operacional: hasOftalmo ? statusOperacional : "todos",
     local_id: localId,
     data_inicio: dataInicio,
     data_fim: dataFim,
@@ -69,6 +74,7 @@ export function PacientesTabela() {
     queryKey: queryKeys.pacientes.lista(filtros),
     queryFn: () => getPacientes(filtros),
   });
+  const tableColumns = hasOftalmo ? 8 : 6;
 
   const setParam = useCallback(
     (updates: Record<string, string>) => {
@@ -118,6 +124,7 @@ export function PacientesTabela() {
         onLocalChange={(v) => setParam({ local: v })}
         onDataInicioChange={(v) => setParam({ de: v })}
         onDataFimChange={(v) => setParam({ ate: v })}
+        hasOftalmo={hasOftalmo}
       />
 
       {!isLoading && data && (
@@ -140,18 +147,22 @@ export function PacientesTabela() {
                 <TableHead className="text-slate-500 font-medium hidden sm:table-cell">Sexo</TableHead>
                 <TableHead className="text-slate-500 font-medium hidden sm:table-cell">Idade</TableHead>
                 <TableHead className="text-slate-500 font-medium hidden md:table-cell">Local</TableHead>
-                <TableHead className="text-slate-500 font-medium hidden xl:table-cell">Status</TableHead>
+                {hasOftalmo ? (
+                  <TableHead className="text-slate-500 font-medium hidden xl:table-cell">Status</TableHead>
+                ) : null}
                 <TableHead className="text-slate-500 font-medium hidden lg:table-cell">Extensionista</TableHead>
-                <TableHead className="text-slate-500 font-medium">Laudo</TableHead>
+                {hasOftalmo ? (
+                  <TableHead className="text-slate-500 font-medium">Laudo</TableHead>
+                ) : null}
                 <TableHead className="text-slate-500 font-medium w-24" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
-                <TableSkeletonRows rows={PAGE_SIZE} columns={8} />
+              {isLoading || isLoadingModules ? (
+                <TableSkeletonRows rows={PAGE_SIZE} columns={tableColumns} />
               ) : data?.data.length === 0 ? (
                 <TableRow className="border-slate-200">
-                  <TableCell colSpan={8} className="text-center py-12 text-slate-400">
+                  <TableCell colSpan={tableColumns} className="text-center py-12 text-slate-400">
                     Nenhum paciente encontrado
                   </TableCell>
                 </TableRow>
@@ -183,39 +194,45 @@ export function PacientesTabela() {
                         {idade ? `${idade} anos` : "—"}
                       </TableCell>
                       <TableCell className="text-slate-600 hidden md:table-cell">{local}</TableCell>
-                      <TableCell className="hidden xl:table-cell">
-                        <span
-                          className={`text-xs px-2 py-1 rounded-md font-medium border ${getPacienteStatusBadge(status)}`}
-                        >
-                          {getPacienteStatusLabel(status)}
-                        </span>
-                      </TableCell>
+                      {hasOftalmo ? (
+                        <TableCell className="hidden xl:table-cell">
+                          <span
+                            className={`text-xs px-2 py-1 rounded-md font-medium border ${getPacienteStatusBadge(status)}`}
+                          >
+                            {getPacienteStatusLabel(status)}
+                          </span>
+                        </TableCell>
+                      ) : null}
                       <TableCell className="text-slate-600 hidden lg:table-cell">{extensionista}</TableCell>
-                      <TableCell>
-                        {resultado ? (
-                          <span className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[resultado as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}>
-                            {resultado}
-                          </span>
-                        ) : (
-                          <span className="text-xs px-2 py-1 rounded-md font-medium bg-orange-50 text-orange-600 border border-orange-200">
-                            Sem laudo
-                          </span>
-                        )}
-                      </TableCell>
+                      {hasOftalmo ? (
+                        <TableCell>
+                          {resultado ? (
+                            <span className={`text-xs px-2 py-1 rounded-md font-medium border ${resultadoBadge[resultado as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}>
+                              {resultado}
+                            </span>
+                          ) : (
+                            <span className="text-xs px-2 py-1 rounded-md font-medium bg-orange-50 text-orange-600 border border-orange-200">
+                              Sem laudo
+                            </span>
+                          )}
+                        </TableCell>
+                      ) : null}
                       <TableCell>
                         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/pacientes/${paciente.id}/laudo`);
-                            }}
-                            className="h-8 w-8 p-0 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50"
-                            title="Adicionar laudo"
-                          >
-                            <FileText className="w-4 h-4" />
-                          </Button>
+                          {hasOftalmo ? (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/pacientes/${paciente.id}/laudo`);
+                              }}
+                              className="h-8 w-8 p-0 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50"
+                              title="Adicionar laudo"
+                            >
+                              <FileText className="w-4 h-4" />
+                            </Button>
+                          ) : null}
                           <Button
                             size="sm"
                             variant="ghost"

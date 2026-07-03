@@ -11,12 +11,15 @@ import {
   SidebarRail,
 } from "@/shared/components/ui/sidebar";
 import { useProfile } from "@/shared/hooks/use-profile";
+import { useOrganizationModules } from "@/features/treinamento/hooks/use-organization-modules";
 import {
   Activity,
   BarChart2,
   BookOpen,
+  ClipboardPlus,
   FileText,
   Home,
+  ShieldCheck,
   UserCog,
   Users,
 } from "lucide-react";
@@ -26,7 +29,13 @@ import { OrganizationSwitcher } from "./OrganizationSwitcher";
 
 export function AppSidebar() {
   const { profile } = useProfile();
+  const { data: organizationModules, isLoading: isLoadingModules } =
+    useOrganizationModules();
   const canManage = profile?.role === "admin" || profile?.role === "developer";
+  const isDeveloper = profile?.role === "developer";
+  const enabledModuleIds = new Set(
+    organizationModules?.map((module) => module.module_id) ?? [],
+  );
 
   const navGroups = [
     {
@@ -37,7 +46,18 @@ export function AppSidebar() {
       label: "Operação clínica",
       items: [
         { title: "Pacientes", href: "/pacientes", icon: Users },
-        { title: "Laudos", href: "/laudos", icon: FileText },
+        {
+          title: "Laudos",
+          href: "/laudos",
+          icon: FileText,
+          moduleId: "oftalmo" as const,
+        },
+        {
+          title: "Documentos",
+          href: "/documentos",
+          icon: ClipboardPlus,
+          moduleId: "documentos" as const,
+        },
       ],
     },
     {
@@ -55,6 +75,20 @@ export function AppSidebar() {
             items: [
               { title: "Usuários", href: "/usuarios", icon: UserCog },
               { title: "Atividade", href: "/atividade", icon: Activity },
+            ],
+          },
+        ]
+      : []),
+    ...(isDeveloper
+      ? [
+          {
+            label: "Plataforma",
+            items: [
+              {
+                title: "Licenças",
+                href: "/desenvolvedor",
+                icon: ShieldCheck,
+              },
             ],
           },
         ]
@@ -77,7 +111,11 @@ export function AppSidebar() {
             <SidebarGroupLabel className="text-[0.68rem] text-slate-400 uppercase tracking-wider px-2 mb-1">
               {group.label}
             </SidebarGroupLabel>
-            <NavMain items={group.items} />
+            <NavMain
+              items={group.items}
+              enabledModuleIds={enabledModuleIds}
+              showModuleAvailability={isDeveloper && !isLoadingModules}
+            />
           </SidebarGroup>
         ))}
       </SidebarContent>

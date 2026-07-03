@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/shared/components/ui/button";
+import { parseBrazilianDateToIso } from "@/shared/lib/format/date";
 import { queryKeys } from "@/shared/lib/query/keys";
 import { ResultadoRD } from "@/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -163,12 +164,7 @@ export function LaudoForm({ pacienteId }: Props) {
             placeholder="DD/MM/AAAA"
             className={inputClass}
             onAccept={(value: string) => {
-              if (value.length === 10) {
-                const [d, m, y] = value.split("/");
-                set("data_laudo", `${y}-${m}-${d}`);
-              } else {
-                set("data_laudo", "");
-              }
+              set("data_laudo", parseBrazilianDateToIso(value));
             }}
           />
           {erros.data_laudo && (

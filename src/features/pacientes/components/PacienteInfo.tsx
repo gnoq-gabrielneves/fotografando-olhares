@@ -1,153 +1,262 @@
-import { PacienteDetalhado } from "@/shared/types";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import {
+  formatDateTimeToBrazilian,
+  formatIsoDateToBrazilian,
+} from "@/shared/lib/format/date";
 import {
   getPacienteStatusBadge,
   getPacienteStatusLabel,
 } from "@/shared/lib/utils/paciente-status";
+import type { PacienteDetalhado } from "@/shared/types";
+import {
+  Activity,
+  ClipboardCheck,
+  Eye,
+  FileHeart,
+  MapPinned,
+  Pill,
+  UserRound,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
 type Props = {
   paciente: PacienteDetalhado;
+  hasOftalmo: boolean;
 };
 
-function InfoRow({
-  label,
-  value,
-}: {
+type InfoItem = {
   label: string;
   value: string | null | undefined;
-}) {
-  return (
-    <div className="flex items-start justify-between gap-4 py-3 border-b border-slate-100 last:border-0">
-      <span className="text-slate-500 text-sm shrink-0">{label}</span>
-      <span className="text-slate-800 text-sm text-right">{value || "—"}</span>
-    </div>
-  );
-}
-
-function BoolRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: boolean | null | undefined;
-}) {
-  return (
-    <div className="flex items-start justify-between gap-4 py-3 border-b border-slate-100 last:border-0">
-      <span className="text-slate-500 text-sm shrink-0">{label}</span>
-      {value === null || value === undefined ? (
-        <span className="text-slate-800 text-sm">—</span>
-      ) : (
-        <span
-          className={`text-xs px-2 py-0.5 rounded-md font-medium border ${
-            value
-              ? "bg-cyan-50 text-cyan-700 border-cyan-200"
-              : "bg-slate-100 text-slate-500 border-slate-200"
-          }`}
-        >
-          {value ? "Sim" : "Não"}
-        </span>
-      )}
-    </div>
-  );
-}
+};
 
 function formatarData(data: string | null) {
-  if (!data) return null;
-  return new Date(data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+  return formatDateTimeToBrazilian(data);
 }
 
-export function PacienteInfo({ paciente }: Props) {
+function formatarDataCivil(data: string | null) {
+  return formatIsoDateToBrazilian(data);
+}
+
+function boolLabel(value: boolean | null | undefined) {
+  if (value === null || value === undefined) return "—";
+  return value ? "Sim" : "Não";
+}
+
+function boolClass(value: boolean | null | undefined) {
+  if (value === null || value === undefined) {
+    return "border-slate-200 bg-slate-100 text-slate-500";
+  }
+
+  return value
+    ? "border-cyan-200 bg-cyan-50 text-cyan-700"
+    : "border-slate-200 bg-slate-100 text-slate-500";
+}
+
+function SectionCard({
+  icon: Icon,
+  title,
+  children,
+  className = "",
+}: {
+  icon: LucideIcon;
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-slate-300 ${className}`}
+    >
+      <div className="mb-4 flex items-center gap-2">
+        <span className="flex size-8 items-center justify-center rounded-lg border border-cyan-100 bg-cyan-50 text-cyan-700">
+          <Icon className="size-4" />
+        </span>
+        <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function InfoGrid({ items }: { items: InfoItem[] }) {
+  return (
+    <dl className="grid gap-3 sm:grid-cols-2">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
+        >
+          <dt className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+            {item.label}
+          </dt>
+          <dd className="mt-1 text-sm font-medium text-slate-800">
+            {formatDisplayTextOrDash(item.value)}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function BoolGrid({
+  items,
+}: {
+  items: Array<{ label: string; value: boolean | null | undefined }>;
+}) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
+        >
+          <span className="text-sm text-slate-600">{item.label}</span>
+          <span
+            className={`rounded-md border px-2 py-0.5 text-xs font-medium ${boolClass(item.value)}`}
+          >
+            {boolLabel(item.value)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TextBlock({ title, content }: { title: string; content: string }) {
+  return (
+    <SectionCard icon={FileHeart} title={title} className="lg:col-span-2">
+      <p className="whitespace-pre-wrap text-sm leading-7 text-slate-600">
+        {content}
+      </p>
+    </SectionCard>
+  );
+}
+
+export function PacienteInfo({ paciente, hasOftalmo }: Props) {
   const status = paciente.status_operacional ?? "cadastrado";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Dados pessoais */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider mb-2">
-          Dados pessoais
-        </h2>
-        <InfoRow label="CPF / CNS" value={paciente.cpf_cns} />
-        <InfoRow label="Prontuário" value={paciente.prontuario} />
-        <InfoRow
-          label="Data de nascimento"
-          value={formatarData(paciente.data_nascimento)}
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <SectionCard icon={UserRound} title="Identificação">
+        <InfoGrid
+          items={[
+            { label: "CPF / CNS", value: paciente.cpf_cns },
+            { label: "Prontuário", value: paciente.prontuario },
+            {
+              label: "Data de nascimento",
+              value: formatarDataCivil(paciente.data_nascimento),
+            },
+            {
+              label: "Responsável",
+              value: paciente.profiles?.full_name,
+            },
+          ]}
         />
-        <InfoRow
-          label="Local de atendimento"
-          value={formatDisplayTextOrDash(paciente.locais_atendimento?.nome)}
-        />
-        <InfoRow
-          label="Extensionista"
-          value={formatDisplayTextOrDash(paciente.profiles?.full_name)}
-        />
-        <div className="flex items-start justify-between gap-4 py-3 border-b border-slate-100 last:border-0">
-          <span className="text-slate-500 text-sm shrink-0">
-            Status operacional
-          </span>
-          <span
-            className={`text-xs px-2 py-0.5 rounded-md font-medium border ${getPacienteStatusBadge(status)}`}
-          >
-            {getPacienteStatusLabel(status)}
-          </span>
-        </div>
-        <InfoRow
-          label="Cadastrado em"
-          value={formatarData(paciente.created_at)}
-        />
-      </div>
+      </SectionCard>
 
-      {/* Dados clínicos */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider mb-2">
-          Dados clínicos
-        </h2>
-        <InfoRow
-          label="Tempo de diagnóstico DM"
-          value={paciente.tempo_diagnostico_dm}
+      <SectionCard icon={MapPinned} title="Atendimento">
+        <InfoGrid
+          items={[
+            {
+              label: "Local",
+              value: paciente.locais_atendimento?.nome,
+            },
+            { label: "Zona", value: paciente.zona },
+            {
+              label: "Cadastrado em",
+              value: formatarData(paciente.created_at),
+            },
+            {
+              label: hasOftalmo ? "Status da esteira" : "Módulo clínico",
+              value: hasOftalmo ? getPacienteStatusLabel(status) : "Básico",
+            },
+          ]}
         />
-        <InfoRow
-          label="Tempo de diagnóstico HAS"
-          value={paciente.tempo_diagnostico_has}
-        />
-        <InfoRow label="Zona" value={paciente.zona} />
-        <InfoRow label="Acuidade visual OD" value={paciente.av_od} />
-        <InfoRow label="Acuidade visual OE" value={paciente.av_oe} />
-        <BoolRow label="Usa insulina" value={paciente.insulina} />
-        <BoolRow label="Tabagista" value={paciente.tabagista} />
-        <BoolRow label="Atividade física" value={paciente.atividade_fisica} />
-        <BoolRow
-          label="Fez exame oftalmológico"
-          value={paciente.fez_exame_oftalmologico}
-        />
-        <InfoRow
-          label="Último exame oftalmológico"
-          value={paciente.qt_tempo_ultimo_exame}
-        />
-      </div>
+        {hasOftalmo ? (
+          <div className="mt-3">
+            <span
+              className={`inline-flex rounded-md border px-2.5 py-1 text-xs font-medium ${getPacienteStatusBadge(status)}`}
+            >
+              {getPacienteStatusLabel(status)}
+            </span>
+          </div>
+        ) : null}
+      </SectionCard>
 
-      {/* Medicamentos */}
-      {paciente.medicamentos_em_uso && (
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-2">
-          <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider mb-3">
-            Medicamentos em uso
-          </h2>
-          <p className="text-slate-600 text-sm leading-relaxed">
-            {paciente.medicamentos_em_uso}
+      <SectionCard icon={Activity} title="Hábitos e contexto">
+        <BoolGrid
+          items={[
+            { label: "Tabagista", value: paciente.tabagista },
+            { label: "Atividade física", value: paciente.atividade_fisica },
+          ]}
+        />
+      </SectionCard>
+
+      {hasOftalmo ? (
+        <SectionCard
+          icon={Eye}
+          title="Oftalmologia"
+          className="animate-in fade-in-0 slide-in-from-top-1"
+        >
+          <div className="space-y-3">
+            <InfoGrid
+              items={[
+                {
+                  label: "Tempo de diagnóstico DM",
+                  value: paciente.tempo_diagnostico_dm,
+                },
+                {
+                  label: "Tempo de diagnóstico HAS",
+                  value: paciente.tempo_diagnostico_has,
+                },
+                { label: "Acuidade visual OD", value: paciente.av_od },
+                { label: "Acuidade visual OE", value: paciente.av_oe },
+                {
+                  label: "Último exame oftalmológico",
+                  value: paciente.qt_tempo_ultimo_exame,
+                },
+              ]}
+            />
+            <BoolGrid
+              items={[
+                { label: "Usa insulina", value: paciente.insulina },
+                {
+                  label: "Fez exame oftalmológico",
+                  value: paciente.fez_exame_oftalmologico,
+                },
+              ]}
+            />
+          </div>
+        </SectionCard>
+      ) : (
+        <SectionCard icon={ClipboardCheck} title="Prontuário geral">
+          <p className="text-sm leading-6 text-slate-500">
+            Esta organização está usando apenas o cadastro clínico básico deste
+            paciente. Campos de especialidade aparecem quando um módulo clínico
+            é ativado.
           </p>
-        </div>
+        </SectionCard>
       )}
 
-      {/* Observações */}
-      {paciente.outras_obs && (
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-2">
-          <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider mb-3">
-            Observações
-          </h2>
-          <p className="text-slate-600 text-sm leading-relaxed">
-            {paciente.outras_obs}
+      {paciente.medicamentos_em_uso ? (
+        <TextBlock
+          title="Medicamentos em uso"
+          content={paciente.medicamentos_em_uso}
+        />
+      ) : null}
+
+      {paciente.outras_obs ? (
+        <TextBlock title="Observações" content={paciente.outras_obs} />
+      ) : null}
+
+      {!paciente.medicamentos_em_uso && !paciente.outras_obs ? (
+        <SectionCard icon={Pill} title="Anotações clínicas" className="lg:col-span-2">
+          <p className="text-sm text-slate-500">
+            Nenhum medicamento ou observação adicional registrado.
           </p>
-        </div>
-      )}
+        </SectionCard>
+      ) : null}
     </div>
   );
 }

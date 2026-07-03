@@ -2,29 +2,12 @@
 
 import { queryKeys } from "@/shared/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
-import {
-  FilePlus,
-  Pencil,
-  UserPlus,
-  FileText,
-  Activity,
-} from "lucide-react";
+import { Activity } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { EmptyState, QueryErrorState } from "@/shared/components/states/EmptyState";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { getActivityActionConfig } from "../lib/activity-actions";
 import { getAtividadeRecente } from "../services/atividade-services";
-
-const actionConfig: Record<
-  string,
-  { icon: React.ElementType; color: string; bg: string }
-> = {
-  paciente_criado: { icon: UserPlus, color: "text-cyan-600", bg: "bg-cyan-50" },
-  paciente_editado: { icon: Pencil, color: "text-slate-500", bg: "bg-slate-100" },
-  paciente_excluido: { icon: Pencil, color: "text-red-500", bg: "bg-red-50" },
-  laudo_criado: { icon: FilePlus, color: "text-violet-600", bg: "bg-violet-50" },
-  laudo_editado: { icon: Pencil, color: "text-violet-600", bg: "bg-violet-50" },
-  usuario_criado: { icon: FileText, color: "text-emerald-600", bg: "bg-emerald-50" },
-};
 
 function tempoRelativo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -88,11 +71,7 @@ export function AtividadeFeed() {
         ) : (
           <div className="divide-y divide-slate-50">
             {data.map((log) => {
-              const cfg = actionConfig[log.action] ?? {
-                icon: Activity,
-                color: "text-slate-500",
-                bg: "bg-slate-100",
-              };
+              const cfg = getActivityActionConfig(log.action);
               const Icon = cfg.icon;
               const nome = log.profiles?.full_name
                 ? formatDisplayTextOrDash(log.profiles.full_name)

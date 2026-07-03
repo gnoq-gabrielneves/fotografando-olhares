@@ -14,6 +14,11 @@ export const queryKeys = {
     byPaciente: (pacienteId: string) => ["laudos", pacienteId] as const,
     byId: (id: string) => ["laudos", "detalhe", id] as const,
   },
+  documentos: {
+    all: ["documentos"] as const,
+    lista: ["documentos", "lista"] as const,
+    pacientes: ["documentos", "pacientes"] as const,
+  },
   home: {
     metricas: ["home", "metricas"] as const,
     distribuicaoRD: ["home", "distribuicaoRD"] as const,
@@ -40,5 +45,11 @@ export const queryKeys = {
     recente: ["atividade", "recente"] as const,
     paginada: (filtros: object) => ["atividade", "paginada", filtros] as const,
     usuarios: ["atividade", "usuarios"] as const,
+  },
+  modulos: {
+    organizacaoAtual: ["modulos", "organizacaoAtual"] as const,
+  },
+  desenvolvedor: {
+    modulos: ["desenvolvedor", "modulos"] as const,
   },
 };

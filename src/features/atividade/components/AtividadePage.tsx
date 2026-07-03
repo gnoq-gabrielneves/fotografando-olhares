@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { EmptyState, QueryErrorState } from "@/shared/components/states/EmptyState";
 import { PageHeader } from "@/shared/components/PageHeader/PageHeader";
 import {
   formatDisplayTextOrDash,
@@ -19,92 +20,18 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
-  FilePlus,
-  FileText,
-  Pencil,
-  UserPlus,
-  Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import {
+  ACTIVITY_ACTION_OPTIONS,
+  getActivityActionConfig,
+} from "../lib/activity-actions";
 import {
   AtividadeLog,
   FiltrosAtividade,
   getAtividadePaginada,
   getUsuariosAtivos,
 } from "../services/atividade-services";
-
-const ACTION_OPTIONS = [
-  { value: "todos", label: "Todas as ações" },
-  { value: "paciente_criado", label: "Paciente cadastrado" },
-  { value: "paciente_editado", label: "Paciente editado" },
-  { value: "paciente_excluido", label: "Paciente excluído" },
-  { value: "laudo_criado", label: "Laudo emitido" },
-  { value: "laudo_editado", label: "Laudo editado" },
-  { value: "usuario_criado", label: "Usuário criado" },
-];
-
-const actionConfig: Record<
-  string,
-  { icon: React.ElementType; label: string; color: string; bg: string; border: string; text: string }
-> = {
-  paciente_criado: {
-    icon: UserPlus,
-    label: "Paciente cadastrado",
-    color: "text-cyan-600",
-    bg: "bg-cyan-50",
-    border: "border-cyan-200",
-    text: "text-cyan-700",
-  },
-  paciente_editado: {
-    icon: Pencil,
-    label: "Paciente editado",
-    color: "text-slate-500",
-    bg: "bg-slate-100",
-    border: "border-slate-200",
-    text: "text-slate-600",
-  },
-  paciente_excluido: {
-    icon: Trash2,
-    label: "Paciente excluído",
-    color: "text-red-500",
-    bg: "bg-red-50",
-    border: "border-red-200",
-    text: "text-red-700",
-  },
-  laudo_criado: {
-    icon: FilePlus,
-    label: "Laudo emitido",
-    color: "text-violet-600",
-    bg: "bg-violet-50",
-    border: "border-violet-200",
-    text: "text-violet-700",
-  },
-  laudo_editado: {
-    icon: Pencil,
-    label: "Laudo editado",
-    color: "text-violet-600",
-    bg: "bg-violet-50",
-    border: "border-violet-200",
-    text: "text-violet-700",
-  },
-  usuario_criado: {
-    icon: FileText,
-    label: "Usuário criado",
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
-    text: "text-emerald-700",
-  },
-};
-
-const fallback = {
-  icon: Activity,
-  label: "Ação",
-  color: "text-slate-500",
-  bg: "bg-slate-100",
-  border: "border-slate-200",
-  text: "text-slate-600",
-};
 
 function iniciais(name: string) {
   return name
@@ -153,7 +80,7 @@ export function AtividadePage() {
     pageSize: PAGE_SIZE,
   });
 
-  const { data, isLoading } = useQuery({
+  const { data, error, isError, isLoading } = useQuery({
     queryKey: queryKeys.atividade.paginada(filtros),
     queryFn: () => getAtividadePaginada(filtros),
   });
@@ -187,35 +114,42 @@ export function AtividadePage() {
 
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Select value={filtros.action} onValueChange={(v) => setFiltro("action", v)}>
-          <SelectTrigger className="w-full sm:w-52">
-            <SelectValue placeholder="Todas as ações" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            {ACTION_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-full sm:w-52">
+          <Select value={filtros.action} onValueChange={(v) => setFiltro("action", v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Todas as ações" />
+            </SelectTrigger>
+            <SelectContent position="popper">
+              {ACTIVITY_ACTION_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select value={filtros.user_id} onValueChange={(v) => setFiltro("user_id", v)}>
-          <SelectTrigger className="w-full sm:w-52">
-            <SelectValue placeholder="Todos os usuários" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value="todos">Todos os usuários</SelectItem>
-            {usuarios?.map((u) => (
-              <SelectItem key={u.id} value={u.id}>
-                {formatDisplayTextOrDash(u.full_name)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-full sm:w-52">
+          <Select value={filtros.user_id} onValueChange={(v) => setFiltro("user_id", v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Todos os usuários" />
+            </SelectTrigger>
+            <SelectContent position="popper">
+              <SelectItem value="todos">Todos os usuários</SelectItem>
+              {usuarios?.map((u) => (
+                <SelectItem key={u.id} value={u.id}>
+                  {formatDisplayTextOrDash(u.full_name)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Lista */}
+      {isError ? (
+        <QueryErrorState message={error.message} />
+      ) : (
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-6 space-y-4">
@@ -231,10 +165,11 @@ export function AtividadePage() {
             ))}
           </div>
         ) : !data?.data.length ? (
-          <div className="flex flex-col items-center justify-center py-16 text-slate-400 gap-2">
-            <Activity className="w-8 h-8 text-slate-200" />
-            <p className="text-sm">Nenhuma atividade encontrada</p>
-          </div>
+          <EmptyState
+            title="Nenhuma atividade encontrada"
+            description="Ajuste os filtros ou aguarde novas ações no sistema."
+            className="border-0 shadow-none"
+          />
         ) : (
           Object.entries(grupos).map(([dia, items]) => (
             <div key={dia}>
@@ -244,7 +179,7 @@ export function AtividadePage() {
                 </p>
               </div>
               {items.map((log) => {
-                const cfg = actionConfig[log.action] ?? fallback;
+                const cfg = getActivityActionConfig(log.action);
                 const Icon = cfg.icon;
                 const nome = log.profiles?.full_name
                   ? formatDisplayTextOrDash(log.profiles.full_name)
@@ -293,9 +228,10 @@ export function AtividadePage() {
           ))
         )}
       </div>
+      )}
 
       {/* Paginação */}
-      {totalPages > 1 && (
+      {!isError && totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-slate-400">
             Página {filtros.page} de {totalPages}

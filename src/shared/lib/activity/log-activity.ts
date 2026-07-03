@@ -10,6 +10,7 @@ type LogAction =
   | "paciente_excluido"
   | "laudo_criado"
   | "laudo_editado"
+  | "documento_criado"
   | "usuario_criado";
 
 export async function logActivity({

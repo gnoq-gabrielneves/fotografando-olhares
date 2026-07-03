@@ -2,6 +2,10 @@
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import {
+  formatIsoDateToBrazilian,
+  parseBrazilianDateToIso,
+} from "@/shared/lib/format/date";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import {
   Select,
@@ -11,6 +15,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { queryKeys } from "@/shared/lib/query/keys";
+import { useEnabledClinicalModule } from "@/shared/hooks/use-enabled-clinical-module";
 import { getPacienteStatusLabel } from "@/shared/lib/utils/paciente-status";
 import {
   PACIENTE_STATUS_OPERACIONAIS,
@@ -65,9 +70,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 function formatarDataParaExibicao(data: string | null) {
-  if (!data) return "";
-  const [y, m, d] = data.split("T")[0].split("-");
-  return `${d}/${m}/${y}`;
+  return formatIsoDateToBrazilian(data) ?? "";
 }
 
 function getInitialForm(paciente: PacienteDetalhado): FormData {
@@ -115,27 +118,51 @@ export function EditarPacienteForm({ paciente }: Props) {
     queryKey: ["locais_atendimento"],
     queryFn: getLocaisAtendimento,
   });
+  const { isEnabled: hasOftalmo, isLoading: isLoadingModules } =
+    useEnabledClinicalModule("oftalmo");
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (data: Partial<FormData>) =>
-      atualizarPaciente(paciente.id, {
-        ...data,
+    mutationFn: (data: Partial<FormData>) => {
+      const basePayload = {
+        nome_completo: data.nome_completo,
         sexo: data.sexo as "M" | "F",
-        tempo_diagnostico_dm:
-          (data.tempo_diagnostico_dm as
-            | "<1 ano"
-            | "1 a 5 anos"
-            | "5 a 10 anos"
-            | ">10 anos") || undefined,
-        tempo_diagnostico_has:
-          (data.tempo_diagnostico_has as
-            | "<1 ano"
-            | "1 a 5 anos"
-            | "5 a 10 anos"
-            | ">10 anos") || undefined,
+        cpf_cns: data.cpf_cns || undefined,
+        data_nascimento: data.data_nascimento || undefined,
+        local_atendimento_id: data.local_atendimento_id || undefined,
+        prontuario: data.prontuario || undefined,
+        medicamentos_em_uso: data.medicamentos_em_uso || undefined,
+        tabagista: data.tabagista,
+        atividade_fisica: data.atividade_fisica,
+        outras_obs: data.outras_obs || undefined,
         zona: (data.zona as "Urbana" | "Rural" | "Periurbana") || undefined,
-        status_operacional: data.status_operacional as PacienteStatusOperacional,
-      }),
+      };
+
+      return atualizarPaciente(paciente.id, {
+        ...basePayload,
+        ...(hasOftalmo
+          ? {
+              status_operacional:
+                data.status_operacional as PacienteStatusOperacional,
+              insulina: data.insulina,
+              tempo_diagnostico_dm:
+                (data.tempo_diagnostico_dm as
+                  | "<1 ano"
+                  | "1 a 5 anos"
+                  | "5 a 10 anos"
+                  | ">10 anos") || undefined,
+              tempo_diagnostico_has:
+                (data.tempo_diagnostico_has as
+                  | "<1 ano"
+                  | "1 a 5 anos"
+                  | "5 a 10 anos"
+                  | ">10 anos") || undefined,
+              fez_exame_oftalmologico: data.fez_exame_oftalmologico,
+              av_od: data.av_od || undefined,
+              av_oe: data.av_oe || undefined,
+            }
+          : {}),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.pacientes.byId(paciente.id),
@@ -219,12 +246,7 @@ export function EditarPacienteForm({ paciente }: Props) {
               value={formatarDataParaExibicao(form.data_nascimento)}
               className={inputClass}
               onAccept={(value: string) => {
-                if (value.length === 10) {
-                  const [d, m, y] = value.split("/");
-                  set("data_nascimento", `${y}-${m}-${d}`);
-                } else {
-                  set("data_nascimento", "");
-                }
+                set("data_nascimento", parseBrazilianDateToIso(value));
               }}
             />
           </div>
@@ -291,32 +313,34 @@ export function EditarPacienteForm({ paciente }: Props) {
             </Select>
           </div>
 
-          <div className="space-y-1.5">
-            <label className={labelClass}>Status operacional</label>
-            <Select
-              value={form.status_operacional}
-              onValueChange={(v) =>
-                set("status_operacional", v as PacienteStatusOperacional)
-              }
-            >
-              <SelectTrigger className={selectClass}>
-                <SelectValue placeholder="Selecione o status" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-slate-200 text-slate-700">
-                {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {getPacienteStatusLabel(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {hasOftalmo ? (
+            <div className="space-y-1.5">
+              <label className={labelClass}>Status operacional</label>
+              <Select
+                value={form.status_operacional}
+                onValueChange={(v) =>
+                  set("status_operacional", v as PacienteStatusOperacional)
+                }
+              >
+                <SelectTrigger className={selectClass}>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200 text-slate-700">
+                  {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {getPacienteStatusLabel(status)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
         </div>
       </div>
 
-      {/* Dados clínicos */}
+      {/* Dados gerais */}
       <div className="space-y-4">
-        <SectionTitle>Dados clínicos</SectionTitle>
+        <SectionTitle>Dados gerais</SectionTitle>
 
         <div className="space-y-1.5">
           <label className={labelClass}>Medicamentos em uso</label>
@@ -329,71 +353,10 @@ export function EditarPacienteForm({ paciente }: Props) {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className={labelClass}>Tempo de diagnóstico DM</label>
-            <Select
-              value={form.tempo_diagnostico_dm}
-              onValueChange={(v) => set("tempo_diagnostico_dm", v)}
-            >
-              <SelectTrigger className={selectClass}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-slate-200 text-slate-700">
-                <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
-                <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
-                <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
-                <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className={labelClass}>Tempo de diagnóstico HAS</label>
-            <Select
-              value={form.tempo_diagnostico_has}
-              onValueChange={(v) => set("tempo_diagnostico_has", v)}
-            >
-              <SelectTrigger className={selectClass}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-slate-200 text-slate-700">
-                <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
-                <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
-                <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
-                <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className={labelClass}>Acuidade visual</label>
-          <div className="grid grid-cols-2 gap-2">
-            <Input
-              value={form.av_od}
-              onChange={(e) => set("av_od", e.target.value)}
-              placeholder="OD"
-              className={selectClass}
-            />
-            <Input
-              value={form.av_oe}
-              onChange={(e) => set("av_oe", e.target.value)}
-              placeholder="OE"
-              className={selectClass}
-            />
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { field: "insulina" as const, label: "Usa insulina" },
             { field: "tabagista" as const, label: "Tabagista" },
             { field: "atividade_fisica" as const, label: "Atividade física" },
-            {
-              field: "fez_exame_oftalmologico" as const,
-              label: "Fez exame oftalmológico",
-            },
           ].map(({ field: f, label: l }) => (
             <label
               key={f}
@@ -410,6 +373,99 @@ export function EditarPacienteForm({ paciente }: Props) {
           ))}
         </div>
       </div>
+
+      {isLoadingModules ? (
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-400">
+          Verificando módulos clínicos da organização...
+        </div>
+      ) : null}
+
+      {hasOftalmo ? (
+        <div className="space-y-4 animate-in fade-in-0 slide-in-from-top-1">
+          <SectionTitle>Oftalmologia</SectionTitle>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className={labelClass}>Tempo de diagnóstico DM</label>
+              <Select
+                value={form.tempo_diagnostico_dm}
+                onValueChange={(v) => set("tempo_diagnostico_dm", v)}
+              >
+                <SelectTrigger className={selectClass}>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200 text-slate-700">
+                  <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
+                  <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
+                  <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
+                  <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className={labelClass}>Tempo de diagnóstico HAS</label>
+              <Select
+                value={form.tempo_diagnostico_has}
+                onValueChange={(v) => set("tempo_diagnostico_has", v)}
+              >
+                <SelectTrigger className={selectClass}>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200 text-slate-700">
+                  <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
+                  <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
+                  <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
+                  <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClass}>Acuidade visual</label>
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                value={form.av_od}
+                onChange={(e) => set("av_od", e.target.value)}
+                placeholder="OD"
+                className={selectClass}
+              />
+              <Input
+                value={form.av_oe}
+                onChange={(e) => set("av_oe", e.target.value)}
+                placeholder="OE"
+                className={selectClass}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { field: "insulina" as const, label: "Usa insulina" },
+              {
+                field: "fez_exame_oftalmologico" as const,
+                label: "Fez exame oftalmológico",
+              },
+            ].map(({ field: f, label: l }) => (
+              <label
+                key={f}
+                className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={form[f]}
+                  onChange={(e) => set(f, e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 bg-white accent-cyan-600 shrink-0"
+                />
+                <span className="text-slate-600 text-sm leading-tight">
+                  {l}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {/* Observações */}
       <div className="space-y-4">

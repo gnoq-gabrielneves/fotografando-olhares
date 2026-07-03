@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { parseBrazilianDateToIso } from "@/shared/lib/format/date";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import {
   Select,
@@ -10,6 +11,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { queryKeys } from "@/shared/lib/query/keys";
+import { useEnabledClinicalModule } from "@/shared/hooks/use-enabled-clinical-module";
 import { getPacienteStatusLabel } from "@/shared/lib/utils/paciente-status";
 import {
   PACIENTE_STATUS_OPERACIONAIS,
@@ -105,6 +107,8 @@ export function NovoPacienteForm({ onSuccess }: Props) {
     queryKey: ["locais_atendimento"],
     queryFn: getLocaisAtendimento,
   });
+  const { isEnabled: hasOftalmo, isLoading: isLoadingModules } =
+    useEnabledClinicalModule("oftalmo");
 
   const { mutate, isPending } = useMutation({
     mutationFn: criarPaciente,
@@ -150,17 +154,21 @@ export function NovoPacienteForm({ onSuccess }: Props) {
       local_atendimento_id: form.local_atendimento_id,
       prontuario: form.prontuario || undefined,
       medicamentos_em_uso: form.medicamentos_em_uso || undefined,
-      insulina: form.insulina,
-      tempo_diagnostico_dm: form.tempo_diagnostico_dm,
-      fez_exame_oftalmologico: form.fez_exame_oftalmologico,
       tabagista: form.tabagista,
       atividade_fisica: form.atividade_fisica,
-      av_od: form.av_od || undefined,
-      av_oe: form.av_oe || undefined,
       outras_obs: form.outras_obs || undefined,
       status_operacional: form.status_operacional,
       zona: form.zona,
-      tempo_diagnostico_has: form.tempo_diagnostico_has,
+      ...(hasOftalmo
+        ? {
+            insulina: form.insulina,
+            tempo_diagnostico_dm: form.tempo_diagnostico_dm,
+            fez_exame_oftalmologico: form.fez_exame_oftalmologico,
+            av_od: form.av_od || undefined,
+            av_oe: form.av_oe || undefined,
+            tempo_diagnostico_has: form.tempo_diagnostico_has,
+          }
+        : {}),
     });
   }
 
@@ -211,16 +219,11 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             <IMaskInput
               mask="00/00/0000"
               placeholder="DD/MM/AAAA"
-              className={inputClass}
-              onAccept={(value: string) => {
-                if (value.length === 10) {
-                  const [d, m, y] = value.split("/");
-                  set("data_nascimento", `${y}-${m}-${d}`);
-                } else {
-                  set("data_nascimento", "");
-                }
-              }}
-            />
+            className={inputClass}
+            onAccept={(value: string) => {
+              set("data_nascimento", parseBrazilianDateToIso(value));
+            }}
+          />
           </div>
         </div>
 
@@ -267,34 +270,36 @@ export function NovoPacienteForm({ onSuccess }: Props) {
           </Select>
         </div>
 
-        <div className="space-y-1.5">
-          <label className={labelClass}>Status operacional</label>
-          <Select
-            value={form.status_operacional}
-            onValueChange={(v) =>
-              set("status_operacional", v as PacienteStatusOperacional)
-            }
-          >
-            <SelectTrigger className={fieldClass}>
-              <SelectValue placeholder="Selecione o status" />
-            </SelectTrigger>
-            <SelectContent
-              className="bg-white border-slate-200 text-slate-700"
-              position="popper"
+        {hasOftalmo ? (
+          <div className="space-y-1.5">
+            <label className={labelClass}>Status operacional</label>
+            <Select
+              value={form.status_operacional}
+              onValueChange={(v) =>
+                set("status_operacional", v as PacienteStatusOperacional)
+              }
             >
-              {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {getPacienteStatusLabel(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+              <SelectTrigger className={fieldClass}>
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent
+                className="bg-white border-slate-200 text-slate-700"
+                position="popper"
+              >
+                {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {getPacienteStatusLabel(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
       </div>
 
-      {/* Dados clínicos */}
+      {/* Dados gerais */}
       <div className="space-y-4">
-        <SectionTitle>Dados clínicos</SectionTitle>
+        <SectionTitle>Dados gerais</SectionTitle>
 
         <div className="space-y-1.5">
           <label className={labelClass}>Medicamentos em uso</label>
@@ -308,52 +313,6 @@ export function NovoPacienteForm({ onSuccess }: Props) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className={labelClass}>Tempo de diagnóstico DM</label>
-            <Select
-              value={form.tempo_diagnostico_dm}
-              onValueChange={(v) =>
-                set("tempo_diagnostico_dm", v as TempoDiagnostico)
-              }
-            >
-              <SelectTrigger className={fieldClass}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent
-                className="bg-white border-slate-200 text-slate-700"
-                position="popper"
-              >
-                <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
-                <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
-                <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
-                <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className={labelClass}>Tempo de diagnóstico HAS</label>
-            <Select
-              value={form.tempo_diagnostico_has}
-              onValueChange={(v) =>
-                set("tempo_diagnostico_has", v as TempoDiagnostico)
-              }
-            >
-              <SelectTrigger className={fieldClass}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent
-                className="bg-white border-slate-200 text-slate-700"
-                position="popper"
-              >
-                <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
-                <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
-                <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
-                <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="space-y-1.5">
             <label className={labelClass}>Zona</label>
             <Select
@@ -373,35 +332,12 @@ export function NovoPacienteForm({ onSuccess }: Props) {
               </SelectContent>
             </Select>
           </div>
-
-          <div className="space-y-1.5">
-            <label className={labelClass}>Acuidade visual</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                value={form.av_od}
-                onChange={(e) => set("av_od", e.target.value)}
-                placeholder="OD"
-                className={fieldClass}
-              />
-              <Input
-                value={form.av_oe}
-                onChange={(e) => set("av_oe", e.target.value)}
-                placeholder="OE"
-                className={fieldClass}
-              />
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { field: "insulina" as const, label: "Usa insulina" },
             { field: "tabagista" as const, label: "Tabagista" },
             { field: "atividade_fisica" as const, label: "Atividade física" },
-            {
-              field: "fez_exame_oftalmologico" as const,
-              label: "Fez exame oftalmológico",
-            },
           ].map(({ field: f, label: l }) => (
             <label
               key={f}
@@ -418,6 +354,109 @@ export function NovoPacienteForm({ onSuccess }: Props) {
           ))}
         </div>
       </div>
+
+      {isLoadingModules ? (
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-400">
+          Verificando módulos clínicos da organização...
+        </div>
+      ) : null}
+
+      {hasOftalmo ? (
+        <div className="space-y-4 animate-in fade-in-0 slide-in-from-top-1">
+          <SectionTitle>Oftalmologia</SectionTitle>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className={labelClass}>Tempo de diagnóstico DM</label>
+              <Select
+                value={form.tempo_diagnostico_dm}
+                onValueChange={(v) =>
+                  set("tempo_diagnostico_dm", v as TempoDiagnostico)
+                }
+              >
+                <SelectTrigger className={fieldClass}>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-white border-slate-200 text-slate-700"
+                  position="popper"
+                >
+                  <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
+                  <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
+                  <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
+                  <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className={labelClass}>Tempo de diagnóstico HAS</label>
+              <Select
+                value={form.tempo_diagnostico_has}
+                onValueChange={(v) =>
+                  set("tempo_diagnostico_has", v as TempoDiagnostico)
+                }
+              >
+                <SelectTrigger className={fieldClass}>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-white border-slate-200 text-slate-700"
+                  position="popper"
+                >
+                  <SelectItem value="<1 ano">Menos de 1 ano</SelectItem>
+                  <SelectItem value="1 a 5 anos">1 a 5 anos</SelectItem>
+                  <SelectItem value="5 a 10 anos">5 a 10 anos</SelectItem>
+                  <SelectItem value=">10 anos">Mais de 10 anos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className={labelClass}>Acuidade visual</label>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  value={form.av_od}
+                  onChange={(e) => set("av_od", e.target.value)}
+                  placeholder="OD"
+                  className={fieldClass}
+                />
+                <Input
+                  value={form.av_oe}
+                  onChange={(e) => set("av_oe", e.target.value)}
+                  placeholder="OE"
+                  className={fieldClass}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { field: "insulina" as const, label: "Usa insulina" },
+              {
+                field: "fez_exame_oftalmologico" as const,
+                label: "Fez exame oftalmológico",
+              },
+            ].map(({ field: f, label: l }) => (
+              <label
+                key={f}
+                className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={form[f]}
+                  onChange={(e) => set(f, e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 bg-white accent-cyan-600 shrink-0"
+                />
+                <span className="text-slate-600 text-sm leading-tight">
+                  {l}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {/* Observações */}
       <div className="space-y-4">

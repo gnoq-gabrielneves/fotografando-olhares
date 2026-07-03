@@ -1,5 +1,7 @@
 export const ORGANIZATION_STATUSES = ["active", "inactive"] as const;
 export type OrganizationStatus = (typeof ORGANIZATION_STATUSES)[number];
+export const MODULE_STATUSES = ["active", "inactive"] as const;
+export type ModuleStatus = (typeof MODULE_STATUSES)[number];
 
 export type Organization = {
   id: string;
@@ -9,6 +11,29 @@ export type Organization = {
   status: OrganizationStatus;
   created_at: string;
   updated_at: string;
+};
+
+export type ClinicalModule = {
+  id: string;
+  name: string;
+  specialty: string;
+  description: string | null;
+  status: ModuleStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type OrganizationModule = {
+  organization_id: string;
+  module_id: string;
+  status: ModuleStatus;
+  enabled_at: string;
+  created_at: string;
+  updated_at: string;
+  clinical_modules?: Pick<
+    ClinicalModule,
+    "id" | "name" | "specialty" | "description" | "status"
+  > | null;
 };
 
 export const USER_ROLES = [
@@ -111,6 +136,39 @@ export type Laudo = {
   dilatacao: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export const DOCUMENTO_CLINICO_TYPES = [
+  "exam_request",
+  "white_prescription",
+] as const;
+export type DocumentoClinicoType = (typeof DOCUMENTO_CLINICO_TYPES)[number];
+
+export const DOCUMENTO_CLINICO_STATUSES = [
+  "draft",
+  "issued",
+  "cancelled",
+] as const;
+export type DocumentoClinicoStatus =
+  (typeof DOCUMENTO_CLINICO_STATUSES)[number];
+
+export type DocumentoClinico = {
+  id: string;
+  organization_id: string;
+  paciente_id: string | null;
+  created_by: string | null;
+  document_type: DocumentoClinicoType;
+  title: string;
+  content: string;
+  status: DocumentoClinicoStatus;
+  issued_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DocumentoClinicoTabela = DocumentoClinico & {
+  pacientes: Pick<Paciente, "id" | "nome_completo"> | null;
+  profiles: Pick<Profile, "full_name"> | null;
 };
 
 export type PacienteComRelacoes = Paciente & {

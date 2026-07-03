@@ -1,5 +1,6 @@
 import { Laudo, LocalAtendimento, Paciente, Profile } from "@/shared/types";
 import writeXlsxFile, { type Column } from "write-excel-file/browser";
+import { formatIsoDateToBrazilian } from "@/shared/lib/format/date";
 
 type PacienteExport = Paciente & {
   locais_atendimento: Pick<LocalAtendimento, "nome"> | null;
@@ -14,8 +15,7 @@ type LaudoExport = Laudo & {
 type ExportValue = string | number | boolean | Date | null;
 
 function dateOrEmpty(value: string | null) {
-  if (!value) return "";
-  return new Date(value).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+  return formatIsoDateToBrazilian(value) ?? "";
 }
 
 function todayFileDate() {

@@ -11,8 +11,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/shared/components/ui/alert-dialog";
-import { PageHeader } from "@/shared/components/PageHeader/PageHeader";
 import { Button } from "@/shared/components/ui/button";
+import {
+  formatDateTimeToBrazilian,
+  formatIsoDateToBrazilian,
+} from "@/shared/lib/format/date";
 import { queryKeys } from "@/shared/lib/query/keys";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import {
@@ -22,24 +25,73 @@ import {
 import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
 import { PacienteDetalhado, ResultadoRD } from "@/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, FileText, Pencil, Trash2, UserRound } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  ClipboardList,
+  FileText,
+  IdCard,
+  MapPin,
+  Pencil,
+  Trash2,
+  type LucideIcon,
+  UserRound,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { excluirPaciente } from "../services/pacientes.services";
 
 function calcularIdade(data: string | null) {
   if (!data) return null;
-  const [y, m, d] = data.split("-").map(Number);
+  const [datePart] = data.split("T");
+  const [y, m, d] = datePart.split("-").map(Number);
+  if (!y || !m || !d) return null;
   const nascimento = new Date(y, m - 1, d);
   const diff = Date.now() - nascimento.getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
 }
 
+function formatarData(data: string | null) {
+  return formatDateTimeToBrazilian(data) ?? "Sem data";
+}
+
+function formatarDataCivil(data: string | null) {
+  return formatIsoDateToBrazilian(data) ?? "Sem data";
+}
+
+function sexoLabel(sexo: string | null) {
+  if (sexo === "M") return "Masculino";
+  if (sexo === "F") return "Feminino";
+  return "Sem sexo informado";
+}
+
 type Props = {
   paciente: PacienteDetalhado;
+  hasOftalmo: boolean;
 };
 
-export function PacienteHeader({ paciente }: Props) {
+function SummaryItem({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm transition-colors hover:border-slate-300">
+      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-slate-400">
+        <Icon className="size-3.5 text-cyan-600" />
+        {label}
+      </div>
+      <div className="mt-2 text-sm font-semibold text-slate-800">{value}</div>
+    </div>
+  );
+}
+
+export function PacienteHeader({ paciente, hasOftalmo }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const idade = calcularIdade(paciente.data_nascimento);
@@ -75,7 +127,7 @@ export function PacienteHeader({ paciente }: Props) {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-in fade-in-0 slide-in-from-top-1">
       <button
         onClick={() => router.push("/pacientes")}
         className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 text-sm transition-colors"
@@ -84,27 +136,30 @@ export function PacienteHeader({ paciente }: Props) {
         Voltar para pacientes
       </button>
 
-      <PageHeader
-        icon={UserRound}
-        title={formatDisplayTextOrDash(paciente.nome_completo)}
-        description={
-          <span className="flex flex-wrap items-center gap-2">
-            <span>
-              {paciente.sexo === "M"
-                ? "Masculino"
-                : paciente.sexo === "F"
-                  ? "Feminino"
-                  : "Sem sexo informado"}
-            </span>
-            {idade ? <span>{idade} anos</span> : null}
-            {paciente.locais_atendimento?.nome ? (
-              <span>{formatDisplayTextOrDash(paciente.locais_atendimento.nome)}</span>
-            ) : null}
-          </span>
-        }
-        meta={resultadoMeta}
-        actions={
-          <>
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-cyan-100 bg-cyan-50 text-cyan-700">
+              <UserRound className="size-7" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-2xl font-semibold tracking-tight text-slate-900">
+                  {formatDisplayTextOrDash(paciente.nome_completo)}
+                </h1>
+                {hasOftalmo ? resultadoMeta : null}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+                <span>{sexoLabel(paciente.sexo)}</span>
+                {idade ? <span>{idade} anos</span> : null}
+                <span>
+                  Cadastro em {formatarData(paciente.created_at)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 lg:justify-end">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
@@ -157,22 +212,56 @@ export function PacienteHeader({ paciente }: Props) {
               Editar
             </Button>
 
-            <Button
-              onClick={() => router.push(`/pacientes/${paciente.id}/laudo`)}
-              size="sm"
-              className="gap-2 bg-cyan-600 hover:bg-cyan-500 text-white"
-            >
-              <FileText className="w-4 h-4" />
-              Novo laudo
-            </Button>
-          </>
-        }
-      />
-      <div
-        className={`inline-flex w-fit items-center rounded-md border px-2.5 py-1 text-xs font-medium ${getPacienteStatusBadge(status)}`}
-      >
-        {getPacienteStatusLabel(status)}
-      </div>
+            {hasOftalmo ? (
+              <Button
+                onClick={() => router.push(`/pacientes/${paciente.id}/laudo`)}
+                size="sm"
+                className="gap-2 bg-cyan-600 hover:bg-cyan-500 text-white"
+              >
+                <FileText className="w-4 h-4" />
+                Novo laudo
+              </Button>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <SummaryItem
+            icon={IdCard}
+            label="Prontuário"
+            value={formatDisplayTextOrDash(paciente.prontuario)}
+          />
+          <SummaryItem
+            icon={MapPin}
+            label="Local"
+            value={formatDisplayTextOrDash(paciente.locais_atendimento?.nome)}
+          />
+          <SummaryItem
+            icon={CalendarDays}
+            label="Nascimento"
+            value={formatarDataCivil(paciente.data_nascimento)}
+          />
+          {hasOftalmo ? (
+            <SummaryItem
+              icon={ClipboardList}
+              label="Esteira"
+              value={
+                <span
+                  className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-medium ${getPacienteStatusBadge(status)}`}
+                >
+                  {getPacienteStatusLabel(status)}
+                </span>
+              }
+            />
+          ) : (
+            <SummaryItem
+              icon={ClipboardList}
+              label="Responsável"
+              value={formatDisplayTextOrDash(paciente.profiles?.full_name)}
+            />
+          )}
+        </div>
+      </section>
     </div>
   );
 }

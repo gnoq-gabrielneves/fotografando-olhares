@@ -33,6 +33,7 @@ type Props = {
   onLocalChange: (v: string) => void;
   onDataInicioChange: (v: string) => void;
   onDataFimChange: (v: string) => void;
+  hasOftalmo: boolean;
 };
 
 function toDate(s: string) {
@@ -63,6 +64,7 @@ export function PacientesFiltros({
   onLocalChange,
   onDataInicioChange,
   onDataFimChange,
+  hasOftalmo,
 }: Props) {
   const { data: locais } = useQuery({
     queryKey: ["locais_atendimento"],
@@ -89,49 +91,59 @@ export function PacientesFiltros({
         />
       </div>
 
-      <Select value={resultadoRd} onValueChange={onResultadoChange}>
-        <SelectTrigger className="w-full sm:w-44 h-9 text-sm bg-white border-slate-200 text-slate-700">
-          <SelectValue placeholder="Resultado" />
-        </SelectTrigger>
-        <SelectContent position="popper">
-          <SelectItem value="todos">Todos os resultados</SelectItem>
-          <SelectItem value="sem_laudo">Sem laudo</SelectItem>
-          <SelectItem value="Exame de retinografia normal">Normal</SelectItem>
-          <SelectItem value="Retinopatia diabética não proliferativa">RD não proliferativa</SelectItem>
-          <SelectItem value="Retinopatia diabética proliferativa">RD proliferativa</SelectItem>
-          <SelectItem value="Retinopatia hipertensiva">RD hipertensiva</SelectItem>
-          <SelectItem value="Outras alterações">Outras alterações</SelectItem>
-          <SelectItem value="Qualidade da imagem ruim">Imagem ruim</SelectItem>
-        </SelectContent>
-      </Select>
+      {hasOftalmo ? (
+        <div className="w-full sm:w-44">
+          <Select value={resultadoRd} onValueChange={onResultadoChange}>
+            <SelectTrigger className="h-9 bg-white text-sm text-slate-700 border-slate-200">
+              <SelectValue placeholder="Resultado" />
+            </SelectTrigger>
+            <SelectContent position="popper">
+              <SelectItem value="todos">Todos os resultados</SelectItem>
+              <SelectItem value="sem_laudo">Sem laudo</SelectItem>
+              <SelectItem value="Exame de retinografia normal">Normal</SelectItem>
+              <SelectItem value="Retinopatia diabética não proliferativa">RD não proliferativa</SelectItem>
+              <SelectItem value="Retinopatia diabética proliferativa">RD proliferativa</SelectItem>
+              <SelectItem value="Retinopatia hipertensiva">RD hipertensiva</SelectItem>
+              <SelectItem value="Outras alterações">Outras alterações</SelectItem>
+              <SelectItem value="Qualidade da imagem ruim">Imagem ruim</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
 
-      <Select value={statusOperacional} onValueChange={onStatusChange}>
-        <SelectTrigger className="w-full sm:w-44 h-9 text-sm bg-white border-slate-200 text-slate-700">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent position="popper">
-          <SelectItem value="todos">Todos os status</SelectItem>
-          {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
-            <SelectItem key={status} value={status}>
-              {getPacienteStatusLabel(status)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {hasOftalmo ? (
+        <div className="w-full sm:w-44">
+          <Select value={statusOperacional} onValueChange={onStatusChange}>
+            <SelectTrigger className="h-9 bg-white text-sm text-slate-700 border-slate-200">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent position="popper">
+              <SelectItem value="todos">Todos os status</SelectItem>
+              {PACIENTE_STATUS_OPERACIONAIS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {getPacienteStatusLabel(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
 
-      <Select value={localId} onValueChange={onLocalChange}>
-        <SelectTrigger className="w-full sm:w-40 h-9 text-sm bg-white border-slate-200 text-slate-700">
-          <SelectValue placeholder="Local" />
-        </SelectTrigger>
-        <SelectContent position="popper">
-          <SelectItem value="todos">Todos os locais</SelectItem>
-          {locais?.map((l) => (
-            <SelectItem key={l.id} value={l.id}>
-              {formatDisplayTextOrDash(l.nome)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="w-full sm:w-40">
+        <Select value={localId} onValueChange={onLocalChange}>
+          <SelectTrigger className="h-9 bg-white text-sm text-slate-700 border-slate-200">
+            <SelectValue placeholder="Local" />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            <SelectItem value="todos">Todos os locais</SelectItem>
+            {locais?.map((l) => (
+              <SelectItem key={l.id} value={l.id}>
+                {formatDisplayTextOrDash(l.nome)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <Popover>
         <PopoverTrigger asChild>

@@ -35,30 +35,32 @@ export function LaudosFiltros({
         />
       </div>
 
-      <Select value={resultadoRd} onValueChange={onResultadoChange}>
-        <SelectTrigger className="w-full sm:w-64 bg-white border-slate-200 text-slate-700 focus:ring-cyan-500 h-10">
-          <SelectValue placeholder="Resultado" />
-        </SelectTrigger>
-        <SelectContent className="bg-white border-slate-200 text-slate-700">
-          <SelectItem value="todos">Todos os resultados</SelectItem>
-          <SelectItem value="Exame de retinografia normal">
-            Exame de retinografia normal
-          </SelectItem>
-          <SelectItem value="Retinopatia diabética não proliferativa">
-            Retinopatia diabética não proliferativa
-          </SelectItem>
-          <SelectItem value="Retinopatia diabética proliferativa">
-            Retinopatia diabética proliferativa
-          </SelectItem>
-          <SelectItem value="Retinopatia hipertensiva">
-            Retinopatia hipertensiva
-          </SelectItem>
-          <SelectItem value="Outras alterações">Outras alterações</SelectItem>
-          <SelectItem value="Qualidade da imagem ruim">
-            Qualidade da imagem ruim
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="w-full sm:w-64">
+        <Select value={resultadoRd} onValueChange={onResultadoChange}>
+          <SelectTrigger className="h-10 bg-white text-slate-700 border-slate-200 focus:ring-cyan-500">
+            <SelectValue placeholder="Resultado" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-slate-200 text-slate-700">
+            <SelectItem value="todos">Todos os resultados</SelectItem>
+            <SelectItem value="Exame de retinografia normal">
+              Exame de retinografia normal
+            </SelectItem>
+            <SelectItem value="Retinopatia diabética não proliferativa">
+              Retinopatia diabética não proliferativa
+            </SelectItem>
+            <SelectItem value="Retinopatia diabética proliferativa">
+              Retinopatia diabética proliferativa
+            </SelectItem>
+            <SelectItem value="Retinopatia hipertensiva">
+              Retinopatia hipertensiva
+            </SelectItem>
+            <SelectItem value="Outras alterações">Outras alterações</SelectItem>
+            <SelectItem value="Qualidade da imagem ruim">
+              Qualidade da imagem ruim
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }

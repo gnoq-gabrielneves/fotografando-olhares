@@ -1,12 +1,13 @@
 "use client";
 
 import { Button } from "@/shared/components/ui/button";
-import { queryKeys } from "@/shared/lib/query/keys";
+import { formatIsoDateToBrazilian } from "@/shared/lib/format/date";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
+import { queryKeys } from "@/shared/lib/query/keys";
 import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
-import { LaudoComLaudador, ResultadoRD } from "@/shared/types";
+import type { LaudoComLaudador, ResultadoRD } from "@/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, FileText, Plus, Trash2, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -16,6 +17,10 @@ type Props = {
   laudos: LaudoComLaudador[];
   pacienteId: string;
 };
+
+function formatarData(data: string | null) {
+  return formatIsoDateToBrazilian(data) ?? "Sem data";
+}
 
 export function PacienteLaudos({ laudos, pacienteId }: Props) {
   const router = useRouter();
@@ -56,80 +61,106 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
   });
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xs font-medium text-cyan-600 uppercase tracking-wider">
-          Histórico de laudos
-        </h2>
+    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="flex size-8 items-center justify-center rounded-lg border border-cyan-100 bg-cyan-50 text-cyan-700">
+              <FileText className="size-4" />
+            </span>
+            <h2 className="text-sm font-semibold text-slate-800">
+              Histórico de laudos
+            </h2>
+          </div>
+          <p className="mt-1 text-xs text-slate-400">
+            {laudos.length === 0
+              ? "Nenhum laudo registrado para este paciente."
+              : `${laudos.length} laudo${laudos.length === 1 ? "" : "s"} registrado${laudos.length === 1 ? "" : "s"}.`}
+          </p>
+        </div>
         <Button
           onClick={() => router.push(`/pacientes/${pacienteId}/laudo`)}
           size="sm"
-          className="gap-2 bg-cyan-600 hover:bg-cyan-500 text-white h-8 text-xs"
+          className="gap-2 bg-cyan-600 hover:bg-cyan-500 text-white"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <Plus className="size-4" />
           Novo laudo
         </Button>
       </div>
 
       {laudos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 gap-3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
-            <FileText className="w-6 h-6 text-slate-400" />
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-slate-200 bg-slate-50 py-12">
+          <div className="flex size-12 items-center justify-center rounded-lg border border-slate-200 bg-white">
+            <FileText className="size-5 text-slate-400" />
           </div>
-          <p className="text-slate-400 text-sm">Nenhum laudo registrado</p>
+          <p className="text-sm text-slate-500">
+            O histórico oftalmológico aparecerá aqui.
+          </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {laudos.map((laudo) => (
             <div
               key={laudo.id}
-              className="border border-slate-200 rounded-lg p-4 space-y-3 hover:border-slate-300 transition-colors"
+              className="rounded-lg border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-slate-300"
             >
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0 space-y-3">
                   {laudo.resultado_rd ? (
-                    <span className={`text-xs px-2.5 py-1 rounded-md font-medium border ${resultadoBadge[laudo.resultado_rd as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}>
+                    <span
+                      className={`inline-flex rounded-md border px-2.5 py-1 text-xs font-medium ${resultadoBadge[laudo.resultado_rd as ResultadoRD] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
+                    >
                       {laudo.resultado_rd}
                     </span>
                   ) : (
-                    <span className="text-xs px-2.5 py-1 rounded-md font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                    <span className="inline-flex rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
                       Sem resultado
                     </span>
                   )}
-                  {laudo.dilatacao && (
-                    <span className="text-xs text-slate-400">Dilatação: {laudo.dilatacao}</span>
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                    <span className="inline-flex items-center gap-1">
+                      <CalendarDays className="size-3.5 text-slate-400" />
+                      {formatarData(laudo.data_laudo)}
+                    </span>
+                    {laudo.profiles?.full_name ? (
+                      <span className="inline-flex items-center gap-1">
+                        <UserRound className="size-3.5 text-slate-400" />
+                        {formatDisplayTextOrDash(laudo.profiles.full_name)}
+                      </span>
+                    ) : null}
+                    {laudo.dilatacao ? (
+                      <span>Dilatação: {laudo.dilatacao}</span>
+                    ) : null}
+                  </div>
+
+                  {laudo.descricao ? (
+                    <p className="max-w-3xl text-sm leading-7 text-slate-600">
+                      {laudo.descricao}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-slate-400">
+                      Sem descrição complementar.
+                    </p>
                   )}
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-3 text-xs text-slate-400">
-                    {laudo.profiles?.full_name && (
-                      <span>{formatDisplayTextOrDash(laudo.profiles.full_name)}</span>
-                    )}
-                    {laudo.data_laudo && (
-                      <>
-                        <span className="text-slate-300">·</span>
-                        <span>{new Date(laudo.data_laudo).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</span>
-                      </>
-                    )}
-                  </div>
-
+                <div className="shrink-0">
                   {confirmandoId === laudo.id ? (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-500">Excluir?</span>
+                    <div className="flex items-center gap-2 rounded-md border border-red-100 bg-red-50 px-2 py-1.5">
+                      <span className="text-xs text-red-700">Excluir?</span>
                       <button
                         type="button"
                         onClick={() => deletar(laudo.id)}
                         disabled={isPending}
-                        className="text-xs text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
+                        className="text-xs font-medium text-red-700 hover:text-red-800 disabled:opacity-50"
                       >
                         Sim
                       </button>
-                      <span className="text-slate-300 text-xs">·</span>
                       <button
                         type="button"
                         onClick={() => setConfirmandoId(null)}
-                        className="text-xs text-slate-400 hover:text-slate-600"
+                        className="text-xs text-slate-500 hover:text-slate-700"
                       >
                         Não
                       </button>
@@ -139,26 +170,20 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
                       type="button"
                       onClick={() => setConfirmandoId(laudo.id)}
                       disabled={isPending}
-                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                       aria-label="Excluir laudo"
                       title="Excluir laudo"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="size-3.5" />
                       Excluir
                     </button>
                   )}
                 </div>
               </div>
-
-              {laudo.descricao && (
-                <p className="text-slate-600 text-sm leading-relaxed border-t border-slate-100 pt-3">
-                  {laudo.descricao}
-                </p>
-              )}
             </div>
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
