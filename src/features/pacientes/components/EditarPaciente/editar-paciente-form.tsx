@@ -35,6 +35,9 @@ import {
 
 type FormData = {
   nome_completo: string;
+  nome_mae: string;
+  telefone: string;
+  endereco: string;
   sexo: "M" | "F" | "";
   cpf_cns: string;
   data_nascimento: string;
@@ -76,6 +79,9 @@ function formatarDataParaExibicao(data: string | null) {
 function getInitialForm(paciente: PacienteDetalhado): FormData {
   return {
     nome_completo: paciente.nome_completo ?? "",
+    nome_mae: paciente.nome_mae ?? "",
+    telefone: paciente.telefone ?? "",
+    endereco: paciente.endereco ?? "",
     sexo: paciente.sexo ?? "",
     cpf_cns: paciente.cpf_cns ?? "",
     data_nascimento: paciente.data_nascimento ?? "",
@@ -125,6 +131,9 @@ export function EditarPacienteForm({ paciente }: Props) {
     mutationFn: (data: Partial<FormData>) => {
       const basePayload = {
         nome_completo: data.nome_completo,
+        nome_mae: data.nome_mae || undefined,
+        telefone: data.telefone || undefined,
+        endereco: data.endereco || undefined,
         sexo: data.sexo as "M" | "F",
         cpf_cns: data.cpf_cns || undefined,
         data_nascimento: data.data_nascimento || undefined,
@@ -272,6 +281,37 @@ export function EditarPacienteForm({ paciente }: Props) {
               className={selectClass}
             />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className={labelClass}>Nome da mãe</label>
+            <Input
+              value={form.nome_mae}
+              onChange={(e) => set("nome_mae", e.target.value)}
+              placeholder="Nome completo da mãe"
+              className={selectClass}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelClass}>Telefone</label>
+            <Input
+              value={form.telefone}
+              onChange={(e) => set("telefone", e.target.value)}
+              placeholder="Telefone do paciente"
+              className={selectClass}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelClass}>Endereço</label>
+          <Input
+            value={form.endereco}
+            onChange={(e) => set("endereco", e.target.value)}
+            placeholder="Endereço completo do paciente"
+            className={selectClass}
+          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

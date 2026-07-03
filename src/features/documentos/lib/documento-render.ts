@@ -21,6 +21,22 @@ function formatDate(value: string | null) {
   });
 }
 
+function formatShortDate(value: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  });
+}
+
+function formatSexo(value: string | null | undefined) {
+  if (value === "M") return "Masculino";
+  if (value === "F") return "Feminino";
+  return "-";
+}
+
 function slugify(value: string) {
   return value
     .normalize("NFD")
@@ -38,8 +54,10 @@ export function getDocumentoFileName(documento: DocumentoClinicoTabela) {
 export function buildDocumentoHtml(documento: DocumentoClinicoTabela) {
   const tipo = documentoTipoLabel[documento.document_type];
   const paciente = documento.pacientes?.nome_completo ?? "Sem paciente vinculado";
-  const responsavel = documento.profiles?.full_name ?? "Não informado";
   const dataEmissao = formatDate(documento.issued_at ?? documento.created_at);
+  const localData = [documento.clinic_city, dataEmissao].filter(Boolean).join(", ");
+  const physicianName = documento.physician_name ?? "Médica responsável";
+  const physicianCrm = documento.physician_crm ?? "CRM não informado";
   const content = markdownToHtml(documento.content);
 
   return `<!doctype html>
@@ -73,6 +91,35 @@ export function buildDocumentoHtml(documento: DocumentoClinicoTabela) {
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
+      }
+      .doc-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        align-items: flex-start;
+        margin-bottom: 28px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .logo {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+      }
+      .clinic-name {
+        margin: 0;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .issued-place {
+        margin: 0;
+        color: #64748b;
+        font-size: 12px;
+        text-align: right;
       }
       h1 {
         margin: 0;
@@ -156,7 +203,7 @@ export function buildDocumentoHtml(documento: DocumentoClinicoTabela) {
         margin-top: 72px;
         padding-top: 18px;
         border-top: 1px solid #94a3b8;
-        width: 280px;
+        width: 320px;
         color: #475569;
         text-align: center;
         font-size: 12px;
@@ -182,31 +229,69 @@ export function buildDocumentoHtml(documento: DocumentoClinicoTabela) {
   </head>
   <body>
     <main class="page">
-      <p class="eyebrow">${escapeHtml(tipo)}</p>
+      <header class="doc-header">
+        <div class="brand">
+          ${
+            documento.clinic_logo_url
+              ? `<img class="logo" src="${escapeHtml(documento.clinic_logo_url)}" alt="" />`
+              : ""
+          }
+          <div>
+            <p class="clinic-name">${escapeHtml(documento.clinic_name ?? "Clínica/Hospital")}</p>
+            <p class="eyebrow">${escapeHtml(tipo)}</p>
+          </div>
+        </div>
+        <p class="issued-place">${escapeHtml(localData || dataEmissao)}</p>
+      </header>
       <h1>${escapeHtml(documento.title)}</h1>
-      <section class="meta" aria-label="Informações do documento">
+      <section class="meta" aria-label="Dados do paciente">
         <div>
           <span class="label">Paciente</span>
           <span class="value">${escapeHtml(paciente)}</span>
         </div>
         <div>
-          <span class="label">Responsável</span>
-          <span class="value">${escapeHtml(responsavel)}</span>
+          <span class="label">Nascimento</span>
+          <span class="value">${escapeHtml(formatShortDate(documento.pacientes?.data_nascimento ?? null))}</span>
         </div>
         <div>
-          <span class="label">Emissão</span>
-          <span class="value">${escapeHtml(dataEmissao)}</span>
+          <span class="label">Sexo</span>
+          <span class="value">${escapeHtml(formatSexo(documento.pacientes?.sexo))}</span>
         </div>
         <div>
-          <span class="label">Tipo</span>
-          <span class="value">${escapeHtml(tipo)}</span>
+          <span class="label">Nome da mãe</span>
+          <span class="value">${escapeHtml(documento.pacientes?.nome_mae ?? "-")}</span>
+        </div>
+        <div>
+          <span class="label">Telefone</span>
+          <span class="value">${escapeHtml(documento.pacientes?.telefone ?? "-")}</span>
+        </div>
+        <div>
+          <span class="label">Endereço</span>
+          <span class="value">${escapeHtml(documento.pacientes?.endereco ?? "-")}</span>
         </div>
       </section>
+      ${
+        documento.clinical_justification || documento.material_to_examine
+          ? `<section class="meta" aria-label="Informações clínicas">
+        <div>
+          <span class="label">Justificativa clínica</span>
+          <span class="value">${escapeHtml(documento.clinical_justification ?? "-")}</span>
+        </div>
+        <div>
+          <span class="label">Material a examinar</span>
+          <span class="value">${escapeHtml(documento.material_to_examine ?? "-")}</span>
+        </div>
+      </section>`
+          : ""
+      }
       <section class="content">
         <p class="content-title">Conteúdo</p>
         ${content}
       </section>
-      <footer class="signature">${escapeHtml(responsavel)}</footer>
+      <footer class="signature">
+        <strong>${escapeHtml(physicianName)}</strong><br />
+        ${escapeHtml(physicianCrm)}
+      </footer>
       <p class="disclaimer">
         Documento emitido pelo sistema Fotografando Olhares. Antes de uso externo,
         valide identificação profissional, assinatura e requisitos regulatórios aplicáveis.

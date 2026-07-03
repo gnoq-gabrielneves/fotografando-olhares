@@ -1,6 +1,7 @@
 "use client";
 
 import { ChartCard, ChartLoading } from "@/shared/components/charts/ChartCard";
+import { useEnabledClinicalModule } from "@/shared/hooks/use-enabled-clinical-module";
 import { chartAxisTick, chartTooltipStyle } from "@/shared/lib/charts/styles";
 import { queryKeys } from "@/shared/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
@@ -17,9 +18,12 @@ import {
 import { getCadastrosPorMes, getLaudosPorMes } from "../services/relatorios-services";
 
 export function RelatorioPorMes() {
+  const { isEnabled: hasOftalmo, isLoading: loadingModules } =
+    useEnabledClinicalModule("oftalmo");
   const { data: laudos, isLoading: loadingLaudos } = useQuery({
     queryKey: queryKeys.relatorios.laudosPorMes,
     queryFn: getLaudosPorMes,
+    enabled: hasOftalmo,
   });
 
   const { data: cadastros, isLoading: loadingCadastros } = useQuery({
@@ -27,7 +31,7 @@ export function RelatorioPorMes() {
     queryFn: getCadastrosPorMes,
   });
 
-  const isLoading = loadingLaudos || loadingCadastros;
+  const isLoading = loadingModules || (hasOftalmo && loadingLaudos) || loadingCadastros;
 
   const merged = (() => {
     const meses: Record<string, { mes: string; laudos: number; cadastros: number }> = {};
@@ -36,13 +40,15 @@ export function RelatorioPorMes() {
       meses[c.mes] = { mes: c.label, laudos: 0, cadastros: c.total };
     });
 
-    laudos?.forEach((l) => {
-      if (meses[l.mesRaw]) {
-        meses[l.mesRaw].laudos = l.total;
-      } else {
-        meses[l.mesRaw] = { mes: l.mesLabel, laudos: l.total, cadastros: 0 };
-      }
-    });
+    if (hasOftalmo) {
+      laudos?.forEach((l) => {
+        if (meses[l.mesRaw]) {
+          meses[l.mesRaw].laudos = l.total;
+        } else {
+          meses[l.mesRaw] = { mes: l.mesLabel, laudos: l.total, cadastros: 0 };
+        }
+      });
+    }
 
     return Object.entries(meses)
       .sort(([a], [b]) => a.localeCompare(b))
@@ -86,15 +92,17 @@ export function RelatorioPorMes() {
               activeDot={{ r: 5 }}
               name="Cadastros"
             />
-            <Line
-              type="monotone"
-              dataKey="laudos"
-              stroke="#7c3aed"
-              strokeWidth={2}
-              dot={{ fill: "#7c3aed", r: 3 }}
-              activeDot={{ r: 5 }}
-              name="Laudos"
-            />
+            {hasOftalmo ? (
+              <Line
+                type="monotone"
+                dataKey="laudos"
+                stroke="#7c3aed"
+                strokeWidth={2}
+                dot={{ fill: "#7c3aed", r: 3 }}
+                activeDot={{ r: 5 }}
+                name="Laudos"
+              />
+            ) : null}
           </LineChart>
         </ResponsiveContainer>
       )}

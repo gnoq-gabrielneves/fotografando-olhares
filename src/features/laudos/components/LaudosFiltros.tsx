@@ -38,7 +38,7 @@ export function LaudosFiltros({
       <div className="w-full sm:w-64">
         <Select value={resultadoRd} onValueChange={onResultadoChange}>
           <SelectTrigger className="h-10 bg-white text-slate-700 border-slate-200 focus:ring-cyan-500">
-            <SelectValue placeholder="Resultado" />
+            <SelectValue placeholder="Resultado do laudo" />
           </SelectTrigger>
           <SelectContent className="bg-white border-slate-200 text-slate-700">
             <SelectItem value="todos">Todos os resultados</SelectItem>

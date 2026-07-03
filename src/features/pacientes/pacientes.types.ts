@@ -2,6 +2,9 @@ import type { PacienteStatusOperacional } from "@/shared/types";
 
 export type NovoPacienteInput = {
   nome_completo: string;
+  nome_mae?: string;
+  telefone?: string;
+  endereco?: string;
   sexo: "M" | "F";
   cpf_cns?: string;
   data_nascimento?: string;

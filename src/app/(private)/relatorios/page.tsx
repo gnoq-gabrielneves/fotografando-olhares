@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { RelatorioEsteiraClinica } from "@/features/relatorios/components/RelatorioEsteiraClinica";
 import { RelatorioExtensionistas } from "@/features/relatorios/components/RelatorioExtensionistas";
+import { ModuleGate } from "@/shared/components/ModuleGate/ModuleGate";
 import { PageHeader } from "@/shared/components/PageHeader/PageHeader";
 
 export const metadata: Metadata = {
@@ -27,15 +28,19 @@ export default function RelatoriosPage() {
         <RelatorioMetricas />
       </section>
 
-      <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Esteira clínica</h2>
-        <RelatorioEsteiraClinica />
-      </section>
+      <ModuleGate moduleId="oftalmo" fallback="hidden">
+        <section className="space-y-4">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Esteira clínica</h2>
+          <RelatorioEsteiraClinica />
+        </section>
+      </ModuleGate>
 
-      <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Distribuição de resultados</h2>
-        <RelatorioResultados />
-      </section>
+      <ModuleGate moduleId="oftalmo" fallback="hidden">
+        <section className="space-y-4">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Distribuição de resultados</h2>
+          <RelatorioResultados />
+        </section>
+      </ModuleGate>
 
       <section className="space-y-4">
         <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Atendimentos</h2>

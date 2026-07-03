@@ -20,6 +20,7 @@ import {
   FileText,
   Home,
   Newspaper,
+  Settings,
   ShieldCheck,
   UserCog,
   Users,
@@ -77,6 +78,7 @@ export function AppSidebar() {
           {
             label: "Administração",
             items: [
+              { title: "Configurações", href: "/configuracoes", icon: Settings },
               { title: "Usuários", href: "/usuarios", icon: UserCog },
               { title: "Atividade", href: "/atividade", icon: Activity },
             ],

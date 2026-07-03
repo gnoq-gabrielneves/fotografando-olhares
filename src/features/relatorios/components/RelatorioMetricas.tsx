@@ -1,12 +1,15 @@
 "use client";
 
 import { MetricCard } from "@/shared/components/metrics/MetricCard";
+import { useEnabledClinicalModule } from "@/shared/hooks/use-enabled-clinical-module";
 import { queryKeys } from "@/shared/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Clock, FileText, Users } from "lucide-react";
 import { getRelatorioGeral } from "../services/relatorios-services";
 
 export function RelatorioMetricas() {
+  const { isEnabled: hasOftalmo, isLoading: isLoadingModules } =
+    useEnabledClinicalModule("oftalmo");
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.relatorios.geral,
     queryFn: getRelatorioGeral,
@@ -30,6 +33,7 @@ export function RelatorioMetricas() {
       icon: FileText,
       tone: "violet" as const,
       sub: data?.totalPacientes ? `de ${data.totalPacientes} pacientes` : undefined,
+      moduleId: "oftalmo" as const,
     },
     {
       key: "totalPendentes" as const,
@@ -39,6 +43,7 @@ export function RelatorioMetricas() {
       sub: data && data.totalPacientes > 0
         ? `${Math.round((data.totalPendentes / data.totalPacientes) * 100)}% do total`
         : undefined,
+      moduleId: "oftalmo" as const,
     },
     {
       key: "totalComRD" as const,
@@ -48,12 +53,15 @@ export function RelatorioMetricas() {
       sub: data && data.totalLaudos > 0
         ? `${Math.round((data.totalComRD / data.totalLaudos) * 100)}% dos laudos`
         : undefined,
+      moduleId: "oftalmo" as const,
     },
   ];
 
+  const visibleCards = cards.filter((card) => !card.moduleId || hasOftalmo);
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card) => (
+      {visibleCards.map((card) => (
         <MetricCard
           key={card.key}
           label={card.label}
@@ -61,7 +69,7 @@ export function RelatorioMetricas() {
           icon={card.icon}
           tone={card.tone}
           sublabel={card.sub}
-          loading={isLoading}
+          loading={isLoading || isLoadingModules}
           accent
         />
       ))}

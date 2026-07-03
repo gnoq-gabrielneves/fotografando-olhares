@@ -38,6 +38,8 @@ export function NovoDocumentoDialog() {
     useState<DocumentoClinicoType>("exam_request");
   const [pacienteId, setPacienteId] = useState(SEM_PACIENTE);
   const [title, setTitle] = useState("");
+  const [clinicalJustification, setClinicalJustification] = useState("");
+  const [materialToExamine, setMaterialToExamine] = useState("");
   const [content, setContent] = useState("");
 
   const { data: pacientes, isLoading: isLoadingPacientes } =
@@ -61,6 +63,8 @@ export function NovoDocumentoDialog() {
     documentType !== "exam_request" ||
     pacienteId !== SEM_PACIENTE ||
     Boolean(title.trim()) ||
+    Boolean(clinicalJustification.trim()) ||
+    Boolean(materialToExamine.trim()) ||
     Boolean(content.trim());
   const contentLength = content.trim().length;
   const contentLines = content.trim() ? content.trim().split("\n").length : 0;
@@ -78,6 +82,8 @@ export function NovoDocumentoDialog() {
     setDocumentType("exam_request");
     setPacienteId(SEM_PACIENTE);
     setTitle("");
+    setClinicalJustification("");
+    setMaterialToExamine("");
     setContent("");
   }
 
@@ -87,6 +93,8 @@ export function NovoDocumentoDialog() {
       document_type: documentType,
       paciente_id: pacienteId === SEM_PACIENTE ? undefined : pacienteId,
       title,
+      clinical_justification: clinicalJustification,
+      material_to_examine: materialToExamine,
       content,
     });
   }
@@ -214,6 +222,34 @@ export function NovoDocumentoDialog() {
                 />
               </div>
 
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-500">
+                  Justificativa clínica
+                </label>
+                <textarea
+                  value={clinicalJustification}
+                  onChange={(event) =>
+                    setClinicalJustification(event.target.value)
+                  }
+                  disabled={isPending}
+                  placeholder="Motivo clínico da solicitação..."
+                  className="min-h-20 w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-[color,box-shadow] placeholder:text-slate-400 focus-visible:border-cyan-500 focus-visible:ring-3 focus-visible:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-500">
+                  Material a examinar
+                </label>
+                <Input
+                  value={materialToExamine}
+                  onChange={(event) => setMaterialToExamine(event.target.value)}
+                  placeholder="Ex: Sangue, urina, imagem, retinografia..."
+                  disabled={isPending}
+                  className="bg-white"
+                />
+              </div>
+
               <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-3">
                 <p className="text-xs font-medium text-slate-500">
                   Montagem rápida
@@ -332,6 +368,21 @@ export function NovoDocumentoDialog() {
                   className="mt-5 text-sm leading-6 text-slate-700 [&_.empty]:text-slate-400 [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-xs [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-slate-900 [&_h3]:mt-4 [&_h3]:mb-2 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-slate-900 [&_li]:my-1 [&_ol]:mb-3 [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:mb-2 [&_strong]:font-semibold [&_strong]:text-slate-900 [&_ul]:mb-3 [&_ul]:ml-5 [&_ul]:list-disc"
                   dangerouslySetInnerHTML={{ __html: previewContent }}
                 />
+                {clinicalJustification || materialToExamine ? (
+                  <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+                    {clinicalJustification ? (
+                      <p>
+                        <strong>Justificativa:</strong>{" "}
+                        {clinicalJustification}
+                      </p>
+                    ) : null}
+                    {materialToExamine ? (
+                      <p className="mt-2">
+                        <strong>Material:</strong> {materialToExamine}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </section>
           </div>

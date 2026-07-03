@@ -17,7 +17,7 @@ import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
 import { ResultadoRD } from "@/shared/types";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useDebounce } from "use-debounce";
@@ -80,13 +80,13 @@ export function LaudosTabela() {
                 Paciente
               </TableHead>
               <TableHead className="text-slate-500 font-medium">
-                Resultado
+                Resultado do laudo
               </TableHead>
               <TableHead className="text-slate-500 font-medium hidden sm:table-cell">
                 Laudador
               </TableHead>
               <TableHead className="text-slate-500 font-medium hidden sm:table-cell">Data</TableHead>
-              <TableHead className="text-slate-500 font-medium w-16" />
+              <TableHead className="text-slate-500 font-medium w-24" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -133,18 +133,32 @@ export function LaudosTabela() {
                     {formatarData(laudo.data_laudo)}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/pacientes/${laudo.pacientes?.id}`);
-                      }}
-                      className="h-8 w-8 p-0 text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                      title="Ver paciente"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/laudos/${laudo.id}/editar`);
+                        }}
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-cyan-700 hover:bg-cyan-50"
+                        title="Editar laudo"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/pacientes/${laudo.pacientes?.id}`);
+                        }}
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                        title="Ver paciente"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

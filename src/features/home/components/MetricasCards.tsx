@@ -1,6 +1,7 @@
 "use client";
 
 import { MetricCard } from "@/shared/components/metrics/MetricCard";
+import { useEnabledClinicalModule } from "@/shared/hooks/use-enabled-clinical-module";
 import { queryKeys } from "@/shared/lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Clock, FileText, Users } from "lucide-react";
@@ -23,6 +24,7 @@ const cards = [
     icon: FileText,
     tone: "violet",
     href: "/laudos",
+    moduleId: "oftalmo",
   },
   {
     key: "totalSemLaudo",
@@ -31,6 +33,7 @@ const cards = [
     tone: "amber",
     href: "/pacientes",
     urgent: true,
+    moduleId: "oftalmo",
   },
   {
     key: "totalComRD",
@@ -39,6 +42,7 @@ const cards = [
     tone: "red",
     href: "/pacientes",
     urgent: true,
+    moduleId: "oftalmo",
   },
 ] satisfies {
   key: "totalPacientes" | "totalLaudos" | "totalSemLaudo" | "totalComRD";
@@ -47,20 +51,25 @@ const cards = [
   tone: "cyan" | "violet" | "amber" | "red";
   href: string;
   urgent?: boolean;
+  moduleId?: "oftalmo";
 }[];
 
 export function MetricasCards() {
   const router = useRouter();
+  const { isEnabled: hasOftalmo, isLoading: isLoadingModules } =
+    useEnabledClinicalModule("oftalmo");
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.home.metricas,
     queryFn: getMetricas,
   });
 
-  if (isLoading) return <SkeletonCards />;
+  if (isLoading || isLoadingModules) return <SkeletonCards />;
+
+  const visibleCards = cards.filter((card) => !card.moduleId || hasOftalmo);
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {cards.map((card) => (
+      {visibleCards.map((card) => (
         <MetricCard
           key={card.key}
           onClick={() => router.push(card.href)}

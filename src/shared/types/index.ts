@@ -36,6 +36,17 @@ export type OrganizationModule = {
   > | null;
 };
 
+export type ClinicalSettings = {
+  organization_id: string;
+  clinic_name: string | null;
+  clinic_logo_url: string | null;
+  clinic_city: string | null;
+  physician_name: string | null;
+  physician_crm: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export const USER_ROLES = [
   "developer",
   "admin",
@@ -91,6 +102,9 @@ export type Paciente = {
   nome_completo: string;
   sexo: Sexo | null;
   cpf_cns: string | null;
+  nome_mae: string | null;
+  telefone: string | null;
+  endereco: string | null;
   data_nascimento: string | null;
   local_atendimento_id: string | null;
   prontuario: string | null;
@@ -160,6 +174,13 @@ export type DocumentoClinico = {
   document_type: DocumentoClinicoType;
   title: string;
   content: string;
+  clinic_name: string | null;
+  clinic_logo_url: string | null;
+  clinic_city: string | null;
+  physician_name: string | null;
+  physician_crm: string | null;
+  clinical_justification: string | null;
+  material_to_examine: string | null;
   status: DocumentoClinicoStatus;
   issued_at: string | null;
   created_at: string;
@@ -167,7 +188,16 @@ export type DocumentoClinico = {
 };
 
 export type DocumentoClinicoTabela = DocumentoClinico & {
-  pacientes: Pick<Paciente, "id" | "nome_completo"> | null;
+  pacientes: Pick<
+    Paciente,
+    | "id"
+    | "nome_completo"
+    | "data_nascimento"
+    | "sexo"
+    | "nome_mae"
+    | "telefone"
+    | "endereco"
+  > | null;
   profiles: Pick<Profile, "full_name"> | null;
 };
 

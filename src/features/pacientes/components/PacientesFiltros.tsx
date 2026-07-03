@@ -95,7 +95,7 @@ export function PacientesFiltros({
         <div className="w-full sm:w-44">
           <Select value={resultadoRd} onValueChange={onResultadoChange}>
             <SelectTrigger className="h-9 bg-white text-sm text-slate-700 border-slate-200">
-              <SelectValue placeholder="Resultado" />
+              <SelectValue placeholder="Resultado do laudo" />
             </SelectTrigger>
             <SelectContent position="popper">
               <SelectItem value="todos">Todos os resultados</SelectItem>

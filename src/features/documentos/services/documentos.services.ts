@@ -12,11 +12,18 @@ export type NovoDocumentoInput = {
   document_type: DocumentoClinicoType;
   title: string;
   content: string;
+  clinical_justification?: string;
+  material_to_examine?: string;
 };
 
 export type DocumentoPacienteOpcao = {
   id: string;
   nome_completo: string;
+  data_nascimento: string | null;
+  sexo: string | null;
+  nome_mae: string | null;
+  telefone: string | null;
+  endereco: string | null;
 };
 
 export async function listarDocumentosClinicos(): Promise<
@@ -30,7 +37,7 @@ export async function listarDocumentosClinicos(): Promise<
     .select(
       `
       *,
-      pacientes(id, nome_completo),
+      pacientes(id, nome_completo, data_nascimento, sexo, nome_mae, telefone, endereco),
       profiles!clinical_documents_created_by_fkey(full_name)
       `,
     )
@@ -54,7 +61,7 @@ export async function listarPacientesParaDocumento(): Promise<
 
   let query = supabase
     .from("pacientes")
-    .select("id, nome_completo")
+    .select("id, nome_completo, data_nascimento, sexo, nome_mae, telefone, endereco")
     .order("nome_completo", { ascending: true });
 
   if (organizationId) {
@@ -80,6 +87,11 @@ export async function criarDocumentoClinico(input: NovoDocumentoInput) {
 
   const title = input.title.trim();
   const content = input.content.trim();
+  const { data: settings } = await supabase
+    .from("clinical_settings")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .maybeSingle();
 
   if (!title) throw new Error("Informe o título do documento");
   if (!content) throw new Error("Informe o conteúdo do documento");
@@ -94,6 +106,13 @@ export async function criarDocumentoClinico(input: NovoDocumentoInput) {
           document_type: input.document_type,
           title,
           content,
+          clinic_name: settings?.clinic_name ?? null,
+          clinic_logo_url: settings?.clinic_logo_url ?? null,
+          clinic_city: settings?.clinic_city ?? null,
+          physician_name: settings?.physician_name ?? null,
+          physician_crm: settings?.physician_crm ?? null,
+          clinical_justification: input.clinical_justification?.trim() || null,
+          material_to_examine: input.material_to_examine?.trim() || null,
           status: "issued",
           issued_at: new Date().toISOString(),
         },

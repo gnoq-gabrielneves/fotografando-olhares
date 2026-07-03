@@ -50,6 +50,9 @@ export const queryKeys = {
   modulos: {
     organizacaoAtual: ["modulos", "organizacaoAtual"] as const,
   },
+  configuracoes: {
+    clinicas: ["configuracoes", "clinicas"] as const,
+  },
   desenvolvedor: {
     modulos: ["desenvolvedor", "modulos"] as const,
   },

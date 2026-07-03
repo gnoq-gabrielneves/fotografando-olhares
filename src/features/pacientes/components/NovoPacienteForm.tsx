@@ -32,6 +32,9 @@ type Zona = "Urbana" | "Rural" | "Periurbana";
 
 type FormData = {
   nome_completo: string;
+  nome_mae: string;
+  telefone: string;
+  endereco: string;
   sexo: "M" | "F" | undefined;
   cpf_cns: string;
   data_nascimento: string;
@@ -57,6 +60,9 @@ type Props = {
 
 const initialForm: FormData = {
   nome_completo: "",
+  nome_mae: "",
+  telefone: "",
+  endereco: "",
   sexo: undefined,
   cpf_cns: "",
   data_nascimento: "",
@@ -148,6 +154,9 @@ export function NovoPacienteForm({ onSuccess }: Props) {
     }
     mutate({
       nome_completo: form.nome_completo,
+      nome_mae: form.nome_mae || undefined,
+      telefone: form.telefone || undefined,
+      endereco: form.endereco || undefined,
       sexo: form.sexo!,
       cpf_cns: form.cpf_cns || undefined,
       data_nascimento: form.data_nascimento || undefined,
@@ -246,6 +255,37 @@ export function NovoPacienteForm({ onSuccess }: Props) {
               className={fieldClass}
             />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className={labelClass}>Nome da mãe</label>
+            <Input
+              value={form.nome_mae}
+              onChange={(e) => set("nome_mae", e.target.value)}
+              placeholder="Nome completo da mãe"
+              className={fieldClass}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelClass}>Telefone</label>
+            <Input
+              value={form.telefone}
+              onChange={(e) => set("telefone", e.target.value)}
+              placeholder="Telefone do paciente"
+              className={fieldClass}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelClass}>Endereço</label>
+          <Input
+            value={form.endereco}
+            onChange={(e) => set("endereco", e.target.value)}
+            placeholder="Endereço completo do paciente"
+            className={fieldClass}
+          />
         </div>
 
         <div className="space-y-1.5">

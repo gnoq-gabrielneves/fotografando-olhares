@@ -1,7 +1,10 @@
 "use client";
 
 import { Button } from "@/shared/components/ui/button";
-import { parseBrazilianDateToIso } from "@/shared/lib/format/date";
+import {
+  formatIsoDateToBrazilian,
+  parseBrazilianDateToIso,
+} from "@/shared/lib/format/date";
 import { queryKeys } from "@/shared/lib/query/keys";
 import { ResultadoRD } from "@/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,6 +13,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
+import {
+  atualizarLaudo,
+  type LaudoDetalhe,
+} from "@/features/laudos/services/laudo.services";
 import { criarLaudo } from "../../services/pacientes.services";
 
 type FormData = {
@@ -21,6 +28,7 @@ type FormData = {
 
 type Props = {
   pacienteId: string;
+  laudo?: LaudoDetalhe;
 };
 
 const resultados: { value: ResultadoRD; activeClass: string }[] = [
@@ -54,15 +62,16 @@ const inputClass =
   "w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 rounded-md px-3 h-10 text-sm outline-none";
 const labelClass = "text-slate-600 text-xs mb-1.5 block";
 
-export function LaudoForm({ pacienteId }: Props) {
+export function LaudoForm({ pacienteId, laudo }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isEditing = Boolean(laudo);
 
   const [form, setForm] = useState<FormData>({
-    resultado_rd: "",
-    data_laudo: "",
-    dilatacao: "",
-    descricao: "",
+    resultado_rd: laudo?.resultado_rd ?? "",
+    data_laudo: laudo?.data_laudo ?? "",
+    dilatacao: laudo?.dilatacao ?? "",
+    descricao: laudo?.descricao ?? "",
   });
 
   const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
@@ -70,24 +79,54 @@ export function LaudoForm({ pacienteId }: Props) {
   );
 
   const { mutate, isPending } = useMutation({
-    mutationFn: criarLaudo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    mutationFn: (payload: {
+      paciente_id: string;
+      resultado_rd: ResultadoRD;
+      data_laudo?: string;
+      dilatacao?: string;
+      descricao?: string;
+    }) =>
+      isEditing && laudo
+        ? atualizarLaudo(laudo.id, {
+            resultado_rd: payload.resultado_rd,
+            data_laudo: payload.data_laudo,
+            dilatacao: payload.dilatacao,
+            descricao: payload.descricao,
+          })
+        : criarLaudo(payload),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
         queryKey: queryKeys.pacientes.byId(pacienteId),
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.all });
-      queryClient.invalidateQueries({
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.all }),
+        queryClient.invalidateQueries({
         queryKey: queryKeys.laudos.byPaciente(pacienteId),
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.home.metricas });
-      queryClient.invalidateQueries({
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.laudos.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.home.metricas }),
+        queryClient.invalidateQueries({
         queryKey: queryKeys.home.ultimosPacientes,
-      });
-      toast.success("Laudo registrado com sucesso!");
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.relatorios.geral }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.relatorios.distribuicaoResultados,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.relatorios.laudosPorMes,
+        }),
+      ]);
+      toast.success(
+        isEditing
+          ? "Laudo atualizado com sucesso!"
+          : "Laudo registrado com sucesso!",
+      );
       router.push(`/pacientes/${pacienteId}`);
     },
     onError: (error) => {
-      toast.error("Erro ao registrar laudo", { description: error.message });
+      toast.error(isEditing ? "Erro ao atualizar laudo" : "Erro ao registrar laudo", {
+        description: error.message,
+      });
     },
   });
 
@@ -120,16 +159,20 @@ export function LaudoForm({ pacienteId }: Props) {
   }
 
   const isDirty =
-    !!form.resultado_rd ||
-    !!form.data_laudo ||
-    !!form.dilatacao ||
-    !!form.descricao;
+    isEditing
+      ? form.resultado_rd !== (laudo?.resultado_rd ?? "") ||
+        form.data_laudo !== (laudo?.data_laudo ?? "") ||
+        form.dilatacao !== (laudo?.dilatacao ?? "") ||
+        form.descricao !== (laudo?.descricao ?? "")
+      : !!form.resultado_rd ||
+        !!form.data_laudo ||
+        !!form.dilatacao ||
+        !!form.descricao;
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      {/* Resultado RD */}
       <div className="space-y-1.5">
-        <label className={labelClass}>Resultado da RD *</label>
+        <label className={labelClass}>Resultado do laudo *</label>
         <div className="grid grid-cols-2 gap-3">
           {resultados.map((r) => {
             const isActive = form.resultado_rd === r.value;
@@ -162,6 +205,7 @@ export function LaudoForm({ pacienteId }: Props) {
           <IMaskInput
             mask="00/00/0000"
             placeholder="DD/MM/AAAA"
+            value={formatIsoDateToBrazilian(form.data_laudo) ?? ""}
             className={inputClass}
             onAccept={(value: string) => {
               set("data_laudo", parseBrazilianDateToIso(value));
@@ -197,7 +241,9 @@ export function LaudoForm({ pacienteId }: Props) {
 
       <p className="text-xs text-slate-400">
         {isPending
-          ? "Salvando laudo..."
+          ? isEditing
+            ? "Atualizando laudo..."
+            : "Salvando laudo..."
           : isDirty
             ? "Laudo com alterações prontas para salvar."
             : "Selecione o resultado e informe a data do laudo."}
@@ -220,10 +266,10 @@ export function LaudoForm({ pacienteId }: Props) {
           {isPending ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Salvando...
+              {isEditing ? "Atualizando..." : "Salvando..."}
             </>
           ) : (
-            "Salvar laudo"
+            isEditing ? "Atualizar laudo" : "Salvar laudo"
           )}
         </Button>
       </div>

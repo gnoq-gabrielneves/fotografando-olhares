@@ -7,7 +7,14 @@ import { queryKeys } from "@/shared/lib/query/keys";
 import { resultadoBadge } from "@/shared/lib/utils/resultado-badge";
 import type { LaudoComLaudador, ResultadoRD } from "@/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, FileText, Plus, Trash2, UserRound } from "lucide-react";
+import {
+  CalendarDays,
+  FileText,
+  Pencil,
+  Plus,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -145,7 +152,7 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
                   )}
                 </div>
 
-                <div className="shrink-0">
+                <div className="flex shrink-0 items-center gap-2">
                   {confirmandoId === laudo.id ? (
                     <div className="flex items-center gap-2 rounded-md border border-red-100 bg-red-50 px-2 py-1.5">
                       <span className="text-xs text-red-700">Excluir?</span>
@@ -166,17 +173,29 @@ export function PacienteLaudos({ laudos, pacienteId }: Props) {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmandoId(laudo.id)}
-                      disabled={isPending}
-                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-                      aria-label="Excluir laudo"
-                      title="Excluir laudo"
-                    >
-                      <Trash2 className="size-3.5" />
-                      Excluir
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/laudos/${laudo.id}/editar`)}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-cyan-50 hover:text-cyan-700"
+                        aria-label="Editar laudo"
+                        title="Editar laudo"
+                      >
+                        <Pencil className="size-3.5" />
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmandoId(laudo.id)}
+                        disabled={isPending}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                        aria-label="Excluir laudo"
+                        title="Excluir laudo"
+                      >
+                        <Trash2 className="size-3.5" />
+                        Excluir
+                      </button>
+                    </>
                   )}
                 </div>
               </div>

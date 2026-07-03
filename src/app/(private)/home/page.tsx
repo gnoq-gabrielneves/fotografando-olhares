@@ -4,6 +4,7 @@ import { GraficoRD } from "@/features/home/components/GraficoRd";
 import { HomeGreeting } from "@/features/home/components/HomeGreeting";
 import { MetricasCards } from "@/features/home/components/MetricasCards";
 import { UltimosPacientes } from "@/features/home/components/UltimosPacientes";
+import { ModuleGate } from "@/shared/components/ModuleGate/ModuleGate";
 
 export const metadata: Metadata = {
   title: "Início | Fotografando Olhares",
@@ -23,9 +24,11 @@ export default function HomePage() {
         <div className="lg:col-span-1">
           <AtividadeFeed />
         </div>
-        <div className="lg:col-span-1">
-          <GraficoRD />
-        </div>
+        <ModuleGate moduleId="oftalmo" fallback="hidden">
+          <div className="lg:col-span-1">
+            <GraficoRD />
+          </div>
+        </ModuleGate>
       </div>
     </div>
   );

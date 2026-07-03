@@ -13,9 +13,14 @@ import {
 type ModuleGateProps = {
   moduleId: ClinicalModuleId;
   children: ReactNode;
+  fallback?: "block" | "hidden";
 };
 
-export function ModuleGate({ moduleId, children }: ModuleGateProps) {
+export function ModuleGate({
+  moduleId,
+  children,
+  fallback = "block",
+}: ModuleGateProps) {
   const { profile, isLoading: isLoadingProfile } = useProfile();
   const { isEnabled, isLoading: isLoadingModule } =
     useEnabledClinicalModule(moduleId);
@@ -27,6 +32,8 @@ export function ModuleGate({ moduleId, children }: ModuleGateProps) {
   }
 
   if (isLoadingProfile || isLoadingModule) {
+    if (fallback === "hidden") return null;
+
     return (
       <div className="flex min-h-[320px] items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 shadow-sm">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -36,6 +43,8 @@ export function ModuleGate({ moduleId, children }: ModuleGateProps) {
   }
 
   if (!isEnabled) {
+    if (fallback === "hidden") return null;
+
     return (
       <EmptyState
         icon={LockKeyhole}
