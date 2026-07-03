@@ -110,7 +110,18 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
-        {navGroups.map((group) => (
+        {navGroups
+          .map((group) => ({
+            ...group,
+            items: group.items.filter(
+              (item) =>
+                isDeveloper ||
+                !item.moduleId ||
+                (!isLoadingModules && enabledModuleIds.has(item.moduleId)),
+            ),
+          }))
+          .filter((group) => group.items.length > 0)
+          .map((group) => (
           <SidebarGroup key={group.label} className="py-1">
             <SidebarGroupLabel className="text-[0.68rem] text-slate-400 uppercase tracking-wider px-2 mb-1">
               {group.label}
