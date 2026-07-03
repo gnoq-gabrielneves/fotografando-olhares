@@ -11,6 +11,7 @@ type LogAction =
   | "laudo_criado"
   | "laudo_editado"
   | "documento_criado"
+  | "documento_excluido"
   | "usuario_criado";
 
 export async function logActivityServer({

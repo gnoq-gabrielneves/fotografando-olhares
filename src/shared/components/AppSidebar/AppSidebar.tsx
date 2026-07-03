@@ -19,6 +19,7 @@ import {
   ClipboardPlus,
   FileText,
   Home,
+  Newspaper,
   ShieldCheck,
   UserCog,
   Users,
@@ -66,7 +67,10 @@ export function AppSidebar() {
     },
     {
       label: "Aprendizado",
-      items: [{ title: "Treinamento", href: "/treinamento", icon: BookOpen }],
+      items: [
+        { title: "Treinamento", href: "/treinamento", icon: BookOpen },
+        { title: "Novidades", href: "/devblog", icon: Newspaper },
+      ],
     },
     ...(canManage
       ? [

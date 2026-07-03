@@ -116,3 +116,41 @@ export async function criarDocumentoClinico(input: NovoDocumentoInput) {
 
   return data;
 }
+
+export async function excluirDocumentoClinico(documentoId: string) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Não autenticado");
+
+  const organizationId = await getCurrentOrganizationId();
+  if (!organizationId) throw new Error("Organização não encontrada");
+
+  const { data: documento, error: documentoError } = await supabase
+    .from("clinical_documents")
+    .select("id, title, organization_id")
+    .eq("id", documentoId)
+    .eq("organization_id", organizationId)
+    .single();
+
+  if (documentoError) throw new Error(documentoError.message);
+
+  const { error } = await supabase
+    .from("clinical_documents")
+    .delete()
+    .eq("id", documentoId)
+    .eq("organization_id", organizationId);
+
+  if (error) throw new Error(error.message);
+
+  await logActivity({
+    user_id: user.id,
+    action: "documento_excluido",
+    entity_type: "clinical_document",
+    entity_id: documento.id,
+    description: `excluiu o documento ${documento.title}`,
+    organization_id: organizationId,
+  });
+}

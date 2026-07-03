@@ -12,6 +12,7 @@ import {
 } from "@/shared/components/ui/select";
 import { useAvatarUpload } from "@/shared/hooks/use-avatar";
 import { useProfile } from "@/shared/hooks/use-profile";
+import { getOrganizationOverrideId } from "@/shared/lib/organization/current-client";
 import type { UserRole } from "@/shared/types";
 import { Loader2, Upload, X } from "lucide-react";
 import { useState } from "react";
@@ -55,6 +56,9 @@ const roles: { value: FormData["role"]; label: string; developerOnly?: boolean }
 export function NovoUsuarioForm({ onSuccess }: Props) {
   const { profile } = useProfile();
   const isDeveloper = profile?.role === "developer";
+  const currentOrganizationId = isDeveloper
+    ? getOrganizationOverrideId() || profile?.organization_id || ""
+    : profile?.organization_id || "";
   const { upload, isUploading } = useAvatarUpload();
   const { mutate: criar, isPending } = useCriarUsuario(onSuccess);
   const { data: organizacoes, isLoading: isLoadingOrganizacoes } =
@@ -65,13 +69,14 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
     email: "",
     password: "",
     role: "extensionista",
-    organization_id: profile?.organization_id ?? "",
+    organization_id: currentOrganizationId,
   });
   const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [erros, setErros] = useState<Partial<Record<keyof FormData, string>>>(
     {},
   );
+  const effectiveOrganizationId = form.organization_id || currentOrganizationId;
 
   function set<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -92,7 +97,7 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
     if (!form.email) novosErros.email = "E-mail é obrigatório";
     if (!form.password || form.password.length < 6)
       novosErros.password = "Senha deve ter ao menos 6 caracteres";
-    if (isDeveloper && !form.organization_id)
+    if (isDeveloper && !effectiveOrganizationId)
       novosErros.organization_id = "Selecione uma organização";
     return novosErros;
   }
@@ -108,7 +113,11 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
     if (avatar) {
       avatar_url = await upload(avatar);
     }
-    criar({ ...form, organization_id: form.organization_id || undefined, avatar_url });
+    criar({
+      ...form,
+      organization_id: effectiveOrganizationId || undefined,
+      avatar_url,
+    });
   }
 
   const isDirty =
@@ -116,7 +125,7 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
     !!form.email ||
     !!form.password ||
     form.role !== "extensionista" ||
-    !!form.organization_id ||
+    !!effectiveOrganizationId ||
     !!avatar;
   const isBusy = isPending || isUploading || isLoadingOrganizacoes;
   const availableRoles = roles.filter((role) => !role.developerOnly || isDeveloper);
@@ -213,7 +222,7 @@ export function NovoUsuarioForm({ onSuccess }: Props) {
           <div className="space-y-1.5">
             <label className={labelClass}>Organização *</label>
             <Select
-              value={form.organization_id}
+              value={effectiveOrganizationId}
               onValueChange={(value) => set("organization_id", value)}
               disabled={isBusy}
             >

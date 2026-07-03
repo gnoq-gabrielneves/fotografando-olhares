@@ -102,13 +102,23 @@ export function DocumentoPreviewDialog({
               </div>
             </dl>
 
-            <div className="mt-8 whitespace-pre-wrap text-sm leading-7 text-slate-700">
-              {documento.content}
-            </div>
+            <section className="mt-8">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Conteúdo
+              </p>
+              <div className="whitespace-pre-wrap text-sm leading-7 text-slate-700">
+                {documento.content}
+              </div>
+            </section>
 
             <div className="mt-20 w-64 border-t border-slate-400 pt-3 text-center text-xs text-slate-500">
               {formatDisplayTextOrDash(documento.profiles?.full_name)}
             </div>
+            <p className="mt-8 border-t border-slate-200 pt-3 text-[11px] leading-5 text-slate-400">
+              Documento emitido pelo sistema Fotografando Olhares. Antes de uso
+              externo, valide identificação profissional, assinatura e requisitos
+              regulatórios aplicáveis.
+            </p>
           </article>
         </div>
 

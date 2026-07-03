@@ -101,16 +101,21 @@ export async function criarUsuario(input: CriarUsuarioInput) {
   return data.user;
 }
 
-export async function listarUsuarios() {
+export async function listarUsuarios(selectedOrganizationId?: string) {
   const { supabase, profile } = await verificarAdmin();
-  const organizationId = getOrganizationIdFromRecord(profile);
+  const organizationId =
+    profile?.role === "developer"
+      ? selectedOrganizationId || getOrganizationIdFromRecord(profile)
+      : getOrganizationIdFromRecord(profile);
 
   let query = supabase
     .from("profiles")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (profile?.role !== "developer" && organizationId) {
+  if (profile?.role === "developer" && organizationId) {
+    query = query.or(`organization_id.eq.${organizationId},role.eq.developer`);
+  } else if (organizationId) {
     query = query.eq("organization_id", organizationId);
   }
 

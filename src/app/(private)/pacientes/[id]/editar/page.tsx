@@ -20,7 +20,7 @@ export default function EditarPacientePage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       <div className="space-y-4">
         <button
           onClick={() => router.push(`/pacientes/${id}`)}
@@ -44,7 +44,7 @@ export default function EditarPacientePage() {
       </div>
 
       {/* Formulário */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+      <div className="w-full bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
         {isLoading ? (
           <div className="space-y-4 animate-pulse">
             {Array.from({ length: 6 }).map((_, i) => (

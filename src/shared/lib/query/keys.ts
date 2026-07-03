@@ -39,7 +39,8 @@ export const queryKeys = {
   },
   usuarios: {
     all: ["usuarios"] as const,
-    lista: ["usuarios", "lista"] as const,
+    lista: (organizationId?: string) =>
+      ["usuarios", "lista", organizationId ?? "sem-organizacao"] as const,
   },
   atividade: {
     recente: ["atividade", "recente"] as const,

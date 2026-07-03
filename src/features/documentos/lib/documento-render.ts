@@ -1,4 +1,5 @@
 import type { DocumentoClinicoTabela } from "@/shared/types";
+import { markdownToHtml } from "./documento-markdown";
 import { documentoTipoLabel } from "./documentos-labels";
 
 function escapeHtml(value: string | null | undefined) {
@@ -39,7 +40,7 @@ export function buildDocumentoHtml(documento: DocumentoClinicoTabela) {
   const paciente = documento.pacientes?.nome_completo ?? "Sem paciente vinculado";
   const responsavel = documento.profiles?.full_name ?? "Não informado";
   const dataEmissao = formatDate(documento.issued_at ?? documento.created_at);
-  const content = escapeHtml(documento.content).replaceAll("\n", "<br />");
+  const content = markdownToHtml(documento.content);
 
   return `<!doctype html>
 <html lang="pt-BR">
@@ -110,6 +111,47 @@ export function buildDocumentoHtml(documento: DocumentoClinicoTabela) {
         font-size: 15px;
         white-space: normal;
       }
+      .content h2,
+      .content h3,
+      .content h4,
+      .content h5 {
+        margin: 18px 0 8px;
+        color: #0f172a;
+        font-size: 16px;
+        line-height: 1.35;
+      }
+      .content p {
+        margin: 0 0 10px;
+      }
+      .content ul,
+      .content ol {
+        margin: 0 0 14px 22px;
+        padding: 0;
+      }
+      .content li {
+        margin: 4px 0;
+      }
+      .content strong {
+        color: #0f172a;
+      }
+      .content code {
+        border-radius: 4px;
+        background: #f1f5f9;
+        padding: 1px 4px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+      }
+      .content .empty {
+        color: #94a3b8;
+      }
+      .content-title {
+        margin: 0 0 12px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
       .signature {
         margin-top: 72px;
         padding-top: 18px;
@@ -118,6 +160,13 @@ export function buildDocumentoHtml(documento: DocumentoClinicoTabela) {
         color: #475569;
         text-align: center;
         font-size: 12px;
+      }
+      .disclaimer {
+        margin-top: 36px;
+        padding-top: 14px;
+        border-top: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 11px;
       }
       @media print {
         body { background: #ffffff; }
@@ -153,8 +202,15 @@ export function buildDocumentoHtml(documento: DocumentoClinicoTabela) {
           <span class="value">${escapeHtml(tipo)}</span>
         </div>
       </section>
-      <section class="content">${content}</section>
+      <section class="content">
+        <p class="content-title">Conteúdo</p>
+        ${content}
+      </section>
       <footer class="signature">${escapeHtml(responsavel)}</footer>
+      <p class="disclaimer">
+        Documento emitido pelo sistema Fotografando Olhares. Antes de uso externo,
+        valide identificação profissional, assinatura e requisitos regulatórios aplicáveis.
+      </p>
     </main>
   </body>
 </html>`;

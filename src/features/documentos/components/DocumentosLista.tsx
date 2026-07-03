@@ -1,8 +1,20 @@
 "use client";
 
-import { ClipboardPlus, Download, Printer } from "lucide-react";
+import { ClipboardPlus, Download, Loader2, Printer, Trash2 } from "lucide-react";
 import { EmptyState, QueryErrorState } from "@/shared/components/states/EmptyState";
 import { TableSkeletonRows } from "@/shared/components/states/TableSkeletonRows";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -21,7 +33,10 @@ import {
   documentoTipoLabel,
 } from "../lib/documentos-labels";
 import { downloadDocumento, printDocumento } from "../lib/documento-render";
-import { useDocumentosClinicos } from "../hooks/use-documentos";
+import {
+  useDocumentosClinicos,
+  useExcluirDocumentoClinico,
+} from "../hooks/use-documentos";
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -35,6 +50,8 @@ function formatDate(value: string | null) {
 
 export function DocumentosLista() {
   const { data, error, isError, isLoading } = useDocumentosClinicos();
+  const { mutate: excluirDocumento, isPending: isExcluindo } =
+    useExcluirDocumentoClinico();
 
   if (isError) return <QueryErrorState message={error.message} />;
 
@@ -63,7 +80,7 @@ export function DocumentosLista() {
               <TableHead className="hidden text-slate-500 sm:table-cell">
                 Emissão
               </TableHead>
-              <TableHead className="w-32 text-right text-slate-500">
+              <TableHead className="w-44 text-right text-slate-500">
                 Ações
               </TableHead>
             </TableRow>
@@ -138,6 +155,50 @@ export function DocumentosLista() {
                         <Printer />
                         <span className="sr-only">Imprimir documento</span>
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            title="Excluir documento"
+                            className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                            disabled={isExcluindo}
+                          >
+                            <Trash2 />
+                            <span className="sr-only">Excluir documento</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent size="sm">
+                          <AlertDialogHeader>
+                            <AlertDialogMedia className="border border-rose-100 bg-rose-50 text-rose-600">
+                              <Trash2 />
+                            </AlertDialogMedia>
+                            <AlertDialogTitle>
+                              Excluir documento?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Essa ação remove “{documento.title}” da
+                              organização atual. Não será possível desfazer.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isExcluindo}>
+                              Cancelar
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              disabled={isExcluindo}
+                              className="bg-rose-600 text-white hover:bg-rose-500"
+                              onClick={() => excluirDocumento(documento.id)}
+                            >
+                              {isExcluindo ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : null}
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>

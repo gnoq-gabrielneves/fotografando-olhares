@@ -12,15 +12,16 @@ import {
   getOrganizationOverrideId,
   setOrganizationOverrideId,
 } from "@/shared/lib/organization/current-client";
-import { queryKeys } from "@/shared/lib/query/keys";
 import { formatDisplayTextOrDash } from "@/shared/lib/format/text";
 import { useOrganizacoes } from "@/features/usuarios/hooks/use-users";
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function OrganizationSwitcher() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { profile } = useProfile();
   const isDeveloper = profile?.role === "developer";
   const { data: organizations } = useOrganizacoes(isDeveloper);
@@ -33,10 +34,15 @@ export function OrganizationSwitcher() {
   if (!isDeveloper || !organizations?.length) return null;
 
   function handleChange(organizationId: string) {
+    if (organizationId === currentOrganizationId) return;
+
     setSelectedOrganizationId(organizationId);
     setOrganizationOverrideId(organizationId);
-    queryClient.invalidateQueries();
-    queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
+    queryClient.clear();
+    router.refresh();
+    window.setTimeout(() => {
+      window.location.reload();
+    }, 0);
   }
 
   return (
