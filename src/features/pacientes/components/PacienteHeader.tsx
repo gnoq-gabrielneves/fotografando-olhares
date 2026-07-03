@@ -40,6 +40,7 @@ import {
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
+import { getPacientesReturnUrl } from "../lib/pacientes-return-url";
 import { excluirPaciente } from "../services/pacientes.services";
 
 function calcularIdade(data: string | null) {
@@ -119,7 +120,7 @@ export function PacienteHeader({ paciente, hasOftalmo }: Props) {
         queryKey: queryKeys.home.ultimosPacientes,
       });
       toast.success("Paciente excluído com sucesso!");
-      router.push("/pacientes");
+      router.push(getPacientesReturnUrl());
     },
     onError: (error) => {
       toast.error("Erro ao excluir paciente", { description: error.message });
@@ -129,7 +130,7 @@ export function PacienteHeader({ paciente, hasOftalmo }: Props) {
   return (
     <div className="space-y-4 animate-in fade-in-0 slide-in-from-top-1">
       <button
-        onClick={() => router.push("/pacientes")}
+        onClick={() => router.push(getPacientesReturnUrl())}
         className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 text-sm transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />

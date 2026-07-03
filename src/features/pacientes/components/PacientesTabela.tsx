@@ -23,8 +23,9 @@ import { PacienteTabela, ResultadoRD } from "@/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, FileText } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useTransition } from "react";
+import { useCallback, useEffect, useTransition } from "react";
 import { useDebounce } from "use-debounce";
+import { savePacientesReturnUrl } from "../lib/pacientes-return-url";
 import { getPacientes } from "../services/pacientes.services";
 import { PacientesFiltros } from "./PacientesFiltros";
 import { PacientesPaginacao } from "./PacientesPaginacao";
@@ -58,6 +59,11 @@ export function PacientesTabela() {
   const page = Number(searchParams.get("pagina") ?? "1");
 
   const [buscaDebounced] = useDebounce(busca, 400);
+
+  useEffect(() => {
+    const queryString = searchParams.toString();
+    savePacientesReturnUrl(queryString ? `${pathname}?${queryString}` : pathname);
+  }, [pathname, searchParams]);
 
   const filtros = {
     busca: buscaDebounced,
