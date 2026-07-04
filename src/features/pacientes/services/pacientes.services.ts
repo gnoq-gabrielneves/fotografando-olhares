@@ -304,7 +304,7 @@ export async function atualizarPaciente(
     query = query.eq("organization_id", organizationId);
   }
 
-  const { data, error } = await query.select().single();
+  const { data, error } = await query.select().maybeSingle();
 
   if (error) {
     const isMissingClinicalFields =
@@ -320,6 +320,12 @@ export async function atualizarPaciente(
     }
 
     throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error(
+      "Paciente não encontrado na organização atual ou você não tem permissão para editá-lo.",
+    );
   }
 
   if (user) {
