@@ -50,6 +50,7 @@ type FormData = {
   tempo_diagnostico_has: string;
   zona: string;
   fez_exame_oftalmologico: boolean;
+  qt_tempo_ultimo_exame: string;
   tabagista: boolean;
   atividade_fisica: boolean;
   av_od: string;
@@ -77,6 +78,41 @@ function formatarDataParaExibicao(data: string | null) {
   return formatIsoDateToBrazilian(data) ?? "";
 }
 
+const TEMPO_ULTIMO_EXAME_OPTIONS = [
+  "Menos de 1 ano",
+  "Entre 1 e 5 anos",
+  "Entre 5 e 10 anos",
+  "Mais de 10 anos",
+  "Nunca fez",
+] as const;
+
+function normalizeTempoUltimoExame(value: string | null | undefined) {
+  if (!value) return "";
+  const normalized = value.trim().toLowerCase();
+
+  if (normalized === "<1 ano" || normalized === "menos de 1 ano") {
+    return "Menos de 1 ano";
+  }
+
+  if (normalized === "1 a 5 anos" || normalized === "entre 1 e 5 anos") {
+    return "Entre 1 e 5 anos";
+  }
+
+  if (normalized === "5 a 10 anos" || normalized === "entre 5 e 10 anos") {
+    return "Entre 5 e 10 anos";
+  }
+
+  if (normalized === ">10 anos" || normalized === "mais de 10 anos") {
+    return "Mais de 10 anos";
+  }
+
+  if (normalized === "nunca fez") {
+    return "Nunca fez";
+  }
+
+  return "";
+}
+
 function getInitialForm(paciente: PacienteDetalhado): FormData {
   return {
     nome_completo: paciente.nome_completo ?? "",
@@ -94,6 +130,9 @@ function getInitialForm(paciente: PacienteDetalhado): FormData {
     tempo_diagnostico_has: paciente.tempo_diagnostico_has ?? "",
     zona: paciente.zona ?? "",
     fez_exame_oftalmologico: paciente.fez_exame_oftalmologico ?? false,
+    qt_tempo_ultimo_exame: normalizeTempoUltimoExame(
+      paciente.qt_tempo_ultimo_exame,
+    ),
     tabagista: paciente.tabagista ?? false,
     atividade_fisica: paciente.atividade_fisica ?? false,
     av_od: paciente.av_od ?? "",
@@ -179,6 +218,7 @@ export function EditarPacienteForm({ paciente }: Props) {
                   | "5 a 10 anos"
                   | ">10 anos") || undefined,
               fez_exame_oftalmologico: data.fez_exame_oftalmologico,
+              qt_tempo_ultimo_exame: data.qt_tempo_ultimo_exame || undefined,
               av_od: data.av_od || undefined,
               av_oe: data.av_oe || undefined,
             }
@@ -520,6 +560,27 @@ export function EditarPacienteForm({ paciente }: Props) {
                 </span>
               </label>
             ))}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClass}>
+              Há quanto tempo fez exame oftalmológico?
+            </label>
+            <Select
+              value={form.qt_tempo_ultimo_exame}
+              onValueChange={(v) => set("qt_tempo_ultimo_exame", v)}
+            >
+              <SelectTrigger className={selectClass}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200 text-slate-700">
+                {TEMPO_ULTIMO_EXAME_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       ) : null}

@@ -28,6 +28,12 @@ import {
 } from "../services/pacientes.services";
 
 type TempoDiagnostico = "<1 ano" | "1 a 5 anos" | "5 a 10 anos" | ">10 anos";
+type TempoUltimoExame =
+  | "Menos de 1 ano"
+  | "Entre 1 e 5 anos"
+  | "Entre 5 e 10 anos"
+  | "Mais de 10 anos"
+  | "Nunca fez";
 type Zona = "Urbana" | "Rural" | "Periurbana";
 
 type FormData = {
@@ -44,6 +50,7 @@ type FormData = {
   insulina: boolean;
   tempo_diagnostico_dm: TempoDiagnostico | undefined;
   fez_exame_oftalmologico: boolean;
+  qt_tempo_ultimo_exame: TempoUltimoExame | undefined;
   tabagista: boolean;
   atividade_fisica: boolean;
   av_od: string;
@@ -72,6 +79,7 @@ const initialForm: FormData = {
   insulina: false,
   tempo_diagnostico_dm: undefined,
   fez_exame_oftalmologico: false,
+  qt_tempo_ultimo_exame: undefined,
   tabagista: false,
   atividade_fisica: false,
   av_od: "",
@@ -173,6 +181,7 @@ export function NovoPacienteForm({ onSuccess }: Props) {
             insulina: form.insulina,
             tempo_diagnostico_dm: form.tempo_diagnostico_dm,
             fez_exame_oftalmologico: form.fez_exame_oftalmologico,
+            qt_tempo_ultimo_exame: form.qt_tempo_ultimo_exame,
             av_od: form.av_od || undefined,
             av_oe: form.av_oe || undefined,
             tempo_diagnostico_has: form.tempo_diagnostico_has,
@@ -494,6 +503,36 @@ export function NovoPacienteForm({ onSuccess }: Props) {
                 </span>
               </label>
             ))}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClass}>
+              Há quanto tempo fez exame oftalmológico?
+            </label>
+            <Select
+              value={form.qt_tempo_ultimo_exame}
+              onValueChange={(v) =>
+                set("qt_tempo_ultimo_exame", v as TempoUltimoExame)
+              }
+            >
+              <SelectTrigger className={fieldClass}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent
+                className="bg-white border-slate-200 text-slate-700"
+                position="popper"
+              >
+                <SelectItem value="Menos de 1 ano">Menos de 1 ano</SelectItem>
+                <SelectItem value="Entre 1 e 5 anos">
+                  Entre 1 e 5 anos
+                </SelectItem>
+                <SelectItem value="Entre 5 e 10 anos">
+                  Entre 5 e 10 anos
+                </SelectItem>
+                <SelectItem value="Mais de 10 anos">Mais de 10 anos</SelectItem>
+                <SelectItem value="Nunca fez">Nunca fez</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       ) : null}

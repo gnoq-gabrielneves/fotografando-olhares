@@ -3,10 +3,6 @@ import {
   formatDateTimeToBrazilian,
   formatIsoDateToBrazilian,
 } from "@/shared/lib/format/date";
-import {
-  getPacienteStatusBadge,
-  getPacienteStatusLabel,
-} from "@/shared/lib/utils/paciente-status";
 import type { PacienteDetalhado } from "@/shared/types";
 import {
   Activity,
@@ -134,8 +130,6 @@ function TextBlock({ title, content }: { title: string; content: string }) {
 }
 
 export function PacienteInfo({ paciente, hasOftalmo }: Props) {
-  const status = paciente.status_operacional ?? "cadastrado";
-
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <SectionCard icon={UserRound} title="Identificação">
@@ -167,21 +161,16 @@ export function PacienteInfo({ paciente, hasOftalmo }: Props) {
               label: "Cadastrado em",
               value: formatarData(paciente.created_at),
             },
-            {
-              label: hasOftalmo ? "Status da esteira" : "Módulo clínico",
-              value: hasOftalmo ? getPacienteStatusLabel(status) : "Básico",
-            },
+            ...(hasOftalmo
+              ? []
+              : [
+                  {
+                    label: "Módulo clínico",
+                    value: "Básico",
+                  },
+                ]),
           ]}
         />
-        {hasOftalmo ? (
-          <div className="mt-3">
-            <span
-              className={`inline-flex rounded-md border px-2.5 py-1 text-xs font-medium ${getPacienteStatusBadge(status)}`}
-            >
-              {getPacienteStatusLabel(status)}
-            </span>
-          </div>
-        ) : null}
       </SectionCard>
 
       <SectionCard icon={Activity} title="Hábitos e contexto">
