@@ -28,14 +28,16 @@ async function comprimirImagem(file: File, maxWidth = 400): Promise<Blob> {
   });
 }
 
-export function useAvatarUpload() {
+export function useAvatarUpload(options?: { folder?: string; maxWidth?: number }) {
   const [isUploading, setIsUploading] = useState(false);
 
   async function upload(file: File): Promise<string> {
     setIsUploading(true);
     try {
-      const fileName = `${Date.now()}.jpg`;
-      const blob = await comprimirImagem(file);
+      const fileName = options?.folder
+        ? `${options.folder}/${Date.now()}.jpg`
+        : `${Date.now()}.jpg`;
+      const blob = await comprimirImagem(file, options?.maxWidth);
 
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();

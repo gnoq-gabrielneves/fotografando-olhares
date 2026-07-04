@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Building2, Loader2, Save } from "lucide-react";
+import { Building2, ImageUp, Loader2, Save, X } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { useAvatarUpload } from "@/shared/hooks/use-avatar";
+import { toast } from "sonner";
 import {
   useClinicalSettings,
   useSalvarClinicalSettings,
@@ -32,6 +34,10 @@ const labelClass = "text-xs font-medium text-slate-500";
 export function ClinicalSettingsForm() {
   const { data, isLoading } = useClinicalSettings();
   const { mutate, isPending } = useSalvarClinicalSettings();
+  const { upload, isUploading } = useAvatarUpload({
+    folder: "clinical-logos",
+    maxWidth: 600,
+  });
   const [draft, setDraft] = useState<FormState | null>(null);
 
   const savedForm = useMemo<FormState>(
@@ -66,6 +72,25 @@ export function ClinicalSettingsForm() {
     });
   }
 
+  async function handleLogoFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    try {
+      const url = await upload(file);
+      set("clinic_logo_url", url);
+      toast.success("Logo carregado");
+    } catch (error) {
+      toast.error("Erro ao carregar logo", {
+        description:
+          error instanceof Error ? error.message : "Tente novamente.",
+      });
+    }
+  }
+
+  const isBusy = isPending || isUploading;
+
   if (isLoading) {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -97,13 +122,69 @@ export function ClinicalSettingsForm() {
             />
           </div>
           <div className="space-y-1.5 sm:col-span-2">
-            <label className={labelClass}>URL do logo da clínica</label>
-            <Input
-              value={form.clinic_logo_url}
-              onChange={(event) => set("clinic_logo_url", event.target.value)}
-              placeholder="https://..."
-              className={fieldClass}
-            />
+            <label className={labelClass}>Logo da clínica</label>
+            <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white">
+                {form.clinic_logo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={form.clinic_logo_url}
+                    alt=""
+                    className="h-full w-full rounded-lg object-contain p-2"
+                  />
+                ) : (
+                  <Building2 className="h-6 w-6 text-slate-300" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isBusy}
+                    className="bg-white"
+                    asChild
+                  >
+                    <label className="cursor-pointer">
+                      {isUploading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <ImageUp className="mr-2 h-4 w-4" />
+                      )}
+                      Enviar logo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleLogoFile}
+                      />
+                    </label>
+                  </Button>
+                  {form.clinic_logo_url ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isBusy}
+                      className="bg-white text-slate-500"
+                      onClick={() => set("clinic_logo_url", "")}
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Remover
+                    </Button>
+                  ) : null}
+                </div>
+                <Input
+                  value={form.clinic_logo_url}
+                  onChange={(event) =>
+                    set("clinic_logo_url", event.target.value)
+                  }
+                  placeholder="URL do logo, caso queira colar manualmente"
+                  className={fieldClass}
+                />
+              </div>
+            </div>
           </div>
           <div className="space-y-1.5">
             <label className={labelClass}>Cidade da emissão</label>
@@ -144,10 +225,10 @@ export function ClinicalSettingsForm() {
 
         <Button
           type="submit"
-          disabled={isPending || !isDirty}
+          disabled={isBusy || !isDirty}
           className="bg-cyan-600 text-white hover:bg-cyan-500"
         >
-          {isPending ? (
+          {isBusy ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Save className="mr-2 h-4 w-4" />

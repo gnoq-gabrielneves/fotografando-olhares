@@ -32,6 +32,7 @@ import {
   atualizarPaciente,
   getLocaisAtendimento,
 } from "../../services/pacientes.services";
+import type { NovoPacienteInput } from "../../pacientes.types";
 
 type FormData = {
   nome_completo: string;
@@ -132,11 +133,8 @@ export function EditarPacienteForm({ paciente }: Props) {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: Partial<FormData>) => {
-      const basePayload = {
+      const basePayload: Partial<NovoPacienteInput> = {
         nome_completo: data.nome_completo,
-        nome_mae: data.nome_mae || undefined,
-        telefone: data.telefone || undefined,
-        endereco: data.endereco || undefined,
         sexo: data.sexo as "M" | "F",
         cpf_cns: data.cpf_cns || undefined,
         data_nascimento: data.data_nascimento || undefined,
@@ -148,6 +146,18 @@ export function EditarPacienteForm({ paciente }: Props) {
         outras_obs: data.outras_obs || undefined,
         zona: (data.zona as "Urbana" | "Rural" | "Periurbana") || undefined,
       };
+
+      if (data.nome_mae !== initialForm.nome_mae) {
+        basePayload.nome_mae = data.nome_mae || undefined;
+      }
+
+      if (data.telefone !== initialForm.telefone) {
+        basePayload.telefone = data.telefone || undefined;
+      }
+
+      if (data.endereco !== initialForm.endereco) {
+        basePayload.endereco = data.endereco || undefined;
+      }
 
       return atualizarPaciente(paciente.id, {
         ...basePayload,

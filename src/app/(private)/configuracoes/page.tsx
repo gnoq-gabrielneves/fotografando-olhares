@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Settings } from "lucide-react";
 import { ClinicalSettingsForm } from "@/features/configuracoes/components/ClinicalSettingsForm";
 import { PageHeader } from "@/shared/components/PageHeader/PageHeader";
+import { RoleGate } from "@/shared/components/RoleGate/RoleGate";
 
 export const metadata: Metadata = {
   title: "Configurações | Fotografando Olhares",
@@ -16,8 +17,9 @@ export default function ConfiguracoesPage() {
         title="Configurações"
         description="Identidade clínica e emissão de documentos"
       />
-      <ClinicalSettingsForm />
+      <RoleGate allowedRoles={["admin", "developer"]}>
+        <ClinicalSettingsForm />
+      </RoleGate>
     </div>
   );
 }
-

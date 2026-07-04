@@ -306,7 +306,21 @@ export async function atualizarPaciente(
 
   const { data, error } = await query.select().single();
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    const isMissingClinicalFields =
+      error.message.includes("nome_mae") ||
+      error.message.includes("telefone") ||
+      error.message.includes("endereco") ||
+      error.message.includes("schema cache");
+
+    if (isMissingClinicalFields) {
+      throw new Error(
+        "Campos clínicos do paciente ainda não existem no banco. Rode a migration 20260703133000_add_clinical_settings_and_document_fields.sql e tente novamente.",
+      );
+    }
+
+    throw new Error(error.message);
+  }
 
   if (user) {
     await logActivity({
